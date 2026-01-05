@@ -1,6 +1,6 @@
 import { MyListItem, CustomCollection, ListStats, FilterOptions, ListPreferences, BulkOperation } from '../types/myList';
 import { Movie, TVShow } from '../types';
-import { myListApi, collectionsApi, preferencesApi, checkBackendHealth } from './api';
+import { myListApi, collectionsApi, preferencesApi } from './api';
 
 export class ValidationError extends Error { constructor(message: string) { super(message); this.name = 'ValidationError'; } }
 export class ApiError extends Error { constructor(message: string) { super(message); this.name = 'ApiError'; } }

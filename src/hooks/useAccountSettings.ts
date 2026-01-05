@@ -113,7 +113,7 @@ export const useAccountSettings = (): UseAccountSettingsReturn => {
 
     // Track pending changes for debounced save
     const pendingChanges = useRef<Partial<AccountSettings>>({});
-    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const saveTimeoutRef = useRef<number | null>(null);
     const previousSettingsRef = useRef<AccountSettings>(defaultSettings);
 
     // Load settings on mount

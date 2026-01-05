@@ -8,7 +8,7 @@ import {
 
   Search
 } from 'lucide-react';
-import { ViewMode, SortOption, SortDirection, ListStats } from '../../types/myList';
+import { ViewMode, ListStats } from '../../types/myList';
 
 interface MyListHeaderProps {
   stats: ListStats;

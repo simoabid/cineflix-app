@@ -17,13 +17,10 @@ import {
   Sun,
   Menu,
   X,
-  Download,
-  Heart,
-  Clock,
-  Crown,
   Maximize,
   Minimize,
-  LayoutGrid
+  LayoutGrid,
+  Heart
 } from 'lucide-react';
 import SearchModal from './SearchModal';
 import { useAuth } from '../contexts/AuthContext';

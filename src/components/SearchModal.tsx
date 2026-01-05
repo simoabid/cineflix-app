@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useScreenSize } from '../hooks/useScreenSize';
 import {
   Search,
   X,
@@ -47,7 +46,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Hooks
   const navigate = useNavigate();
   const { addToList, removeByContentId, isInList, isLiked, toggleLike } = useMyList();
-  const { isMobile } = useScreenSize();
+
 
   // State management
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,7 +54,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'movie' | 'tv' | 'documentary' | 'kids'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
+
   const [isVoiceSearch, setIsVoiceSearch] = useState(false);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -65,7 +64,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     'Stranger Things', 'Game of Thrones', 'The Batman', 'Top Gun', 'Avatar'
   ]);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [, setHasMore] = useState(true);
 
   const handleLike = async (e: React.MouseEvent, item: SearchResult) => {
     e.stopPropagation();
@@ -99,7 +98,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+
 
   // Load genres on mount
   useEffect(() => {

@@ -30,7 +30,7 @@ import { Movie, MovieCredits } from '../types';
 import AddToListButton from '../components/AddToListButton';
 import LikeButton from '../components/LikeButton';
 import ContentCarousel from '../components/ContentCarousel';
-import GenreCollections from '../components/GenreCollections';
+
 import ContinueWatching from '../components/Home/ContinueWatching';
 
 const HomePage = (): JSX.Element => {

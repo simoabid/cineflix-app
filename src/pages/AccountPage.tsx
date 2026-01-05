@@ -22,9 +22,6 @@ import {
     Languages,
     Clock,
     Tv,
-    Laptop,
-    Smartphone,
-    Tablet,
     Crown,
     Zap,
     Settings,
@@ -329,15 +326,6 @@ const AccountPage: React.FC = () => {
         navigate('/');
     };
 
-    // Get device icon
-    const getDeviceIcon = (type: string) => {
-        switch (type) {
-            case 'phone': return Smartphone;
-            case 'tv': return Tv;
-            case 'tablet': return Tablet;
-            default: return Laptop;
-        }
-    };
 
     // Render tab content
     const renderTabContent = () => {
@@ -870,10 +858,10 @@ const AccountPage: React.FC = () => {
                                 ].map((plan) => (
                                     <div
                                         key={plan.name}
-                                        className={`p-4 rounded-xl border transition-all ${plan.current
+                                        className={`p - 4 rounded - xl border transition - all ${plan.current
                                             ? 'bg-netflix-red/10 border-netflix-red'
                                             : 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
-                                            }`}
+                                            } `}
                                     >
                                         <h4 className="text-lg font-bold text-white mb-1">{plan.name}</h4>
                                         <p className="text-2xl font-bold text-netflix-red mb-3">{plan.price}<span className="text-sm text-gray-400">/mo</span></p>
@@ -887,10 +875,10 @@ const AccountPage: React.FC = () => {
                                         </ul>
                                         <button
                                             disabled={plan.current}
-                                            className={`w-full mt-4 py-2 rounded-lg font-medium transition-colors ${plan.current
+                                            className={`w - full mt - 4 py - 2 rounded - lg font - medium transition - colors ${plan.current
                                                 ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
                                                 : 'bg-netflix-red hover:bg-red-700 text-white'
-                                                }`}
+                                                } `}
                                         >
                                             {plan.current ? 'Current Plan' : 'Switch'}
                                         </button>
@@ -1032,10 +1020,10 @@ const AccountPage: React.FC = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
+                                            className={`w - full flex items - center gap - 3 px - 4 py - 3 rounded - xl text - left transition - all duration - 200 ${activeTab === tab.id
                                                 ? 'bg-netflix-red text-white shadow-lg shadow-netflix-red/25'
                                                 : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-                                                }`}
+                                                } `}
                                         >
                                             <Icon className="w-5 h-5" />
                                             <span className="font-medium">{tab.label}</span>
@@ -1182,13 +1170,13 @@ const AccountPage: React.FC = () => {
                                         key={avatar.id}
                                         onClick={() => handleAvatarChange(avatar.id)}
                                         disabled={avatarLoading}
-                                        className={`relative group flex flex-col items-center p-3 rounded-xl transition-all duration-200 ${isSelected
+                                        className={`relative group flex flex - col items - center p - 3 rounded - xl transition - all duration - 200 ${isSelected
                                             ? 'bg-netflix-red/20 ring-2 ring-netflix-red'
                                             : 'bg-gray-800/50 hover:bg-gray-700/50'
-                                            } ${avatarLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            } ${avatarLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} `}
                                     >
-                                        <div className={`w-16 h-16 rounded-full overflow-hidden transition-transform ${!avatarLoading && 'group-hover:scale-110'
-                                            }`}>
+                                        <div className={`w - 16 h - 16 rounded - full overflow - hidden transition - transform ${!avatarLoading && 'group-hover:scale-110'
+                                            } `}>
                                             <AvatarComponent className="w-full h-full" />
                                         </div>
                                         <span className="text-xs text-gray-400 mt-2 text-center">{avatar.name}</span>

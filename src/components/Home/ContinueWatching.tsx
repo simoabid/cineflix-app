@@ -4,7 +4,7 @@ import { Play } from 'lucide-react';
 import { myListApi } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { getPosterUrl } from '../../services/tmdb';
-import { progressService } from '../../services/progressService';
+
 
 interface ContinueWatchingItem {
     id: string;

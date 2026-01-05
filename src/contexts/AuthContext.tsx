@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { authApi, User, setAuthToken, getAuthToken } from '../services/api';
-import { progressService } from '../services/progressService';
+
 
 interface AuthContextType {
     user: User | null;

@@ -29,7 +29,6 @@ import {
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -135,9 +134,6 @@ const Footer: React.FC = () => {
     },
   ];
 
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
 
   /*
     const FooterSection = ({ 
