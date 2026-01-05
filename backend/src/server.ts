@@ -43,14 +43,20 @@ app.use((req, res) => res.status(404).json({ success: false, error: 'Endpoint no
 const startServer = async () => {
     try {
         await connectDB();
-        app.listen(PORT, () => {
-            console.log(`🚀 Server running on http://localhost:${PORT}`);
-            console.log(`📚 API: /api/my-list, /api/collections, /api/preferences`);
-        });
+        if (process.env.NODE_ENV !== 'production') {
+            app.listen(PORT, () => {
+                console.log(`🚀 Server running on http://localhost:${PORT}`);
+                console.log(`📚 API: /api/my-list, /api/collections, /api/preferences`);
+            });
+        }
     } catch (error) {
         console.error('Failed to start server:', error);
-        process.exit(1);
+        if (process.env.NODE_ENV !== 'production') {
+            process.exit(1);
+        }
     }
 };
 
 startServer();
+
+export default app;

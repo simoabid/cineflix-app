@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env?.VITE_API_URL || '/api';
 
 // Token management
 let authToken: string | null = localStorage.getItem('auth_token');
@@ -86,15 +86,15 @@ export const myListApi = {
     getContinueWatching: () => apiRequest<any[]>('/my-list/continue-watching'),
     getRecentlyAdded: (limit = 10) => apiRequest<any[]>(`/my-list/recent?limit=${limit}`),
     getAllTags: () => apiRequest<string[]>('/my-list/tags'),
-    updateProgress: (data: { 
-        contentId: number; 
-        contentType: 'movie' | 'tv'; 
-        progress: number; 
-        playbackPosition: number; 
-        duration: number; 
+    updateProgress: (data: {
+        contentId: number;
+        contentType: 'movie' | 'tv';
+        progress: number;
+        playbackPosition: number;
+        duration: number;
         content?: any;
         seasonNumber?: number;
-        episodeNumber?: number; 
+        episodeNumber?: number;
     }) => apiRequest<any>('/my-list/progress', { method: 'POST', body: JSON.stringify(data) }),
 };
 
