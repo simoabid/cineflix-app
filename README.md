@@ -1,4 +1,5 @@
 # 🎬 CineFlix
+
 ### Full-Stack MERN Streaming Platform
 
 Welcome to **CINEFLIX**! This project is a modern, responsive streaming service tailored for a seamless user experience, mimicking the core functionality of major platforms like Netflix.
@@ -76,9 +77,6 @@ The frontend handles the visuals and movie data. It uses **The Movie Database (T
 
 #### Step 2: Configure Frontend Environment
 1.  Open a new terminal window (keep the backend running) and navigate to the project root:
-    ```bash
-    cd "CINEFLIX"
-    ```
 2.  Install dependencies:
     ```bash
     npm install
