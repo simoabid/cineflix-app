@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './config/database';
-import authRoutes from './routes/authRoutes';
-import myListRoutes from './routes/myListRoutes';
-import collectionsRoutes from './routes/collectionsRoutes';
-import preferencesRoutes from './routes/preferencesRoutes';
-import watchedEpisodeRoutes from './routes/watchedEpisodeRoutes';
+import { connectDB } from './config/database.js';
+import authRoutes from './routes/authRoutes.js';
+import myListRoutes from './routes/myListRoutes.js';
+import collectionsRoutes from './routes/collectionsRoutes.js';
+import preferencesRoutes from './routes/preferencesRoutes.js';
+import watchedEpisodeRoutes from './routes/watchedEpisodeRoutes.js';
 
 dotenv.config();
 
