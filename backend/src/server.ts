@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './config/database.js';
-import authRoutes from './routes/authRoutes.js';
-import myListRoutes from './routes/myListRoutes.js';
-import collectionsRoutes from './routes/collectionsRoutes.js';
-import preferencesRoutes from './routes/preferencesRoutes.js';
-import watchedEpisodeRoutes from './routes/watchedEpisodeRoutes.js';
+import { connectDB } from './config/database';
+import authRoutes from './routes/authRoutes';
+import myListRoutes from './routes/myListRoutes';
+import collectionsRoutes from './routes/collectionsRoutes';
+import preferencesRoutes from './routes/preferencesRoutes';
+import watchedEpisodeRoutes from './routes/watchedEpisodeRoutes';
 
 dotenv.config();
 
@@ -14,18 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-
-        // Allow any localhost origin
-        if (origin.match(/^http:\/\/localhost:\d+$/) || origin.match(/^http:\/\/127\.0\.0\.1:\d+$/)) {
-            return callback(null, true);
-        }
-
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-        return callback(new Error(msg), false);
-    },
+    origin: true,
     credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));

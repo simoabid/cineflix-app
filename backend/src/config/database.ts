@@ -21,7 +21,7 @@ export const connectDB = async (): Promise<void> => {
 
     } catch (error) {
         console.error('❌ Database connection failed:', error);
-        process.exit(1);
+        // Do not exit process in serverless
     }
 };
 
