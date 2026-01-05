@@ -1,0 +1,150 @@
+{
+  "name": "cineflix",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "security:axios-upgrade-plan": "node -e \"console.log(JSON.stringify(require('./package.json').security.plan, null, 2))\""
+  },
+  "dependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "axios": "^0.21.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.11",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-intersection-observer": "^9.5.2",
+    "react-router-dom": "^6.8.1",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  },
+  "security": {
+    "summary": "Mitigation plan and short-term controls for identified vulnerability affecting axios versions < 0.21.1. This entry documents validation/wrapping work to be applied to code and an upgrade coordination plan. NOTE: Do NOT change the axios dependency version in this pass; coordinate upgrade with release/ops per repo rules.",
+    "vulnerabilities": [
+      {
+        "package": "axios",
+        "vulnerable_version": "<0.21.1",
+        "finding": "CWE-20 Input Validation",
+        "severity": "medium",
+        "note": "Repository currently depends on axios. Implement runtime input validation and safe URL/parameter builders around axios usage before scheduling dependency upgrade."
+      }
+    ],
+    "plan": {
+      "objective": "Eliminate unsafe usage patterns around axios calls and prepare for coordinated upgrade to axios >= 0.21.1 without modifying dependency automatically in this phase.",
+      "phases": [
+        {
+          "name": "Audit",
+          "description": "Repository-wide search for axios usage and identification of service modules that call axios directly.",
+          "steps": [
+            "Search for imports of 'axios' and usages across services, controllers, and utilities.",
+            "Create an inventory list mapping file paths to axios call patterns (GET/POST/etc) and note where URLs/params are dynamically assembled."
+          ]
+        },
+        {
+          "name": "Implement Validation & Sanitization Wrappers",
+          "description": "Introduce small, focused wrapper functions around axios calls to validate inputs and sanitize parameters at runtime.",
+          "requirements": [
+            "Do not change public API signatures of services; add internal helpers or single utilities file if one exists.",
+            "Validate all inputs used to build URLs, query parameters, headers, and request bodies.",
+            "Reject or normalize inputs that are missing, not of expected types, or contain disallowed characters/patterns.",
+            "Replace ad-hoc concatenation with a safe URL builder that enforces expected host, path segments, and allowed query keys."
+          ],
+          "example_guidelines": [
+            "Safe URL builder must validate base host against an allowlist or expected pattern.",
+            "Path segments should be encoded with encodeURIComponent and validated for expected format (e.g., numeric id, slug regex).",
+            "Query parameter keys must be restricted to a known set; unknown keys should be ignored or rejected.",
+            "Headers should be validated for expected names and sanitized values."
+          ]
+        },
+        {
+          "name": "Refactor Services",
+          "description": "Apply wrappers across all service modules identified in the audit.",
+          "steps": [
+            "For each service file that uses axios directly, add an internal wrapper (e.g., safeRequest) that performs validation and then calls axios.",
+            "Prefer a single shared utility if multiple services exist and reuse it consistently.",
+            "Ensure existing behavior is preserved for valid inputs; add explicit errors for invalid input to fail fast."
+          ]
+        },
+        {
+          "name": "Add Unit Tests",
+          "description": "Create unit tests that exercise the new wrappers to validate input-sanitization behavior and edge cases.",
+          "test_matrix": [
+            "Valid inputs produce expected axios calls (use mocks to verify axios invoked with sanitized URL/params).",
+            "Invalid inputs are rejected with descriptive errors and do not trigger axios.",
+            "URL builder encodes and rejects disallowed path segments and query keys.",
+            "Headers and body sanitization behave as expected for typical and boundary inputs."
+          ],
+          "note": "Add tests under the repository's test framework (e.g., jest or existing framework). Include tests that mock axios to verify no network call is made on invalid input."
+        },
+        {
+          "name": "CI & Linting",
+          "description": "Add CI checks to run the new unit tests and static checks for disallowed patterns (optional regex checks to detect ad-hoc URL concatenations).",
+          "steps": [
+            "Ensure unit tests run in CI and fail the build if wrappers are not covered.",
+            "Optionally add a lint rule or grep step to detect occurrences of string concatenation patterns used to assemble URLs (e.g., + '/' + , template strings with direct unvalidated inputs)."
+          ]
+        },
+        {
+          "name": "Coordinate Upgrade to axios >= 0.21.1",
+          "description": "Plan the dependency upgrade after wrapping and testing are complete. This step must be coordinated with release/ops and not performed automatically by this remediation pass.",
+          "steps": [
+            "Create a dedicated PR that updates axios to a secure version (>=0.21.1) and runs the full test suite.",
+            "Include changelog notes and a short risk assessment in the PR describing why the upgrade is safe given the added wrappers.",
+            "Schedule deployment window and rollback instructions with ops.",
+            "Perform staged rollout (canary) and monitor logs/errors for regressions."
+          ]
+        },
+        {
+          "name": "Post-Upgrade Verification",
+          "description": "After dependency upgrade, verify runtime behavior across environments.",
+          "steps": [
+            "Run integration tests and smoke tests in staging.",
+            "Monitor error rates and request behavior for the first 48-72 hours post-deploy.",
+            "If regressions occur, follow rollback plan documented in the upgrade PR."
+          ]
+        }
+      ],
+      "timeline_estimate": {
+        "audit": "1 business day",
+        "implementation_wrappers": "1-3 business days depending on number of services",
+        "unit_tests": "1-2 business days",
+        "CI_integration": "0.5-1 business day",
+        "upgrade_coordination_and_release": "Dependent on release cadence (coordinate with ops)"
+      },
+      "acceptance_criteria": [
+        "All axios calls are funneled through validated wrappers or a shared utility.",
+        "Unit tests cover positive and negative input validation scenarios for wrappers.",
+        "No direct unsafe URL/param concatenation remains in services.",
+        "Upgrade PR to axios >=0.21.1 passes all tests and is approved by release/ops before merging."
+      ],
+      "constraints": [
+        "This remediation pass intentionally DOES NOT modify the axios version in package.json; dependency upgrade must be done in a separate, coordinated change.",
+        "Preserve existing public APIs of service modules to avoid breaking consumers; add wrappers internally where possible."
+      ]
+    },
+    "owner": "security-team@your-org.example",
+    "last_updated": "2025-08-29"
+  }
+}
