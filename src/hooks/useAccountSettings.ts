@@ -190,7 +190,7 @@ export const useAccountSettings = (): UseAccountSettingsReturn => {
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
-        saveTimeoutRef.current = setTimeout(debouncedSave, 500);
+        saveTimeoutRef.current = window.setTimeout(debouncedSave, 500);
     }, [debouncedSave]);
 
     // Update multiple settings at once
@@ -209,7 +209,7 @@ export const useAccountSettings = (): UseAccountSettingsReturn => {
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
-        saveTimeoutRef.current = setTimeout(debouncedSave, 500);
+        saveTimeoutRef.current = window.setTimeout(debouncedSave, 500);
     }, [debouncedSave]);
 
     // Cleanup timeout on unmount
