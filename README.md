@@ -133,4 +133,4 @@ npm run dev
 *   **Database**: MongoDB
 *   **API**: TMDB (The Movie Database)
 
-Enjoy building with CineFlix! 🍿
+Enjoy building with CINEFLIX! 🍿
