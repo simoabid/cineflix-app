@@ -317,7 +317,7 @@ const HomePage = (): JSX.Element => {
                   {/* Primary Actions */}
                   <div className="flex flex-col sm:flex-row justify-start gap-3 sm:gap-4">
                     <Link
-                      to={`/movie/${heroMovie.id}`}
+                      to={`/watch/movie/${heroMovie.id}`}
                       className="flex items-center justify-center gap-2 sm:gap-3 bg-netflix-red hover:bg-netflix-red/80 px-6 sm:px-8 py-3 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 shadow-xl hover:scale-105 w-full sm:w-auto"
                     >
                       <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
