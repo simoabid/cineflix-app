@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Heart,
   Play,
   Star,
   ChevronLeft,
@@ -13,6 +12,8 @@ import {
 import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
 import { useMyList } from '../../hooks/useMyList';
+import AddToListButton from '../AddToListButton';
+import LikeButton from '../LikeButton';
 
 interface SimilarContentProps {
   content: (Movie | TVShow)[];
@@ -22,7 +23,7 @@ interface SimilarContentProps {
 
 const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type }) => {
   const navigate = useNavigate();
-  const { isInList, toggleInList, removeByContentId } = useMyList();
+  useMyList();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
 
@@ -42,16 +43,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type })
     navigate(`/watch/${contentType}/${item.id}`);
   };
 
-  const handleAddToList = (item: Movie | TVShow, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const contentType = 'title' in item ? 'movie' : 'tv';
-    if (isInList(item.id, contentType)) {
-      removeByContentId(item.id, contentType);
-    } else {
-      toggleInList(item, contentType);
-    }
-  };
+  // Removed manual handler, using AddToListButton/LikeButton components for auth checks and consistency
 
   const currentItems = content.slice(
     currentIndex * itemsPerPage,
@@ -138,18 +130,20 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type })
                           <Play className="h-5 w-5" />
                         </motion.button>
 
-                        <motion.button
-                          onClick={(e) => handleAddToList(item, e)}
-                          className="p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          {isInList(item.id, contentType) ? (
-                            <Heart className="h-5 w-5 text-[#ff0000] fill-current" />
-                          ) : (
-                            <Heart className="h-5 w-5" />
-                          )}
-                        </motion.button>
+                        <AddToListButton
+                          content={item}
+                          contentType={contentType}
+                          variant="icon"
+                          showText={false}
+                          className="!p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700"
+                        />
+                        <LikeButton
+                          content={item}
+                          contentType={contentType}
+                          variant="icon"
+                          showText={false}
+                          className="!p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700"
+                        />
                       </div>
                     </div>
                   </div>
@@ -236,16 +230,20 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type })
                       >
                         Watch Now
                       </button>
-                      <button
-                        onClick={(e) => handleAddToList(item, e)}
-                        className="px-3 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
-                      >
-                        {isInList(item.id, contentType) ? (
-                          <Heart className="h-4 w-4 text-[#ff0000] fill-current" />
-                        ) : (
-                          <Heart className="h-4 w-4" />
-                        )}
-                      </button>
+                      <AddToListButton
+                        content={item}
+                        contentType={contentType}
+                        variant="icon"
+                        showText={false}
+                        className="!p-3 bg-gray-700 text-white rounded hover:bg-gray-600"
+                      />
+                      <LikeButton
+                        content={item}
+                        contentType={contentType}
+                        variant="icon"
+                        showText={false}
+                        className="!p-3 bg-gray-700 text-white rounded hover:bg-gray-600"
+                      />
                     </div>
                   </motion.div>
                 )}

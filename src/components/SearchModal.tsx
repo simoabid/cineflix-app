@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import {
   Search,
   X,
@@ -45,6 +47,8 @@ interface SearchResult extends Content {
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Hooks
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const { addToList, removeByContentId, isInList, isLiked, toggleLike } = useMyList();
 
 
@@ -68,6 +72,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   const handleLike = async (e: React.MouseEvent, item: SearchResult) => {
     e.stopPropagation();
+    if (!isAuthenticated) {
+      showToast('Please sign in to like your favorite content', 'warning');
+      return;
+    }
     try {
       await toggleLike(item as any, item.media_type as 'movie' | 'tv' || 'movie');
     } catch (error) {
@@ -77,6 +85,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   const handleMyListClick = async (e: React.MouseEvent, item: SearchResult) => {
     e.stopPropagation();
+    if (!isAuthenticated) {
+      showToast('Please sign in to add items to your list', 'warning');
+      return;
+    }
     const mediaType = item.media_type as 'movie' | 'tv' || 'movie';
     if (isInList(item.id, mediaType)) {
       await removeByContentId(item.id, mediaType);

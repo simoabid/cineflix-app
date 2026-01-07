@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Play, Plus, Calendar } from 'lucide-react';
+import { Star, Play, Calendar } from 'lucide-react';
 import { Movie, TVShow } from '../../types';
 import { ViewMode } from '../../types/browse';
 import { getPosterUrl } from '../../services/tmdb';
+import AddToListButton from '../AddToListButton';
 
 interface BrowseResultsGridProps {
     results: (Movie | TVShow)[];
@@ -91,13 +92,24 @@ const BrowseResultsGrid: React.FC<BrowseResultsGridProps> = ({ results, loading,
                                         </div>
 
                                         <div className="flex items-center gap-1">
-                                            <button className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-netflix-red text-white text-[10px] font-medium hover:bg-red-700 transition-colors duration-150">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    window.location.href = `/watch/${type}/${item.id}`;
+                                                }}
+                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-netflix-red text-white text-[10px] font-medium hover:bg-red-700 transition-colors duration-150"
+                                            >
                                                 <Play className="w-2.5 h-2.5 fill-current" />
                                                 Play
                                             </button>
-                                            <button className="p-1.5 rounded bg-white/20 text-white hover:bg-white/30 transition-colors duration-150">
-                                                <Plus className="w-3 h-3" />
-                                            </button>
+                                            <AddToListButton
+                                                content={item}
+                                                contentType={type}
+                                                variant="card"
+                                                showText={false}
+                                                className="!p-1.5"
+                                            />
                                         </div>
                                     </>
                                 )}

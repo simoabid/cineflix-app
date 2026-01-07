@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { myListService } from '../services/myListService';
 import { Movie, TVShow } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 interface LikeButtonProps {
   content: Movie | TVShow;
@@ -20,6 +22,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   showText = false,
   size = 'md'
 }) => {
+  const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,6 +32,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     let mounted = true;
 
     const checkLiked = async () => {
+      if (!isAuthenticated) {
+        setIsLoading(false);
+        return;
+      }
       try {
         const liked = await myListService.isLiked(content.id, contentType);
         if (mounted) {
@@ -51,6 +59,11 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      showToast('Please sign in to like your favorite content', 'warning');
+      return;
+    }
 
     setIsLoading(true);
 
@@ -91,8 +104,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         onClick={handleLike}
         disabled={isLoading}
         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${isLiked
-            ? 'bg-red-600 hover:bg-red-700 text-white'
-            : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
+          ? 'bg-red-600 hover:bg-red-700 text-white'
+          : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'} ${className}`}
       >
         <Heart
@@ -113,8 +126,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       onClick={handleLike}
       disabled={isLoading}
       className={`${getSizeClasses()} rounded-full flex items-center justify-center transition-all duration-300 ${isLiked
-          ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25'
-          : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
+        ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25'
+        : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 hover:shadow-lg'} ${className}`}
       title={isLiked ? 'Unlike' : 'Like'}
     >

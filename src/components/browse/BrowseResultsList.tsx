@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Play, Plus, Calendar, Info } from 'lucide-react';
+import { Star, Play, Calendar, Info } from 'lucide-react';
 import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
+import AddToListButton from '../AddToListButton';
+import LikeButton from '../LikeButton';
 
 interface BrowseResultsListProps {
     results: (Movie | TVShow)[];
@@ -68,16 +70,25 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
                             {/* Actions */}
                             <div className="flex items-center gap-2 mt-4">
                                 <Link
-                                    to={`/${type}/${item.id}`}
+                                    to={`/watch/${type}/${item.id}`}
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-netflix-red text-white text-sm font-medium hover:bg-red-700 transition-colors duration-150"
                                 >
                                     <Play className="w-4 h-4 fill-current" />
                                     <span className="hidden sm:inline">Watch Now</span>
                                 </Link>
-                                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors duration-150">
-                                    <Plus className="w-4 h-4" />
-                                    <span className="hidden sm:inline">My List</span>
-                                </button>
+                                <AddToListButton
+                                    content={item}
+                                    contentType={type}
+                                    variant="button"
+                                    className="bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                                />
+                                <LikeButton
+                                    content={item}
+                                    contentType={type}
+                                    variant="button"
+                                    className="bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                                    showText={true}
+                                />
                                 <Link
                                     to={`/${type}/${item.id}`}
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors duration-150"
