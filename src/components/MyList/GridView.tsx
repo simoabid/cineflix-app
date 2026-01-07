@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Play, 
-  MoreVertical, 
-  Star, 
-  Calendar, 
-  Trash2, 
-  CheckSquare, 
+import {
+  Play,
+  MoreVertical,
+  Star,
+  Calendar,
+  Trash2,
+  CheckSquare,
   Square,
   Tag,
   EyeOff,
@@ -262,11 +262,10 @@ const GridView: React.FC<GridViewProps> = ({
               e.stopPropagation();
               onItemSelect(item.id, !isSelected);
             }}
-            className={`p-1 rounded transition-colors ${
-              isSelected 
-                ? 'bg-netflix-red text-white' 
+            className={`p-1 rounded transition-colors ${isSelected
+                ? 'bg-netflix-red text-white'
                 : 'bg-black/60 text-white hover:bg-black/80'
-            }`}
+              }`}
           >
             {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
           </button>
@@ -380,12 +379,12 @@ const GridView: React.FC<GridViewProps> = ({
               className="w-full h-full object-cover"
               loading="lazy"
             />
-            
+
             {/* Progress Bar */}
             {hasProgress && (
               <div className="absolute bottom-0 left-0 right-0 bg-black/80 p-2">
                 <div className="w-full bg-gray-600 rounded-full h-1 mb-1">
-                  <div 
+                  <div
                     className="bg-netflix-red h-1 rounded-full transition-all duration-300"
                     style={{ width: `${progressValue}%` }}
                   />
@@ -404,13 +403,13 @@ const GridView: React.FC<GridViewProps> = ({
         {/* Card Info */}
         <div className="p-3">
           <h3 className="text-white font-medium text-sm mb-2 line-clamp-2">{title}</h3>
-          
+
           <div className="space-y-1 text-xs text-gray-400">
             <div className="flex items-center justify-between">
               <span>{year}</span>
               <span className="capitalize">{item.contentType}</span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span>{runtime}</span>
               <span className={statusColorClass}>
@@ -421,7 +420,7 @@ const GridView: React.FC<GridViewProps> = ({
             {hasVoteAverage && (
               <div className="flex items-center gap-1">
                 <Star className="w-3 h-3 text-yellow-400" />
-                <span>{(voteAverage as number).toFixed(1)}</span>
+                <span>{(voteAverage as number || 0).toFixed(1)}</span>
               </div>
             )}
 

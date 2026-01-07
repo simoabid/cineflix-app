@@ -106,7 +106,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
           {typeof rating === 'number' && rating > 0 && (
             <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-md px-2 py-1 flex items-center gap-1 text-white text-xs font-medium">
               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-              {rating.toFixed(1)}
+              {(rating || 0).toFixed(1)}
             </div>
           )}
 
@@ -124,7 +124,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
             {typeof rating === 'number' && (
               <>
                 <span>•</span>
-                <span>{rating.toFixed(1)} ★</span>
+                <span>{(rating || 0).toFixed(1)} ★</span>
               </>
             )}
           </div>

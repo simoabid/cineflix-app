@@ -157,7 +157,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type })
                   {/* Rating Badge */}
                   <div className="absolute top-2 right-2 bg-black/80 text-white px-2 py-1 rounded-lg text-sm flex items-center space-x-1">
                     <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                    <span>{item.vote_average.toFixed(1)}</span>
+                    <span>{(item.vote_average || 0).toFixed(1)}</span>
                   </div>
 
                   {/* Content Type Badge */}
@@ -177,7 +177,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type })
                     <span>•</span>
                     <div className="flex items-center space-x-1">
                       <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                      <span>{item.vote_average.toFixed(1)}</span>
+                      <span>{(item.vote_average || 0).toFixed(1)}</span>
                     </div>
                   </div>
 
@@ -214,7 +214,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type })
                       <div className="flex items-center space-x-2 text-sm">
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                          <span className="text-white">{item.vote_average.toFixed(1)}</span>
+                          <span className="text-white">{(item.vote_average || 0).toFixed(1)}</span>
                         </div>
                         <span className="text-gray-400">
                           ({item.vote_count} votes)

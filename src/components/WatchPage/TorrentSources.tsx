@@ -204,7 +204,7 @@ export function getHealthIcon(health: string) {
  */
 export function getSeederRatio(seeders: number, leechers: number) {
   const total = seeders + leechers;
-  return total > 0 ? ((seeders / total) * 100).toFixed(1) : '0';
+  return total > 0 ? (((seeders || 0) / total) * 100).toFixed(1) : '0';
 }
 
 /**

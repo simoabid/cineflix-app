@@ -544,7 +544,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                               <div className="flex items-center justify-between text-xs text-gray-400">
                                 <span className="flex items-center gap-1">
                                   <Star className="w-3 h-3 text-netflix-red fill-current" />
-                                  {item.vote_average.toFixed(1)}
+                                  {(item.vote_average || 0).toFixed(1)}
                                 </span>
                                 <span>{new Date(item.release_date || item.first_air_date || '').getFullYear() || ''}</span>
                               </div>
@@ -559,7 +559,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                               </div>
                               <p className="text-gray-400 text-sm line-clamp-2 mb-3 leading-relaxed">{item.overview}</p>
                               <div className="flex items-center gap-4 text-xs text-gray-300">
-                                <span className="text-netflix-red flex items-center gap-1 bg-netflix-red/10 px-2 py-1 rounded"><Star className="w-3 h-3 fill-current" /> {item.vote_average.toFixed(1)}</span>
+                                <span className="text-netflix-red flex items-center gap-1 bg-netflix-red/10 px-2 py-1 rounded"><Star className="w-3 h-3 fill-current" /> {(item.vote_average || 0).toFixed(1)}</span>
                                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(item.release_date || item.first_air_date || '').getFullYear() || 'N/A'}</span>
                               </div>
                             </div>

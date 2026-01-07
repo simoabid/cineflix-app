@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Play, 
-  MoreVertical, 
-  Star, 
-  Trash2, 
-  CheckSquare, 
+import {
+  Play,
+  MoreVertical,
+  Star,
+  Trash2,
+  CheckSquare,
   Square,
   EyeOff,
   Heart
@@ -228,11 +228,10 @@ const ItemRow: React.FC<ItemRowProps> = ({
             e.stopPropagation();
             onItemSelect(item.id, !isSelected);
           }}
-          className={`p-1 rounded transition-colors ${
-            isSelected 
-              ? 'bg-netflix-red text-white' 
+          className={`p-1 rounded transition-colors ${isSelected
+              ? 'bg-netflix-red text-white'
               : 'text-gray-400 hover:text-white'
-          }`}
+            }`}
         >
           {isSelected ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
         </button>
@@ -259,7 +258,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               {safeTitle}
             </h3>
           </Link>
-          
+
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-2">
             <span>{safeYear}</span>
             <span>•</span>
@@ -271,7 +270,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 <span>•</span>
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 text-yellow-400" />
-                  <span>{safeVoteAverage.toFixed(1)}</span>
+                  <span>{(safeVoteAverage || 0).toFixed(1)}</span>
                 </div>
               </>
             )}
@@ -315,7 +314,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
           {typeof item.progress === 'number' && item.progress > 0 && (
             <div className="w-24 mb-2">
               <div className="w-full bg-gray-600 rounded-full h-2">
-                <div 
+                <div
                   className="bg-netflix-red h-2 rounded-full transition-all duration-300"
                   style={{ width: `${item.progress}%` }}
                 />

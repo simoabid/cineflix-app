@@ -154,7 +154,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ content, type }) => {
                   <Star className="h-3 w-3 text-yellow-400 fill-current" />
                 </div>
                 <span className={`font-bold text-sm ${getRatingColor(content.vote_average)}`}>
-                  {content.vote_average.toFixed(1)}
+                  {(content.vote_average || 0).toFixed(1)}
                 </span>
               </div>
             </div>
@@ -164,7 +164,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ content, type }) => {
               {type === 'movie' && movie?.imdb_id && (
                 <div className="flex items-center justify-center space-x-2 p-1.5 bg-white/5 rounded border border-white/5">
                   <span className="text-[#f5c518] text-xs font-bold">IMDb</span>
-                  <span className="text-white text-xs font-medium">{(content.vote_average * 0.9).toFixed(1)}</span>
+                  <span className="text-white text-xs font-medium">{((content.vote_average || 0) * 0.9).toFixed(1)}</span>
                 </div>
               )}
               <div className="flex items-center justify-center space-x-2 p-1.5 bg-gray-800/30 rounded border border-white/5">
