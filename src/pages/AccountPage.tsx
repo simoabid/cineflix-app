@@ -1020,12 +1020,12 @@ const AccountPage: React.FC = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`w - full flex items - center gap - 3 px - 4 py - 3 rounded - xl text - left transition - all duration - 200 ${activeTab === tab.id
+                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
                                                 ? 'bg-netflix-red text-white shadow-lg shadow-netflix-red/25'
-                                                : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-                                                } `}
+                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                }`}
                                         >
-                                            <Icon className="w-5 h-5" />
+                                            <Icon className={`w-5 h-5 transition-colors ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
                                             <span className="font-medium">{tab.label}</span>
                                         </button>
                                     );

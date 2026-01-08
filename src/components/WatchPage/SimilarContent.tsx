@@ -1,281 +1,337 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Play,
   Star,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Info,
+  Layers,
+  LayoutGrid
 } from 'lucide-react';
 
 import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
-import { useMyList } from '../../hooks/useMyList';
 import AddToListButton from '../AddToListButton';
 import LikeButton from '../LikeButton';
 
 interface SimilarContentProps {
-  content: (Movie | TVShow)[];
+  similar: (Movie | TVShow)[];
+  recommended: (Movie | TVShow)[];
   title: string;
   type: 'movie' | 'tv';
 }
 
-const SimilarContent: React.FC<SimilarContentProps> = ({ content, title, type }) => {
+const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, title, type }) => {
   const navigate = useNavigate();
-  useMyList();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<'similar' | 'recommended'>('similar');
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(content.length / itemsPerPage);
+  const content = activeTab === 'similar' ? similar : recommended;
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % totalPages);
+  const updateArrows = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftArrow(scrollLeft > 20);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 20);
+    }
   };
 
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages);
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', updateArrows);
+      window.addEventListener('resize', updateArrows);
+      // Wait for content render to calculate
+      const timer = setTimeout(updateArrows, 100);
+      return () => {
+        scrollContainer.removeEventListener('scroll', updateArrows);
+        window.removeEventListener('resize', updateArrows);
+        clearTimeout(timer);
+      };
+    }
+  }, [content, activeTab]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { clientWidth } = scrollRef.current;
+      const scrollAmount = direction === 'left' ? -clientWidth * 0.7 : clientWidth * 0.7;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const switchTab = (tab: 'similar' | 'recommended') => {
+    setActiveTab(tab);
+    setHoveredItem(null);
   };
 
   const handleWatchContent = (item: Movie | TVShow) => {
+    if (isDragging) return;
     const contentType = 'title' in item ? 'movie' : 'tv';
     navigate(`/watch/${contentType}/${item.id}`);
   };
 
-  // Removed manual handler, using AddToListButton/LikeButton components for auth checks and consistency
+  // Mouse Drag Logic
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
 
-  const currentItems = content.slice(
-    currentIndex * itemsPerPage,
-    (currentIndex + 1) * itemsPerPage
-  );
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
-  if (content.length === 0) {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  if (similar.length === 0 && recommended.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-16 bg-[#0A0A1F]">
-      <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-white flex items-center">
-            <Sparkles className="h-8 w-8 text-[#ff0000] mr-3" />
-            {title}
-          </h2>
+    <section className="py-20 bg-[#0A0A1F] relative overflow-hidden">
+      {/* Decorative background glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#ff0000]/5 blur-[120px] rounded-full pointer-events-none" />
 
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={prevSlide}
-              disabled={currentIndex === 0}
-              className="p-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <span className="text-gray-400 text-sm">
-              {currentIndex + 1} / {totalPages}
-            </span>
-            <button
-              onClick={nextSlide}
-              disabled={currentIndex === totalPages - 1}
-              className="p-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+      <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <Sparkles className="h-3 w-3 text-[#ff0000]" />
+              Discover More
+            </div>
+            <h2 className="text-4xl font-bold text-white tracking-tight">
+              Because you watched <span className="text-[#ff0000]">"{title}"</span>
+            </h2>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {currentItems.map((item, index) => {
-            const itemTitle = 'title' in item ? item.title : item.name;
-            const itemDate = 'release_date' in item ? item.release_date : item.first_air_date;
-            const contentType = 'title' in item ? 'movie' : 'tv';
-            const isHovered = hoveredItem === index;
-
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="relative group cursor-pointer"
-                onMouseEnter={() => setHoveredItem(index)}
-                onMouseLeave={() => setHoveredItem(null)}
-                onClick={() => handleWatchContent(item)}
+            {/* Custom Tab Switcher */}
+            <div className="flex p-1 bg-gray-900/50 backdrop-blur-md border border-white/5 rounded-2xl w-fit mt-6">
+              <button
+                onClick={() => switchTab('similar')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'similar'
+                    ? 'bg-[#ff0000] text-white shadow-lg shadow-red-600/20'
+                    : 'text-gray-400 hover:text-white'
+                  }`}
               >
-                {/* Poster Image */}
-                <div className="relative overflow-hidden rounded-lg bg-gray-800">
-                  <img
-                    src={getPosterUrl(item.poster_path, 'w342')}
-                    alt={itemTitle}
-                    className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300">
-                    {/* Action Buttons */}
-                    <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
-                      }`}>
-                      <div className="flex space-x-2">
-                        <motion.button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleWatchContent(item);
-                          }}
-                          className="p-3 bg-[#ff0000] text-white rounded-full hover:bg-red-700 transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <Play className="h-5 w-5" />
-                        </motion.button>
-
-                        <AddToListButton
-                          content={item}
-                          contentType={contentType}
-                          variant="icon"
-                          showText={false}
-                          className="!p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700"
-                        />
-                        <LikeButton
-                          content={item}
-                          contentType={contentType}
-                          variant="icon"
-                          showText={false}
-                          className="!p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Rating Badge */}
-                  <div className="absolute top-2 right-2 bg-black/80 text-white px-2 py-1 rounded-lg text-sm flex items-center space-x-1">
-                    <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                    <span>{(item.vote_average || 0).toFixed(1)}</span>
-                  </div>
-
-                  {/* Content Type Badge */}
-                  <div className="absolute top-2 left-2 bg-[#ff0000] text-white px-2 py-1 rounded text-xs font-semibold uppercase">
-                    {contentType}
-                  </div>
-                </div>
-
-                {/* Content Info */}
-                <div className="mt-3 space-y-1">
-                  <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#ff0000] transition-colors">
-                    {itemTitle}
-                  </h3>
-
-                  <div className="flex items-center space-x-2 text-xs text-gray-400">
-                    <span>{itemDate ? new Date(itemDate).getFullYear() : 'N/A'}</span>
-                    <span>•</span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                      <span>{(item.vote_average || 0).toFixed(1)}</span>
-                    </div>
-                  </div>
-
-                  {/* Genres */}
-                  {item.genre_ids && item.genre_ids.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {item.genre_ids.slice(0, 2).map((genreId) => (
-                        <span
-                          key={genreId}
-                          className="px-1.5 py-0.5 bg-gray-700 text-gray-300 text-xs rounded"
-                        >
-                          {/* In a real app, you'd map genre IDs to names */}
-                          Genre {genreId}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Hover Card */}
-                {isHovered && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 p-4 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10"
-                  >
-                    <h4 className="text-white font-semibold mb-2">{itemTitle}</h4>
-                    <p className="text-gray-300 text-sm line-clamp-3 mb-3">
-                      {item.overview}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                          <span className="text-white">{(item.vote_average || 0).toFixed(1)}</span>
-                        </div>
-                        <span className="text-gray-400">
-                          ({item.vote_count} votes)
-                        </span>
-                      </div>
-
-                      <div className="text-gray-400 text-sm">
-                        {itemDate ? new Date(itemDate).getFullYear() : 'N/A'}
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2 mt-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleWatchContent(item);
-                        }}
-                        className="flex-1 py-2 bg-[#ff0000] text-white rounded text-sm font-medium hover:bg-red-700 transition-colors"
-                      >
-                        Watch Now
-                      </button>
-                      <AddToListButton
-                        content={item}
-                        contentType={contentType}
-                        variant="icon"
-                        showText={false}
-                        className="!p-3 bg-gray-700 text-white rounded hover:bg-gray-600"
-                      />
-                      <LikeButton
-                        content={item}
-                        contentType={contentType}
-                        variant="icon"
-                        showText={false}
-                        className="!p-3 bg-gray-700 text-white rounded hover:bg-gray-600"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Pagination Dots */}
-        <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: totalPages }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex ? 'bg-[#ff0000]' : 'bg-gray-600'
-                }`}
-            />
-          ))}
-        </div>
-
-        {/* Show More Button */}
-        {content.length > itemsPerPage && (
-          <div className="text-center mt-8">
-            <button
-              onClick={() => navigate(`/search?type=${type}&similar=true`)}
-              className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-            >
-              View All Similar Content
-            </button>
+                <Layers className="h-4 w-4" />
+                Similar Content
+              </button>
+              <button
+                onClick={() => switchTab('recommended')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'recommended'
+                    ? 'bg-[#ff0000] text-white shadow-lg shadow-red-600/20'
+                    : 'text-gray-400 hover:text-white'
+                  }`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Recommended for You
+              </button>
+            </div>
           </div>
-        )}
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => scroll('left')}
+                disabled={!showLeftArrow}
+                className="p-3 bg-gray-900 border border-white/10 text-white rounded-2xl hover:bg-gray-800 disabled:opacity-0 disabled:pointer-events-none transition-all hover:scale-105 active:scale-95 z-30"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                disabled={!showRightArrow}
+                className="p-3 bg-gray-900 border border-white/10 text-white rounded-2xl hover:bg-gray-800 disabled:opacity-0 disabled:pointer-events-none transition-all hover:scale-105 active:scale-95 z-30"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Improved Full-Bleed Carousel Container */}
+        <div className="relative -mx-6 sm:-mx-8 lg:-mx-12 group/carousel">
+          {/* High-Performance Edge Fades - Positioned outside the actual content padding */}
+          <div className={`absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0A0A1F] to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showLeftArrow ? 'opacity-100' : 'opacity-0'}`} />
+          <div className={`absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0A0A1F] to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showRightArrow ? 'opacity-100' : 'opacity-0'}`} />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              ref={scrollRef}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseUp}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              className={`flex gap-8 overflow-x-auto scrollbar-hide pb-12 pt-4 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
+              style={{
+                scrollSnapType: isDragging ? 'none' : 'x proximity',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              {content.map((item, index) => {
+                const itemTitle = 'title' in item ? item.title : item.name;
+                const itemDate = 'release_date' in item ? item.release_date : item.first_air_date;
+                const contentType = 'title' in item ? 'movie' : 'tv';
+                const isHovered = hoveredItem === index;
+
+                return (
+                  <div
+                    key={`${activeTab}-${item.id}`}
+                    className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[260px] lg:w-[280px] relative group perspective-1000"
+                    onMouseEnter={() => !isDragging && setHoveredItem(index)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    <motion.div
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      animate={{
+                        y: isHovered ? -12 : 0,
+                        scale: isHovered ? 1.02 : 1
+                      }}
+                      className="relative cursor-pointer"
+                    >
+                      {/* Premium Card Shadow */}
+                      <div className={`absolute inset-0 bg-[#ff0000]/20 blur-2xl rounded-2xl transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+
+                      <div
+                        onClick={() => handleWatchContent(item)}
+                        className="relative overflow-hidden rounded-2xl bg-gray-900 border border-white/5 aspect-[2/3] group-hover:border-[#ff0000]/50 transition-all duration-500"
+                      >
+                        <img
+                          src={getPosterUrl(item.poster_path, 'w500')}
+                          alt={itemTitle}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none"
+                          loading="lazy"
+                        />
+
+                        {/* Dynamic Overlays */}
+                        <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+
+                        <div className={`absolute inset-0 flex flex-col justify-end p-5 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+                          <div className="space-y-3">
+                            <div className="flex gap-2">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) => { e.stopPropagation(); handleWatchContent(item); }}
+                                className="w-10 h-10 flex items-center justify-center bg-[#ff0000] text-white rounded-xl shadow-lg shadow-red-600/40"
+                              >
+                                <Play className="h-5 w-5 fill-current" />
+                              </motion.button>
+                              <AddToListButton
+                                content={item}
+                                contentType={contentType}
+                                variant="icon"
+                                showText={false}
+                                className="!w-10 !h-10 !p-0 bg-white/10 backdrop-blur-md text-white border border-white/10 rounded-xl hover:bg-white/20"
+                              />
+                              <LikeButton
+                                content={item}
+                                contentType={contentType}
+                                variant="icon"
+                                showText={false}
+                                className="!w-10 !h-10 !p-0 bg-white/10 backdrop-blur-md text-white border border-white/10 rounded-xl hover:bg-white/20"
+                              />
+                            </div>
+                            <button className="flex items-center gap-2 text-xs font-semibold text-white/90 hover:text-white transition-colors duration-200">
+                              <Info className="w-4 h-4" />
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Top Badges */}
+                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                          <div className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 shadow-xl">
+                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                            <span className="text-[11px] font-bold text-white">{(item.vote_average || 0).toFixed(1)}</span>
+                          </div>
+                        </div>
+
+                        <div className="absolute top-4 right-4">
+                          <div className="px-2 py-1 rounded-lg bg-[#ff0000] text-white text-[10px] font-black tracking-tighter shadow-lg shadow-red-600/30">
+                            {contentType === 'movie' ? 'MOVIE' : 'TV SHOW'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer Info */}
+                      <div className="mt-5 space-y-1.5">
+                        <h3 className="text-white font-bold text-base leading-tight line-clamp-1 group-hover:text-[#ff0000] transition-colors duration-300">
+                          {itemTitle}
+                        </h3>
+                        <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500">
+                          <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 uppercase">
+                            {itemDate ? new Date(itemDate).getFullYear() : 'N/A'}
+                          </span>
+                          <span>•</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-yellow-600" />
+                            <span>{item.vote_count.toLocaleString()} votes</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Global Action Footer */}
+        <div className="mt-20 flex flex-col md:flex-row items-center justify-between p-8 bg-gray-900/30 backdrop-blur-lg border border-white/5 rounded-[32px] gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 flex items-center justify-center bg-[#ff0000]/10 rounded-2xl">
+              <Sparkles className="h-6 w-6 text-[#ff0000]" />
+            </div>
+            <div>
+              <h4 className="text-white font-bold">Still looking for something?</h4>
+              <p className="text-gray-400 text-sm">Explore our full catalog of {type === 'movie' ? 'movies' : 'TV shows'} with advanced filters.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/search?type=${type}&ref=recommendations`)}
+            className="px-8 py-3.5 bg-white text-black font-bold rounded-2xl hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
+          >
+            Explore All {type === 'movie' ? 'Movies' : 'Series'}
+          </button>
+        </div>
       </div>
+
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </section>
   );
 };

@@ -385,6 +385,11 @@ export const getMovieCredits = async (id: number): Promise<MovieCredits> => {
   return response.data;
 };
 
+export const getMovieKeywords = async (id: number): Promise<{ id: number; name: string }[]> => {
+  const response = await tmdbApi.get(`/movie/${id}/keywords`);
+  return response.data.keywords || [];
+};
+
 export const getSimilarMovies = async (id: number, page: number = 1): Promise<ApiResponse<Movie>> => {
   const response = await tmdbApi.get(`/movie/${id}/similar`, {
     params: { page },
@@ -575,6 +580,85 @@ export const getMoviesByKeywords = async (keywords: string[]): Promise<Movie[]> 
   }
 };
 
+// Enhanced recommendations function using multiple high-quality signals
+export const getEnhancedRecommendationsMovies = async (movie: Movie, page: number = 1): Promise<Movie[]> => {
+  try {
+    const movieId = movie.id;
+
+    // Fetch multiple signals in parallel
+    const [recommendationsRes, keywordsRes, creditsRes] = await Promise.all([
+      tmdbApi.get(`/movie/${movieId}/recommendations`, { params: { page } }),
+      getMovieKeywords(movieId),
+      getMovieCredits(movieId)
+    ]);
+
+    const tmdbRecs = recommendationsRes.data.results || [];
+    const keywords = keywordsRes || [];
+    const credits = creditsRes;
+
+    // Signal 1: TMDB Official Recommendations (High weight)
+    let results = [...tmdbRecs];
+
+    // Signal 2: Same Director (High weight for cinema lovers)
+    const director = credits.crew?.find(m => m.job === 'Director');
+    if (director) {
+      try {
+        const directorCredits = await getPersonMovieCredits(director.id);
+        const otherDirectorMovies = directorCredits.cast
+          .filter(m => m.id !== movieId)
+          .sort((a, b) => b.popularity - a.popularity)
+          .slice(0, 5);
+        results.push(...otherDirectorMovies);
+      } catch (e) { console.warn('Director discovery failed', e); }
+    }
+
+    // Signal 3: Specific Plot Keywords (Discover movies with same theme, not same name)
+    // We use the first 3 keywords to discover similar-themed movies
+    if (keywords.length > 0) {
+      const topKeywords = keywords.slice(0, 3).map(k => k.id).join('|');
+      try {
+        const keywordBasedRes = await tmdbApi.get('/discover/movie', {
+          params: {
+            with_keywords: topKeywords,
+            sort_by: 'popularity.desc',
+            'vote_count.gte': 100,
+            page: 1
+          }
+        });
+        results.push(...(keywordBasedRes.data.results || []).filter((m: Movie) => m.id !== movieId));
+      } catch (e) { console.warn('Keyword discovery failed', e); }
+    }
+
+    // Deduplicate and Score
+    const uniqueMap = new Map<number, Movie & { score: number }>();
+
+    results.forEach((m, idx) => {
+      const existing = uniqueMap.get(m.id);
+      let weight = (results.length - idx); // Base weight on order
+
+      // Bonus for being in official recommendations
+      if (tmdbRecs.find((r: Movie) => r.id === m.id)) weight += 100;
+
+      if (existing) {
+        existing.score += weight;
+      } else {
+        uniqueMap.set(m.id, { ...m, score: weight });
+      }
+    });
+
+    // Final sort by score
+    return Array.from(uniqueMap.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 20)
+      .map(({ score, ...rest }) => rest as Movie);
+
+  } catch (error) {
+    console.error('Enhanced recommendations failed:', error);
+    const fallback = await getMovieRecommendations(movie.id, page);
+    return fallback.results;
+  }
+};
+
 export const getMovieRecommendations = async (id: number, page: number = 1): Promise<ApiResponse<Movie>> => {
   const response = await tmdbApi.get(`/movie/${id}/recommendations`, {
     params: { page },
@@ -678,6 +762,11 @@ export const getSimilarTVShows = async (id: number, page: number = 1): Promise<A
   return response.data;
 };
 
+export const getTVShowKeywords = async (id: number): Promise<{ id: number; name: string }[]> => {
+  const response = await tmdbApi.get(`/tv/${id}/keywords`);
+  return response.data.results || [];
+};
+
 export const getTVShowRecommendations = async (id: number, page: number = 1): Promise<ApiResponse<TVShow>> => {
   const response = await tmdbApi.get(`/tv/${id}/recommendations`, {
     params: { page },
@@ -685,76 +774,105 @@ export const getTVShowRecommendations = async (id: number, page: number = 1): Pr
   return response.data;
 };
 
-// Enhanced similar content functions
-export const getEnhancedSimilarTVShows = async (tvShow: TVShow, page: number = 1): Promise<TVShow[]> => {
+// Enhanced recommendations function for TV Shows
+export const getEnhancedRecommendationsTVShows = async (tvShow: TVShow, page: number = 1): Promise<TVShow[]> => {
   try {
-    // Get multiple sources of similar content
-    const [similarResponse, recommendationsResponse] = await Promise.all([
-      tmdbApi.get(`/tv/${tvShow.id}/similar`, { params: { page } }),
-      tmdbApi.get(`/tv/${tvShow.id}/recommendations`, { params: { page } })
+    const tvId = tvShow.id;
+
+    // Parallel fetch of recommendations and keywords
+    const [recommendationsRes, keywordsRes] = await Promise.all([
+      tmdbApi.get(`/tv/${tvId}/recommendations`, { params: { page } }),
+      getTVShowKeywords(tvId)
     ]);
 
-    const similar = similarResponse.data.results || [];
-    const recommendations = recommendationsResponse.data.results || [];
+    const tmdbRecs = recommendationsRes.data.results || [];
+    const keywords = keywordsRes || [];
 
-    // Combine and deduplicate results
-    const combined = [...similar, ...recommendations];
-    const unique = combined.filter((show, index, self) =>
-      index === self.findIndex(s => s.id === show.id)
-    );
+    let results = [...tmdbRecs];
 
-    // If we have genres, also fetch content by primary genre
-    if (tvShow.genres && tvShow.genres.length > 0) {
-      const primaryGenre = tvShow.genres[0];
+    // Signal: Same Creator/Director if available in details (often hard for TV, but we try keywords)
+    if (keywords.length > 0) {
+      const topKeywords = keywords.slice(0, 3).map(k => k.id).join('|');
       try {
-        const genreResponse = await tmdbApi.get('/discover/tv', {
+        const keywordBasedRes = await tmdbApi.get('/discover/tv', {
           params: {
-            with_genres: primaryGenre.id,
+            with_keywords: topKeywords,
             sort_by: 'popularity.desc',
-            page: 1,
-            'vote_count.gte': 100 // Only shows with decent ratings
+            'vote_count.gte': 50,
+            page: 1
           }
         });
-
-        const genreShows = genreResponse.data.results || [];
-        // Add genre-based shows, avoiding duplicates
-        genreShows.forEach((show: TVShow) => {
-          if (!unique.find(s => s.id === show.id)) {
-            unique.push(show);
-          }
-        });
-      } catch (error) {
-        console.error('Error fetching genre-based shows:', error);
-      }
+        results.push(...(keywordBasedRes.data.results || []).filter((s: TVShow) => s.id !== tvId));
+      } catch (e) { console.warn('TV Keyword discovery failed', e); }
     }
 
-    // Sort by relevance (similarity score, then popularity)
-    return unique
-      .filter(show => show.id !== tvShow.id) // Exclude the original show
-      .sort((a, b) => {
-        // Prioritize shows with similar genres
-        const aGenreMatch = tvShow.genres?.some(g =>
-          a.genre_ids?.includes(g.id)
-        ) ? 1 : 0;
-        const bGenreMatch = tvShow.genres?.some(g =>
-          b.genre_ids?.includes(g.id)
-        ) ? 1 : 0;
+    // Deduplicate and Score
+    const uniqueMap = new Map<number, TVShow & { score: number }>();
 
-        if (aGenreMatch !== bGenreMatch) {
-          return bGenreMatch - aGenreMatch;
-        }
+    results.forEach((s, idx) => {
+      const existing = uniqueMap.get(s.id);
+      let weight = (results.length - idx);
 
-        // Then sort by popularity
-        return b.vote_count - a.vote_count;
-      })
-      .slice(0, 20); // Return top 20 most relevant
-  } catch (error) {
-    console.error('Error fetching enhanced similar TV shows:', error);
-    // Fallback to basic similar
-    const response = await tmdbApi.get(`/tv/${tvShow.id}/similar`, {
-      params: { page },
+      if (tmdbRecs.find((r: TVShow) => r.id === s.id)) weight += 100;
+
+      if (existing) {
+        existing.score += weight;
+      } else {
+        uniqueMap.set(s.id, { ...s, score: weight });
+      }
     });
-    return response.data.results || [];
+
+    return Array.from(uniqueMap.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 20)
+      .map(({ score, ...rest }) => rest as TVShow);
+
+  } catch (error) {
+    console.error('Enhanced TV recommendations failed:', error);
+    const fallback = await getTVShowRecommendations(tvShow.id, page);
+    return fallback.results;
+  }
+};
+
+export const getEnhancedSimilarTVShows = async (tvShow: TVShow, page: number = 1): Promise<TVShow[]> => {
+  try {
+    const tvId = tvShow.id;
+    const [similarRes, recommendationsRes] = await Promise.all([
+      tmdbApi.get(`/tv/${tvId}/similar`, { params: { page } }),
+      tmdbApi.get(`/tv/${tvId}/recommendations`, { params: { page } })
+    ]);
+
+    const similar = similarRes.data.results || [];
+    const recommendations = recommendationsRes.data.results || [];
+
+    // Combine and deduplicate
+    const combined = [...similar, ...recommendations];
+
+    // Add same genre high-rated shows
+    if (tvShow.genres && tvShow.genres.length > 0) {
+      try {
+        const genreRes = await tmdbApi.get('/discover/tv', {
+          params: {
+            with_genres: tvShow.genres[0].id,
+            sort_by: 'popularity.desc',
+            'vote_count.gte': 100,
+            page: 1
+          }
+        });
+        combined.push(...(genreRes.data.results || []));
+      } catch (e) { /* ignore */ }
+    }
+
+    const uniqueMap = new Map<number, TVShow>();
+    combined.forEach(s => {
+      if (s.id !== tvId) uniqueMap.set(s.id, s);
+    });
+
+    return Array.from(uniqueMap.values()).slice(0, 20);
+  } catch (error) {
+    console.error('Enhanced TV similarity failed:', error);
+    const fallback = await getSimilarTVShows(tvShow.id, page);
+    return fallback.results;
   }
 };
 

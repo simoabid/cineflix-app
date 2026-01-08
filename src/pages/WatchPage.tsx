@@ -8,7 +8,14 @@ import {
 } from 'lucide-react';
 
 import { Movie, TVShow, WatchProgress, StreamSource, DownloadOption, TorrentSource } from '../types';
-import { getMovieDetails, getTVShowDetails, getMovieVideos, getTVShowVideos, getSimilarMovies, getSimilarTVShows } from '../services/tmdb';
+import {
+  getMovieDetails,
+  getTVShowDetails,
+  getEnhancedSimilarMovies,
+  getEnhancedRecommendationsMovies,
+  getEnhancedRecommendationsTVShows,
+  getSimilarTVShows
+} from '../services/tmdb';
 import { useMyList } from '../hooks/useMyList';
 import { myListService } from '../services/myListService';
 import { rivestreamService } from '../services/rivestreamService';
@@ -39,6 +46,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
   const [content, setContent] = useState<Movie | TVShow | null>(null);
 
   const [similarContent, setSimilarContent] = useState<(Movie | TVShow)[]>([]);
+  const [recommendedContent, setRecommendedContent] = useState<(Movie | TVShow)[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [watchProgress, setWatchProgress] = useState<WatchProgress | null>(null);
@@ -279,23 +287,29 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
         let contentData: Movie | TVShow;
 
         if (type === 'movie') {
-          const [movieData, _vids, similarResponse] = await Promise.all([
-            getMovieDetails(contentId),
-            getMovieVideos(contentId),
-            getSimilarMovies(contentId)
-          ]);
+          const movieData = await getMovieDetails(contentId);
           contentData = movieData;
-          // no-op
-          setSimilarContent(similarResponse.results || []);
+
+          // Parallel fetch enhanced recommendations and similar content
+          const [similarRes, recommendedRes] = await Promise.all([
+            getEnhancedSimilarMovies(movieData),
+            getEnhancedRecommendationsMovies(movieData)
+          ]);
+
+          setSimilarContent(similarRes.slice(0, 12));
+          setRecommendedContent(recommendedRes.slice(0, 12));
         } else {
-          const [tvData, _vids, similarResponse] = await Promise.all([
-            getTVShowDetails(contentId),
-            getTVShowVideos(contentId),
+          const tvData = await getTVShowDetails(contentId);
+          contentData = tvData;
+
+          // Enhanced TV recommendations and standard similar (or we can use our recommendations as similar too)
+          const [recommendedRes, similarResponse] = await Promise.all([
+            getEnhancedRecommendationsTVShows(tvData),
             getSimilarTVShows(contentId)
           ]);
-          contentData = tvData;
-          // no-op
-          setSimilarContent(similarResponse.results || []);
+
+          setRecommendedContent(recommendedRes.slice(0, 12));
+          setSimilarContent(similarResponse.results.slice(0, 12));
         }
 
         setContent(contentData);
@@ -634,8 +648,9 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
 
       {/* Similar Content */}
       <SimilarContent
-        content={similarContent}
-        title={`More like "${title}"`}
+        similar={similarContent}
+        recommended={recommendedContent}
+        title={title}
         type={type}
       />
     </div>

@@ -13,7 +13,7 @@ import {
   PlayCircle,
   User,
   Award,
-  Download,
+  //Download,
   Film
 } from 'lucide-react';
 import {
@@ -27,8 +27,8 @@ import {
   getSimilarTVShows,
   getEnhancedSimilarTVShows,
   getEnhancedSimilarMovies,
-  getTVShowsByKeywords,
-  getMoviesByKeywords,
+  getEnhancedRecommendationsMovies,
+  getEnhancedRecommendationsTVShows,
   getMovieRecommendations,
   getTVShowRecommendations,
   getTVShowSeasons,
@@ -42,10 +42,12 @@ import {
   getBackdropUrl
 } from '../services/tmdb';
 import { Movie, TVShow, Video, MovieCredits, CastMember, PersonDetails, PersonMovieCredits } from '../types';
+import CastCrewSection from '../components/DetailPage/CastCrewSection';
 import AddToListButton from '../components/AddToListButton';
 import LikeButton from '../components/LikeButton';
 import EpisodesList from '../components/EpisodesList';
 import LogoImage from '../components/LogoImage';
+import SimilarContent from '../components/WatchPage/SimilarContent';
 
 interface DetailPageProps {
   type: 'movie' | 'tv';
@@ -66,8 +68,6 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [showAllCast, setShowAllCast] = useState(false);
-  const [activeCastTab, setActiveCastTab] = useState<'cast' | 'crew'>('cast');
   const [selectedCastMember, setSelectedCastMember] = useState<CastMember | null>(null);
   const [showCastModal, setShowCastModal] = useState(false);
   const [showFilmographyModal, setShowFilmographyModal] = useState(false);
@@ -126,11 +126,10 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
         if (type === 'movie') {
           // Fetch all movie data in parallel
-          const [movieData, videosData, creditsData, recommendedData, externalIdsData] = await Promise.all([
+          const [movieData, videosData, creditsData, externalIdsData] = await Promise.all([
             getMovieDetails(parseInt(id)),
             getMovieVideos(parseInt(id)),
             getMovieCredits(parseInt(id)),
-            getMovieRecommendations(parseInt(id)),
             getMovieExternalIds(parseInt(id))
           ]);
 
@@ -139,34 +138,24 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
           setCredits(creditsData);
           setExternalIds(externalIdsData);
 
-          // Fetch enhanced similar content after getting movie details
+          // Fetch enhanced similar and recommended content
           try {
-            const enhancedSimilar = await getEnhancedSimilarMovies(movieData);
-            setSimilarContent(enhancedSimilar.slice(0, 12));
-
-            // Also get keyword-based recommendations
-            const keywords = extractKeywordsFromMovie(movieData);
-            if (keywords.length > 0) {
-              const keywordMovies = await getMoviesByKeywords(keywords);
-              // Combine with recommendations for better variety
-              const combined = [...keywordMovies, ...recommendedData.results];
-              const unique = combined.filter((movie, index, self) =>
-                index === self.findIndex(m => m.id === movie.id)
-              );
-              setRecommendedContent(unique.slice(0, 12));
-            } else {
-              // Fallback to regular recommendations
-              setRecommendedContent(recommendedData.results.slice(0, 12));
-            }
-          } catch (error) {
-            console.error('Error fetching enhanced similar content:', error);
-            // Fallback to basic similar content
-            const [similarData, recommendedData] = await Promise.all([
-              getSimilarMovies(parseInt(id)),
-              getMovieRecommendations(parseInt(id))
+            const [enhancedSimilar, enhancedRecommended] = await Promise.all([
+              getEnhancedSimilarMovies(movieData),
+              getEnhancedRecommendationsMovies(movieData)
             ]);
-            setSimilarContent(similarData.results.slice(0, 12));
-            setRecommendedContent(recommendedData.results.slice(0, 12));
+
+            setSimilarContent(enhancedSimilar.slice(0, 12));
+            setRecommendedContent(enhancedRecommended.slice(0, 12));
+          } catch (error) {
+            console.error('Error fetching enhanced content:', error);
+            // Minimal fallback
+            const [similarData, recommendedData] = await Promise.all([
+              getSimilarMovies(movieData.id),
+              getMovieRecommendations(movieData.id)
+            ]);
+            setSimilarContent((similarData.results || []).slice(0, 12));
+            setRecommendedContent((recommendedData.results || []).slice(0, 12));
           }
         } else {
           // Fetch all TV show data in parallel
@@ -184,36 +173,23 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
           setSeasons(seasonsData || []);
           setExternalIds(externalIdsData);
 
-          // Fetch enhanced similar content after getting TV show details
+          // Fetch enhanced similar and recommended content
           try {
-            const enhancedSimilar = await getEnhancedSimilarTVShows(tvData);
-            setSimilarContent(enhancedSimilar.slice(0, 12));
-
-            // Also get keyword-based recommendations
-            const keywords = extractKeywordsFromTVShow(tvData);
-            if (keywords.length > 0) {
-              const keywordShows = await getTVShowsByKeywords(keywords);
-              // Combine with recommendations for better variety
-              const recommendations = await getTVShowRecommendations(parseInt(id));
-              const combined = [...keywordShows, ...recommendations.results];
-              const unique = combined.filter((show, index, self) =>
-                index === self.findIndex(s => s.id === show.id)
-              );
-              setRecommendedContent(unique.slice(0, 12));
-            } else {
-              // Fallback to regular recommendations
-              const recommendations = await getTVShowRecommendations(parseInt(id));
-              setRecommendedContent(recommendations.results.slice(0, 12));
-            }
-          } catch (error) {
-            console.error('Error fetching enhanced similar content:', error);
-            // Fallback to basic similar content
-            const [similarData, recommendedData] = await Promise.all([
-              getSimilarTVShows(parseInt(id)),
-              getTVShowRecommendations(parseInt(id))
+            const [enhancedSimilar, enhancedRecommended] = await Promise.all([
+              getEnhancedSimilarTVShows(tvData),
+              getEnhancedRecommendationsTVShows(tvData)
             ]);
-            setSimilarContent(similarData.results.slice(0, 12));
-            setRecommendedContent(recommendedData.results.slice(0, 12));
+
+            setSimilarContent(enhancedSimilar.slice(0, 12));
+            setRecommendedContent(enhancedRecommended.slice(0, 12));
+          } catch (error) {
+            console.error('Error fetching enhanced content:', error);
+            const [similarData, recommendedData] = await Promise.all([
+              getSimilarTVShows(tvData.id),
+              getTVShowRecommendations(tvData.id)
+            ]);
+            setSimilarContent((similarData.results || []).slice(0, 12));
+            setRecommendedContent((recommendedData.results || []).slice(0, 12));
           }
 
           // Set first season as default if available
@@ -289,22 +265,6 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
     }
   };
 
-  const getMainCast = () => {
-    if (!credits) return [];
-    return showAllCast ? credits.cast : credits.cast.slice(0, 12);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // getCrewByDepartment removed (unused)
-
-  const getKeyCrewMembers = () => {
-    if (!credits) return [];
-
-    const keyRoles = ['Director', 'Producer', 'Executive Producer', 'Screenplay', 'Writer', 'Director of Photography', 'Original Music Composer'];
-    return credits.crew
-      .filter(member => keyRoles.includes(member.job))
-      .slice(0, 8);
-  };
 
   const handleCastMemberClick = async (castMember: CastMember) => {
     setSelectedCastMember(castMember);
@@ -365,9 +325,6 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
     setPersonFilmography(null);
   };
 
-  const handleContentClick = (contentId: number, contentType: 'movie' | 'tv') => {
-    navigate(`/${contentType}/${contentId}`);
-  };
 
   const handleMovieClick = (movieId: number) => {
     navigate(`/movie/${movieId}`);
@@ -486,99 +443,6 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
     return links;
   };
 
-  // Extract keywords from TV show for better recommendations
-  const extractKeywordsFromTVShow = (tvShow: TVShow): string[] => {
-    const keywords: string[] = [];
-
-    // Extract from title and name
-    if (tvShow.name) {
-      const titleWords = tvShow.name.toLowerCase().split(/\s+/);
-      keywords.push(...titleWords.filter(word => word.length > 2));
-    }
-
-    // Extract from overview
-    if (tvShow.overview) {
-      const overviewWords = tvShow.overview.toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .split(/\s+/)
-        .filter(word => word.length > 3);
-      keywords.push(...overviewWords.slice(0, 5));
-    }
-
-    // Add genre names as keywords
-    if (tvShow.genres) {
-      tvShow.genres.forEach(genre => {
-        keywords.push(genre.name.toLowerCase());
-      });
-    }
-
-    // Add status as keyword
-    if (tvShow.status) {
-      keywords.push(tvShow.status.toLowerCase());
-    }
-
-    // Remove duplicates and common words
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'a', 'an'];
-    const uniqueKeywords = keywords
-      .filter(word => !commonWords.includes(word))
-      .filter((word, index, self) => self.indexOf(word) === index)
-      .slice(0, 5); // Limit to 5 keywords
-
-    return uniqueKeywords;
-  };
-
-  // Extract keywords from movie for better recommendations
-  const extractKeywordsFromMovie = (movie: Movie): string[] => {
-    const keywords: string[] = [];
-
-    // Extract from title
-    if (movie.title) {
-      const titleWords = movie.title.toLowerCase().split(/\s+/);
-      keywords.push(...titleWords.filter(word => word.length > 2));
-    }
-
-    // Extract from overview
-    if (movie.overview) {
-      const overviewWords = movie.overview.toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .split(/\s+/)
-        .filter(word => word.length > 3);
-      keywords.push(...overviewWords.slice(0, 5));
-    }
-
-    // Add genre names as keywords
-    if (movie.genres) {
-      movie.genres.forEach(genre => {
-        keywords.push(genre.name.toLowerCase());
-      });
-    }
-
-    // Add tagline as keywords
-    if (movie.tagline) {
-      const taglineWords = movie.tagline.toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .split(/\s+/)
-        .filter(word => word.length > 2);
-      keywords.push(...taglineWords.slice(0, 3));
-    }
-
-    // Add production companies as keywords
-    if (movie.production_companies) {
-      movie.production_companies.slice(0, 2).forEach(company => {
-        const companyWords = company.name.toLowerCase().split(/\s+/);
-        keywords.push(...companyWords.filter(word => word.length > 2));
-      });
-    }
-
-    // Remove duplicates and common words
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'a', 'an', 'film', 'movie', 'story', 'tale'];
-    const uniqueKeywords = keywords
-      .filter(word => !commonWords.includes(word))
-      .filter((word, index, self) => self.indexOf(word) === index)
-      .slice(0, 5); // Limit to 5 keywords
-
-    return uniqueKeywords;
-  };
 
   // Handle Escape key to close modals
   useEffect(() => {
@@ -656,14 +520,14 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-transparent to-transparent"></div>
         </div>
 
-        {/* Back Button */}
-        <div className="absolute top-20 sm:top-24 left-4 sm:left-8 z-20">
+        {/* Back Button - Fixed Bubble */}
+        <div className="fixed top-24 left-6 sm:left-10 z-[100]">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1 sm:gap-2 bg-black/70 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-black/90 transition-all duration-300 border border-white/20 hover:border-white/40 shadow-xl"
+            className="flex items-center gap-1 sm:gap-2 bg-black/60 backdrop-blur-xl px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full hover:bg-black/90 transition-all duration-300 border border-white/10 hover:border-netflix-red/50 shadow-[0_8px_32px_rgba(0,0,0,0.5)] group hover:scale-105 active:scale-95"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            <span className="text-white font-medium text-sm sm:text-base">Back</span>
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:-translate-x-1 transition-transform" />
+            <span className="text-white font-bold text-sm sm:text-base tracking-wide uppercase">Back</span>
           </button>
         </div>
 
@@ -803,7 +667,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
           // TV Show Layout: 3-column layout with main sections
           <>
             {/* Row 1: 3-Column Layout - Optimized for space usage */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
               {/* Column 1 (Left): Seasons & Episodes - Takes more space */}
               <div className="lg:col-span-5">
                 <section className="bg-gradient-to-br from-netflix-red/5 to-transparent rounded-2xl p-8 border border-netflix-red/20">
@@ -1124,294 +988,77 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
             </div>
 
             {/* Full-width sections below the 3-column layout for TV */}
-            <div className="space-y-16 mt-16">
+            <div className="space-y-10 mt-10">
               {/* Videos & Trailers for TV */}
               {videos.length > 0 && (
                 <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos & Trailers</h2>
+                  <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos & Trailers</h2>
+                      </div>
+                      <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
                     </div>
-                    <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
-                  </div>
 
-                  {/* Horizontal Scrolling Video Grid */}
-                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                    {videos.slice(0, 4).map((video) => (
-                      <div
-                        key={video.id}
-                        className="flex-shrink-0 w-80 group cursor-pointer"
-                        onClick={() => handleWatchTrailer(video)}
-                      >
-                        <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3">
-                          <img
-                            src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
-                            alt={video.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
-                            }}
-                          />
+                    {/* Horizontal Scrolling Video Grid */}
+                    <div className="relative -mx-6 sm:-mx-8 lg:-mx-12">
+                      <div className="flex gap-4 overflow-x-auto pb-4 px-6 sm:px-8 lg:px-12 scrollbar-hide">
+                        {videos.slice(0, 4).map((video) => (
+                          <div
+                            key={video.id}
+                            className="flex-shrink-0 w-80 group cursor-pointer"
+                            onClick={() => handleWatchTrailer(video)}
+                          >
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3">
+                              <img
+                                src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
+                                alt={video.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
+                                }}
+                              />
 
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                            <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                              <Play className="w-8 h-8 text-white fill-current ml-1" />
+                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                  <Play className="w-8 h-8 text-white fill-current ml-1" />
+                                </div>
+                              </div>
+
+                              <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                                {video.type === 'Trailer' ? '2:30' : '1:45'}
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <h3 className="font-semibold text-white group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
+                                {video.name}
+                              </h3>
+                              <p className="text-sm text-gray-400">
+                                {video.type} • {new Date(video.published_at).toLocaleDateString()}
+                              </p>
                             </div>
                           </div>
-
-                          <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                            {video.type === 'Trailer' ? '2:30' : '1:45'}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <h3 className="font-semibold text-white group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
-                            {video.name}
-                          </h3>
-                          <p className="text-sm text-gray-400">
-                            {video.type} • {new Date(video.published_at).toLocaleDateString()}
-                          </p>
-                        </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </section>
               )}
 
               {/* Cast & Crew for TV */}
-              {credits && (
-                <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Cast & Crew</h2>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">
-                        {credits.cast.length} cast • {credits.crew.length} crew
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Tab Navigation */}
-                  <div className="flex mb-8 border-b border-gray-700">
-                    <button
-                      onClick={() => setActiveCastTab('cast')}
-                      className={`px-6 py-3 font-semibold transition-colors relative ${activeCastTab === 'cast'
-                        ? 'text-netflix-red'
-                        : 'text-gray-400 hover:text-white'
-                        }`}
-                    >
-                      Cast ({credits.cast.length})
-                      {activeCastTab === 'cast' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-netflix-red"></div>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setActiveCastTab('crew')}
-                      className={`px-6 py-3 font-semibold transition-colors relative ${activeCastTab === 'crew'
-                        ? 'text-netflix-red'
-                        : 'text-gray-400 hover:text-white'
-                        }`}
-                    >
-                      Crew ({credits.crew.length})
-                      {activeCastTab === 'crew' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-netflix-red"></div>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Cast Tab */}
-                  {activeCastTab === 'cast' && (
-                    <div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {getMainCast().slice(0, 10).map((actor) => (
-                          <div
-                            key={actor.id}
-                            className="text-center group cursor-pointer"
-                            onClick={() => handleCastMemberClick(actor)}
-                          >
-                            <div className="aspect-[3/4] mb-4 rounded-lg overflow-hidden bg-gray-800 relative">
-                              {actor.profile_path ? (
-                                <img
-                                  src={getImageUrl(actor.profile_path, 'w300')}
-                                  alt={actor.name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <User className="w-16 h-16 text-gray-400" />
-                                </div>
-                              )}
-
-                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <div className="text-center">
-                                  <User className="w-8 h-8 text-white mx-auto mb-2" />
-                                  <p className="text-white text-sm font-medium">View Details</p>
-                                </div>
-                              </div>
-
-                              {actor.order < 5 && (
-                                <div className="absolute top-2 left-2 bg-netflix-red text-white text-xs font-bold px-2 py-1 rounded-full">
-                                  #{actor.order + 1}
-                                </div>
-                              )}
-
-                              {/* Download Icon - Bottom Right Corner */}
-                              {actor.profile_path && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    downloadActorImage(getImageUrl(actor.profile_path, 'w500'), actor.name);
-                                  }}
-                                  className="absolute bottom-2 right-2 bg-black/80 hover:bg-netflix-red/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 group-hover:opacity-100 opacity-0"
-                                  title={`Download ${actor.name}'s photo`}
-                                >
-                                  <Download className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-
-                            <h3 className="font-bold text-white mb-1 group-hover:text-netflix-red transition-colors line-clamp-1">
-                              {actor.name}
-                            </h3>
-                            <p className="text-sm text-gray-400 line-clamp-2 mb-2">{actor.character}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {credits.cast.length > 10 && (
-                        <div className="text-center mt-8">
-                          <button
-                            onClick={() => setShowAllCast(!showAllCast)}
-                            className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg font-semibold transition-colors border border-white/20"
-                          >
-                            {showAllCast ? 'Show Less' : `Show All ${credits.cast.length} Cast Members`}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Crew Tab */}
-                  {activeCastTab === 'crew' && (
-                    <div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {getKeyCrewMembers().slice(0, 8).map((member) => (
-                          <div key={`${member.id}-${member.job}`} className="flex items-center gap-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors group">
-                            <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                              {member.profile_path ? (
-                                <img
-                                  src={getImageUrl(member.profile_path, 'w200')}
-                                  alt={member.name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <User className="w-8 h-8 text-gray-400" />
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-white group-hover:text-netflix-red transition-colors truncate">
-                                {member.name}
-                              </h4>
-                              <p className="text-sm text-gray-400 truncate">{member.job}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </section>
-              )}
-              {/* Recommended Content */}
-              {recommendedContent.length > 0 && (
-                <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Recommended TV Shows</h2>
-                    </div>
-                    <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{recommendedContent.length} shows</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {recommendedContent.map((item) => (
-                      <div
-                        key={item.id}
-                        className="group cursor-pointer"
-                        onClick={() => handleContentClick(item.id, type)}
-                      >
-                        <div className="aspect-[2/3] mb-3 rounded-lg overflow-hidden bg-gray-800">
-                          <img
-                            src={getPosterUrl(item.poster_path, 'w300')}
-                            alt={'title' in item ? item.title : (item as TVShow).name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-                            }}
-                          />
-                        </div>
-                        <h3 className="font-semibold text-sm mb-1 group-hover:text-netflix-red transition-colors line-clamp-2">
-                          {'title' in item ? item.title : (item as TVShow).name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                          <span>{formatRating(item.vote_average)}</span>
-                          <span>•</span>
-                          <span>{new Date('release_date' in item ? (item as Movie).release_date : (item as TVShow).first_air_date).getFullYear()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Similar Content */}
-              {similarContent.length > 0 && (
-                <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Similar TV Shows</h2>
-                    </div>
-                    <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{similarContent.length} shows</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {similarContent.map((item) => (
-                      <div
-                        key={item.id}
-                        className="group cursor-pointer"
-                        onClick={() => handleContentClick(item.id, type)}
-                      >
-                        <div className="aspect-[2/3] mb-3 rounded-lg overflow-hidden bg-gray-800">
-                          <img
-                            src={getPosterUrl(item.poster_path, 'w300')}
-                            alt={'title' in item ? item.title : (item as TVShow).name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-                            }}
-                          />
-                        </div>
-                        <h3 className="font-semibold text-sm mb-1 group-hover:text-netflix-red transition-colors line-clamp-2">
-                          {'title' in item ? item.title : (item as TVShow).name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                          <span>{formatRating(item.vote_average)}</span>
-                          <span>•</span>
-                          <span>{new Date('release_date' in item ? (item as Movie).release_date : (item as TVShow).first_air_date).getFullYear()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+              <CastCrewSection
+                credits={credits}
+                onActorClick={handleCastMemberClick}
+                onDownloadClick={downloadActorImage}
+              />
+              <SimilarContent
+                similar={similarContent}
+                recommended={recommendedContent}
+                title={getTitle()}
+                type={type}
+              />
             </div>
           </>
         ) : null}
@@ -1421,7 +1068,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
       {type === 'movie' && (
         <div className="w-full px-8 pt-8 pb-16">
           {/* Row 1: 3-Column Layout - Optimized for space usage */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
             {/* Column 1 (Left): Movie Details & Overview - Takes more space */}
             <div className="lg:col-span-5">
               <section className="bg-gradient-to-br from-netflix-red/5 to-transparent rounded-2xl p-8 border border-netflix-red/20">
@@ -1735,295 +1382,78 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
           </div>
 
           {/* Full-width sections below the 3-column layout for Movies */}
-          <div className="space-y-16 mt-16">
+          <div className="space-y-10 mt-10">
             {/* Videos & Trailers for Movies */}
             {videos.length > 0 && (
               <section>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos & Trailers</h2>
-                  </div>
-                  <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
-                </div>
-
-                {/* Horizontal Scrolling Video Grid */}
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                  {videos.slice(0, 4).map((video) => (
-                    <div
-                      key={video.id}
-                      className="flex-shrink-0 w-80 group cursor-pointer"
-                      onClick={() => handleWatchTrailer(video)}
-                    >
-                      <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3">
-                        <img
-                          src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
-                          alt={video.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
-                          }}
-                        />
-
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                          <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Play className="w-8 h-8 text-white fill-current ml-1" />
-                          </div>
-                        </div>
-
-                        <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                          {video.type === 'Trailer' ? '2:30' : '1:45'}
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <h3 className="font-semibold text-white group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
-                          {video.name}
-                        </h3>
-                        <p className="text-sm text-gray-400">
-                          {video.type} • {new Date(video.published_at).toLocaleDateString()}
-                        </p>
-                      </div>
+                <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
+                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos & Trailers</h2>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Cast & Crew for Movies */}
-            {credits && (
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Cast & Crew</h2>
+                    <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">
-                      {credits.cast.length} cast • {credits.crew.length} crew
-                    </span>
-                  </div>
-                </div>
 
-                {/* Tab Navigation */}
-                <div className="flex mb-8 border-b border-gray-700">
-                  <button
-                    onClick={() => setActiveCastTab('cast')}
-                    className={`px-6 py-3 font-semibold transition-colors relative ${activeCastTab === 'cast'
-                      ? 'text-netflix-red'
-                      : 'text-gray-400 hover:text-white'
-                      }`}
-                  >
-                    Cast ({credits.cast.length})
-                    {activeCastTab === 'cast' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-netflix-red"></div>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setActiveCastTab('crew')}
-                    className={`px-6 py-3 font-semibold transition-colors relative ${activeCastTab === 'crew'
-                      ? 'text-netflix-red'
-                      : 'text-gray-400 hover:text-white'
-                      }`}
-                  >
-                    Crew ({credits.crew.length})
-                    {activeCastTab === 'crew' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-netflix-red"></div>
-                    )}
-                  </button>
-                </div>
-
-                {/* Cast Tab */}
-                {activeCastTab === 'cast' && (
-                  <div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                      {getMainCast().slice(0, 10).map((actor) => (
+                  {/* Horizontal Scrolling Video Grid */}
+                  <div className="relative -mx-6 sm:-mx-8 lg:-mx-12">
+                    <div className="flex gap-4 overflow-x-auto pb-4 px-6 sm:px-8 lg:px-12 scrollbar-hide">
+                      {videos.slice(0, 4).map((video) => (
                         <div
-                          key={actor.id}
-                          className="text-center group cursor-pointer"
-                          onClick={() => handleCastMemberClick(actor)}
+                          key={video.id}
+                          className="flex-shrink-0 w-80 group cursor-pointer"
+                          onClick={() => handleWatchTrailer(video)}
                         >
-                          <div className="aspect-[3/4] mb-4 rounded-lg overflow-hidden bg-gray-800 relative">
-                            {actor.profile_path ? (
-                              <img
-                                src={getImageUrl(actor.profile_path, 'w300')}
-                                alt={actor.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <User className="w-16 h-16 text-gray-400" />
-                              </div>
-                            )}
+                          <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3">
+                            <img
+                              src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
+                              alt={video.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
+                              }}
+                            />
 
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <div className="text-center">
-                                <User className="w-8 h-8 text-white mx-auto mb-2" />
-                                <p className="text-white text-sm font-medium">View Details</p>
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Play className="w-8 h-8 text-white fill-current ml-1" />
                               </div>
                             </div>
 
-                            {actor.order < 5 && (
-                              <div className="absolute top-2 left-2 bg-netflix-red text-white text-xs font-bold px-2 py-1 rounded-full">
-                                #{actor.order + 1}
-                              </div>
-                            )}
-
-                            {/* Download Icon - Bottom Right Corner */}
-                            {actor.profile_path && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  downloadActorImage(getImageUrl(actor.profile_path, 'w500'), actor.name);
-                                }}
-                                className="absolute bottom-2 right-2 bg-black/80 hover:bg-netflix-red/80 text-white p-2 rounded-full transition-all duration-300 hover:scale-110 group-hover:opacity-100 opacity-0"
-                                title={`Download ${actor.name}'s photo`}
-                              >
-                                <Download className="w-4 h-4" />
-                              </button>
-                            )}
+                            <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                              {video.type === 'Trailer' ? '2:30' : '1:45'}
+                            </div>
                           </div>
 
-                          <h3 className="font-bold text-white mb-1 group-hover:text-netflix-red transition-colors line-clamp-1">
-                            {actor.name}
-                          </h3>
-                          <p className="text-sm text-gray-400 line-clamp-2 mb-2">{actor.character}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {credits.cast.length > 10 && (
-                      <div className="text-center mt-8">
-                        <button
-                          onClick={() => setShowAllCast(!showAllCast)}
-                          className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg font-semibold transition-colors border border-white/20"
-                        >
-                          {showAllCast ? 'Show Less' : `Show All ${credits.cast.length} Cast Members`}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Crew Tab */}
-                {activeCastTab === 'crew' && (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {getKeyCrewMembers().slice(0, 8).map((member) => (
-                        <div key={`${member.id}-${member.job}`} className="flex items-center gap-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors group">
-                          <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                            {member.profile_path ? (
-                              <img
-                                src={getImageUrl(member.profile_path, 'w200')}
-                                alt={member.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <User className="w-8 h-8 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-white group-hover:text-netflix-red transition-colors truncate">
-                              {member.name}
-                            </h4>
-                            <p className="text-sm text-gray-400 truncate">{member.job}</p>
+                          <div className="space-y-1">
+                            <h3 className="font-semibold text-white group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
+                              {video.name}
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              {video.type} • {new Date(video.published_at).toLocaleDateString()}
+                            </p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
-              </section>
-            )}
-
-            {/* Recommended Content */}
-            {recommendedContent.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Recommended Movies</h2>
-                  </div>
-                  <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{recommendedContent.length} movies</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {recommendedContent.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group cursor-pointer"
-                      onClick={() => handleContentClick(item.id, type)}
-                    >
-                      <div className="aspect-[2/3] mb-3 rounded-lg overflow-hidden bg-gray-800">
-                        <img
-                          src={getPosterUrl(item.poster_path, 'w300')}
-                          alt={'title' in item ? item.title : (item as TVShow).name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-                          }}
-                        />
-                      </div>
-                      <h3 className="font-semibold text-sm mb-1 group-hover:text-netflix-red transition-colors line-clamp-2">
-                        {'title' in item ? item.title : (item as TVShow).name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        <span>{formatRating(item.vote_average)}</span>
-                        <span>•</span>
-                        <span>{new Date('release_date' in item ? (item as Movie).release_date : (item as TVShow).first_air_date).getFullYear()}</span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </section>
             )}
 
-            {/* Similar Content */}
-            {similarContent.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Similar Movies</h2>
-                  </div>
-                  <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{similarContent.length} movies</span>
-                </div>
+            {/* Cast & Crew Carousel */}
+            <CastCrewSection
+              credits={credits}
+              onActorClick={handleCastMemberClick}
+              onDownloadClick={downloadActorImage}
+            />
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {similarContent.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group cursor-pointer"
-                      onClick={() => handleContentClick(item.id, type)}
-                    >
-                      <div className="aspect-[2/3] mb-3 rounded-lg overflow-hidden bg-gray-800">
-                        <img
-                          src={getPosterUrl(item.poster_path, 'w300')}
-                          alt={'title' in item ? item.title : (item as TVShow).name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-                          }}
-                        />
-                      </div>
-                      <h3 className="font-semibold text-sm mb-1 group-hover:text-netflix-red transition-colors line-clamp-2">
-                        {'title' in item ? item.title : (item as TVShow).name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                        <span>{formatRating(item.vote_average)}</span>
-                        <span>•</span>
-                        <span>{new Date('release_date' in item ? (item as Movie).release_date : (item as TVShow).first_air_date).getFullYear()}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            <SimilarContent
+              similar={similarContent}
+              recommended={recommendedContent}
+              title={getTitle()}
+              type={type}
+            />
           </div>
         </div>
       )}
