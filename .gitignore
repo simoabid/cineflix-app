@@ -57,3 +57,17 @@ RIVESTREAM_INTEGRATION.md
 WATCHPAGE_README.md
 DEPLOY.md
 logs_result.json
+.agent/*
+.agent
+.ai-code-review/*
+.ai-code-review
+.cursor/*
+.cursor
+.vscode/*
+.vscode
+.gemini/*
+.gemini
+.windsurf/*
+.windsurf
+mobile
+mobile/*

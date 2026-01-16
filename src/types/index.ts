@@ -11,6 +11,27 @@ export interface ExternalIds {
   wikidata_id?: string;
 }
 
+export interface WatchProvider {
+  display_priority: number;
+  logo_path: string;
+  provider_id: number;
+  provider_name: string;
+}
+
+export interface WatchProvidersData {
+  link: string;
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+}
+
+export interface WatchProvidersResponse {
+  id: number;
+  results: {
+    [key: string]: WatchProvidersData; // e.g., "US", "GB"
+  };
+}
+
 export interface Movie {
   id: number;
   title: string;
@@ -66,6 +87,32 @@ export interface TVShow {
   production_countries?: ProductionCountry[];
   spoken_languages?: SpokenLanguage[];
   external_ids?: ExternalIds;
+  seasons?: Season[];
+}
+
+export interface Season {
+  air_date: string;
+  episode_count: number;
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  season_number: number;
+}
+
+export interface Episode {
+  air_date: string;
+  episode_number: number;
+  id: number;
+  name: string;
+  overview: string;
+  production_code: string;
+  runtime: number; // runtime in minutes (api returns runtime)
+  season_number: number;
+  show_id: number;
+  still_path: string | null;
+  vote_average: number;
+  vote_count: number;
 }
 
 export interface Genre {
@@ -223,15 +270,15 @@ export interface CollectionDetails extends Collection {
   user_progress?: FranchiseProgress;
 }
 
-export type CollectionType = 
-  | 'trilogy' 
-  | 'quadrilogy' 
-  | 'pentology' 
-  | 'hexalogy' 
-  | 'septology' 
-  | 'octology' 
-  | 'nonology' 
-  | 'extended_series' 
+export type CollectionType =
+  | 'trilogy'
+  | 'quadrilogy'
+  | 'pentology'
+  | 'hexalogy'
+  | 'septology'
+  | 'octology'
+  | 'nonology'
+  | 'extended_series'
   | 'incomplete_series';
 
 export type CollectionStatus = 'complete' | 'ongoing' | 'incomplete';
