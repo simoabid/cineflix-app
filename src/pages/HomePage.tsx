@@ -425,7 +425,7 @@ const HomePage = (): JSX.Element => {
           {popularMovies.length > 0 && (
             <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
               <ContentCarousel
-                title="⭐ Popular on CineFlix"
+                title="⭐ Popular on CINEFLIX"
                 items={popularMovies}
                 type="movie"
               />

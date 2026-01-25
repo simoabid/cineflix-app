@@ -158,8 +158,8 @@ const Navbar: React.FC = () => {
               >
                 <img
                   src={`${import.meta.env.BASE_URL}cineflix-logo.png`}
-                  alt="CineFlix"
-                  className="h-14 sm:h-28 lg:h-36 w-auto"
+                  alt="CINEFLIX"
+                  className="h-8 sm:h-10 lg:h-12 w-auto"
                 />
               </Link>
 
