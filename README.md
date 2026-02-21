@@ -43,9 +43,9 @@
 <td align="center"><strong>🔍 Search</strong></td>
 </tr>
 <tr>
-<td><img src="https://placehold.co/350x200/141414/E50914?text=Home" alt="Home" width="350"/></td>
-<td><img src="https://placehold.co/350x200/141414/E50914?text=Collections" alt="Collections" width="350"/></td>
-<td><img src="https://placehold.co/350x200/141414/E50914?text=Search" alt="Search" width="350"/></td>
+<td><img src="public/screenshots/home.png" alt="Home" width="350"/></td>
+<td><img src="public/screenshots/collections.png" alt="Collections" width="350"/></td>
+<td><img src="public/screenshots/search.png" alt="Search" width="350"/></td>
 </tr>
 <tr>
 <td align="center"><strong>🎥 Detail</strong></td>
@@ -53,13 +53,12 @@
 <td align="center"><strong>▶️ Watch</strong></td>
 </tr>
 <tr>
-<td><img src="https://placehold.co/350x200/141414/E50914?text=Detail" alt="Detail" width="350"/></td>
-<td><img src="https://placehold.co/350x200/141414/E50914?text=My+List" alt="My List" width="350"/></td>
-<td><img src="https://placehold.co/350x200/141414/E50914?text=Watch" alt="Watch" width="350"/></td>
+<td><img src="public/screenshots/account.png" alt="Detail" width="350"/></td>
+<td><img src="public/screenshots/mylist.png" alt="My List" width="350"/></td>
+<td><img src="public/screenshots/watch.png" alt="Watch" width="350"/></td>
 </tr>
 </table>
 
-> **📸 Replace the placeholders above with actual screenshots!**
 
 </div>
 
