@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import MyList, { IMyListItem } from '../models/MyList.js';
 import mongoose from 'mongoose';
+import { ContentPayload } from '../types/index.js';
 
-const calculateRuntime = (content: any, contentType: 'movie' | 'tv'): number => {
+const calculateRuntime = (content: ContentPayload, contentType: 'movie' | 'tv'): number => {
     if (contentType === 'movie') return content.runtime || 120;
     const episodeRuntime = (content.episode_run_time?.[0]) || 45;
     const episodes = content.number_of_episodes || 20;

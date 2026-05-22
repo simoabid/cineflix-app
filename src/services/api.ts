@@ -1,18 +1,28 @@
 const API_BASE_URL = import.meta.env?.VITE_API_URL || '/api';
 
-// Token management
-let authToken: string | null = localStorage.getItem('auth_token');
+// Token management — kept for backward compatibility during cookie migration
+let authToken: string | null = null;
 
-export const setAuthToken = (token: string | null) => {
+try {
+    authToken = localStorage.getItem('auth_token');
+} catch {
+    // localStorage may be unavailable in some contexts
+}
+
+export const setAuthToken = (token: string | null): void => {
     authToken = token;
-    if (token) {
-        localStorage.setItem('auth_token', token);
-    } else {
-        localStorage.removeItem('auth_token');
+    try {
+        if (token) {
+            localStorage.setItem('auth_token', token);
+        } else {
+            localStorage.removeItem('auth_token');
+        }
+    } catch {
+        // localStorage may be unavailable
     }
 };
 
-export const getAuthToken = () => authToken;
+export const getAuthToken = (): string | null => authToken;
 
 interface ApiResponse<T> { success: boolean; data?: T; error?: string; message?: string; }
 
@@ -23,12 +33,16 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
             ...(options.headers as Record<string, string>)
         };
 
-        // Add auth token if available
+        // Add auth token as Bearer header (backward compatibility fallback)
         if (authToken) {
             headers['Authorization'] = `Bearer ${authToken}`;
         }
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+            credentials: 'include', // Send httpOnly cookies automatically
+        });
         const data = await response.json();
         if (!response.ok) return { success: false, error: data.error || `HTTP error ${response.status}` };
         return data;

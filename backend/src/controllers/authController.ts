@@ -1,13 +1,53 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import User, { IUser } from '../models/User.js';
+import { UpdateProfileRequestBody } from '../types/index.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cineflix-super-secret-jwt-key-2024';
 const JWT_EXPIRE = '30d';
+const COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
-// Generate JWT token
+/** Generate JWT token */
 const generateToken = (id: string): string => {
     return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
+};
+
+/** Build the auth cookie options for httpOnly secure cookies */
+const buildCookieOptions = (): {
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'lax' | 'strict' | 'none';
+    maxAge: number;
+    path: string;
+} => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: COOKIE_MAX_AGE_MS,
+    path: '/',
+});
+
+/**
+ * Send token response with httpOnly cookie and user data.
+ * Token is also returned in the body for backward compatibility during migration.
+ */
+const sendTokenResponse = (user: IUser, statusCode: number, res: Response): void => {
+    const token = generateToken(user._id.toString());
+    res.status(statusCode)
+        .cookie('auth_token', token, buildCookieOptions())
+        .json({
+            success: true,
+            data: {
+                user: {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    avatar: user.avatar,
+                    createdAt: user.createdAt,
+                },
+                token,
+            },
+        });
 };
 
 /**
@@ -24,6 +64,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        // Enforce password complexity: 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
+        const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!PASSWORD_COMPLEXITY_REGEX.test(password)) {
+            res.status(400).json({
+                success: false,
+                error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).'
+            });
+            return;
+        }
+
         // Check if user exists
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
@@ -36,31 +86,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             email: email.toLowerCase(),
             password,
             name,
-            avatar: avatar || '' // Optional avatar
+            avatar: avatar || ''
         });
 
-        // Generate token
-        const token = generateToken(user._id.toString());
-
-        res.status(201).json({
-            success: true,
-            data: {
-                user: {
-                    id: user._id,
-                    email: user.email,
-                    name: user.name,
-                    avatar: user.avatar,
-                    createdAt: user.createdAt
-                },
-                token
-            }
-        });
-    } catch (error: any) {
+        sendTokenResponse(user, 201, res);
+    } catch (error: unknown) {
         console.error('Register error:', error);
 
         // Handle mongoose validation errors
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((err: any) => err.message);
+        if (error instanceof Error && error.name === 'ValidationError') {
+            const validationError = error as unknown as { errors: Record<string, { message: string }> };
+            const messages = Object.values(validationError.errors).map((err) => err.message);
             res.status(400).json({ success: false, error: messages.join(', ') });
             return;
         }
@@ -99,22 +135,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Generate token
-        const token = generateToken(user._id.toString());
-
-        res.json({
-            success: true,
-            data: {
-                user: {
-                    id: user._id,
-                    email: user.email,
-                    name: user.name,
-                    avatar: user.avatar,
-                    createdAt: user.createdAt
-                },
-                token
-            }
-        });
+        sendTokenResponse(user, 200, res);
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ success: false, error: 'Failed to login' });
@@ -161,8 +182,8 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        const { name, avatar } = req.body;
-        const updates: any = {};
+        const { name, avatar }: UpdateProfileRequestBody = req.body;
+        const updates: Partial<Pick<IUser, 'name' | 'avatar'>> = {};
 
         if (name) updates.name = name;
         if (avatar !== undefined) updates.avatar = avatar;
@@ -214,8 +235,12 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
             return;
         }
 
-        if (newPassword.length < 6) {
-            res.status(400).json({ success: false, error: 'New password must be at least 6 characters' });
+        const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!PASSWORD_COMPLEXITY_REGEX.test(newPassword)) {
+            res.status(400).json({
+                success: false,
+                error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).'
+            });
             return;
         }
 
@@ -248,9 +273,15 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 
 /**
  * POST /api/auth/logout
- * Logout user (client-side token removal)
+ * Logout user — clears the httpOnly auth cookie
  */
 export const logout = async (req: Request, res: Response): Promise<void> => {
+    res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax' as const,
+        path: '/',
+    });
     res.json({ success: true, message: 'Logged out successfully' });
 };
 
@@ -312,8 +343,12 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        if (newPassword.length < 6) {
-            res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+        const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!PASSWORD_COMPLEXITY_REGEX.test(newPassword)) {
+            res.status(400).json({
+                success: false,
+                error: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).'
+            });
             return;
         }
 

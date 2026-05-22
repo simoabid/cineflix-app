@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { authApi, User, setAuthToken, getAuthToken } from '../services/api';
+import { authApi, User, setAuthToken } from '../services/api';
 
 
 interface AuthContextType {
@@ -31,21 +31,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Check authentication status on mount
+    // Check authentication status on mount — cookies are sent automatically via credentials:'include'
     useEffect(() => {
         const checkAuth = async () => {
-            const token = getAuthToken();
-            if (!token) {
-                setIsLoading(false);
-                return;
-            }
-
             try {
                 const response = await authApi.getMe();
                 if (response.success && response.data) {
                     setUser(response.data.user);
                 } else {
-                    // Token invalid, clear it
+                    // Session expired or invalid — clear any stale localStorage token
                     setAuthToken(null);
                 }
             } catch (error) {

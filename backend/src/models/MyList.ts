@@ -60,6 +60,11 @@ const myListSchema = new Schema<IMyListItem>(
 myListSchema.index({ userId: 1, contentId: 1, contentType: 1 }, { unique: true });
 myListSchema.index({ userId: 1, status: 1 });
 myListSchema.index({ userId: 1, isLiked: 1 });
+// Compound indexes for optimized tag and progress filtering (Phase 3)
+myListSchema.index({ userId: 1, customTags: 1 });
+myListSchema.index({ userId: 1, status: 1, progress: 1 });
+myListSchema.index({ userId: 1, dateAdded: -1 });
+myListSchema.index({ userId: 1, lastWatched: -1 });
 
 export const MyList = mongoose.model<IMyListItem>('MyList', myListSchema);
 export default MyList;

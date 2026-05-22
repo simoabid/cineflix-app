@@ -18,8 +18,12 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
     try {
         let token: string | undefined;
 
-        // Check for token in Authorization header
-        if (req.headers.authorization?.startsWith('Bearer')) {
+        // Priority 1: Check httpOnly cookie
+        if (req.cookies?.auth_token) {
+            token = req.cookies.auth_token;
+        }
+        // Priority 2: Fall back to Authorization header (backward compatibility)
+        if (!token && req.headers.authorization?.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
         }
 
@@ -53,7 +57,12 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
     try {
         let token: string | undefined;
 
-        if (req.headers.authorization?.startsWith('Bearer')) {
+        // Priority 1: Check httpOnly cookie
+        if (req.cookies?.auth_token) {
+            token = req.cookies.auth_token;
+        }
+        // Priority 2: Fall back to Authorization header
+        if (!token && req.headers.authorization?.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
         }
 
