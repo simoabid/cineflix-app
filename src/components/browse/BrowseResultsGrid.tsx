@@ -17,8 +17,8 @@ const BrowseResultsGrid: React.FC<BrowseResultsGridProps> = ({ results, loading,
     if (loading) {
         return (
             <div className={`grid gap-3 ${viewMode === 'compact'
-                ? 'grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12'
-                : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9'
+                ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12'
+                : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8'
                 }`}>
                 {Array.from({ length: 24 }).map((_, i) => (
                     <div
@@ -35,8 +35,8 @@ const BrowseResultsGrid: React.FC<BrowseResultsGridProps> = ({ results, loading,
 
     return (
         <div className={`grid gap-3 ${viewMode === 'compact'
-            ? 'grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12'
-            : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9'
+            ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12'
+            : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8'
             }`}>
             {results.map((item, index) => {
                 const title = isMovie(item) ? item.title : item.name;

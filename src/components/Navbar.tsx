@@ -183,11 +183,12 @@ const Navbar: React.FC = () => {
                 })}
               </div>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Button — 44px minimum touch target */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
+                className="lg:hidden text-white min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
                 aria-label="Toggle mobile menu"
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
               </button>
@@ -199,10 +200,10 @@ const Navbar: React.FC = () => {
               <div ref={searchRef} className="relative">
                 <button
                   onClick={() => setIsSearchModalOpen(true)}
-                  className="lg:hidden flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black/30 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/50 hover:scale-110 group relative"
+                  className="lg:hidden flex items-center justify-center min-w-[44px] min-h-[44px] bg-black/30 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/50 hover:scale-110 group relative"
                   aria-label="Search"
                 >
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-netflix-red transition-colors" />
+                  <Search className="w-5 h-5 text-white group-hover:text-netflix-red transition-colors" />
                 </button>
 
                 <button
@@ -220,20 +221,22 @@ const Navbar: React.FC = () => {
                 </button>
               </div>
 
-              {/* Theme Toggle */}
+              {/* Theme Toggle — 44px touch target */}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
                 title="Toggle theme"
+                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {isDarkMode ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              {/* Fullscreen Toggle */}
+              {/* Fullscreen Toggle — 44px touch target */}
               <button
                 onClick={toggleFullscreen}
-                className="hidden sm:block p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                className="hidden sm:flex items-center justify-center min-w-[44px] min-h-[44px] text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
                 title={isFullscreen ? "Exit fullscreen (F11)" : "Enter fullscreen (F11)"}
+                aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
               >
                 {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
               </button>
@@ -243,11 +246,13 @@ const Navbar: React.FC = () => {
                 <div ref={notificationsRef} className="relative">
                   <button
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                    className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                    aria-label={`Notifications (${notifications.length} unread)`}
+                    aria-expanded={notificationsOpen}
                   >
-                    <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-netflix-red rounded-full flex items-center justify-center">
-                      <span className="text-xs text-white font-bold">{notifications.length}</span>
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-netflix-red rounded-full flex items-center justify-center" aria-hidden="true">
+                      <span className="text-[10px] text-white font-bold">{notifications.length}</span>
                     </span>
                   </button>
 
@@ -402,7 +407,7 @@ const Navbar: React.FC = () => {
                       key={item.path}
                       to={item.path}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${location.pathname === item.path
+                      className={`flex items-center space-x-3 px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all duration-300 ${location.pathname === item.path
                         ? 'text-white bg-netflix-red shadow-lg'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
@@ -420,7 +425,7 @@ const Navbar: React.FC = () => {
                       <Link
                         to="/account"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
                         <Settings className="w-5 h-5" />
                         <span>Account Settings</span>
@@ -430,7 +435,7 @@ const Navbar: React.FC = () => {
                           handleLogout();
                           setMobileMenuOpen(false);
                         }}
-                        className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
                         <LogOut className="w-5 h-5" />
                         <span>Sign Out</span>
@@ -440,7 +445,7 @@ const Navbar: React.FC = () => {
                     <Link
                       to="/signup"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-white bg-netflix-red hover:bg-red-700 rounded-lg transition-colors"
+                      className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-white bg-netflix-red hover:bg-red-700 rounded-lg transition-colors"
                     >
                       <User className="w-5 h-5" />
                       <span>Sign Up</span>

@@ -314,17 +314,19 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={startVoiceSearch}
-                  className={`p-3 rounded-full transition-colors ${isVoiceSearch
+                  className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${isVoiceSearch
                     ? 'text-netflix-red bg-netflix-red/10 animate-pulse'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}
+                  aria-label={isVoiceSearch ? 'Listening...' : 'Voice search'}
                 >
                   <Mic className="w-5 h-5" />
                 </button>
                 <div className="h-8 w-px bg-white/10 mx-2" />
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close search"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -429,15 +431,19 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     <div className="flex bg-black/40 p-1 rounded-lg border border-white/10">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
                           }`}
+                        aria-label="Grid view"
+                        aria-pressed={viewMode === 'grid'}
                       >
                         <Grid className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
                           }`}
+                        aria-label="List view"
+                        aria-pressed={viewMode === 'list'}
                       >
                         <List className="w-4 h-4" />
                       </button>
@@ -463,7 +469,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                   setSearchQuery(term);
                                   performSearch(term, true);
                                 }}
-                                className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 text-left group transition-all text-gray-400 hover:text-white"
+                                className="flex items-center gap-3 w-full p-3 min-h-[44px] rounded-xl hover:bg-white/5 text-left group transition-all text-gray-400 hover:text-white"
                               >
                                 <History className="w-4 h-4 opacity-50" />
                                 <span>{term}</span>
@@ -478,14 +484,14 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           <Flame className="w-4 h-4 text-netflix-red" /> Trending Now
                         </h3>
                         <div className="flex flex-wrap gap-2">
-                          {trendingSearches.map((term, i) => (
+                            {trendingSearches.map((term, i) => (
                             <button
                               key={i}
                               onClick={() => {
                                 setSearchQuery(term);
                                 performSearch(term, true);
                               }}
-                              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 hover:text-white text-gray-400 text-sm transition-all"
+                              className="px-4 py-2 min-h-[44px] rounded-lg bg-white/5 hover:bg-white/10 hover:text-white text-gray-400 text-sm transition-all"
                             >
                               {term}
                             </button>
@@ -495,7 +501,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className={viewMode === 'grid' ? "grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6" : "space-y-4"}>
+                  <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6" : "space-y-4"}>
                     {searchResults.length === 0 && !isLoading ? (
                       <div className="col-span-full py-20 text-center text-gray-500">
                         No results found for your search.

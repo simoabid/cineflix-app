@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   RotateCcw,
   AlertCircle
@@ -25,22 +25,32 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
   const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isIframeReady, setIsIframeReady] = useState(false);
 
-  const handleReload = () => {
+  const handleReload = useCallback(() => {
     setHasError(false);
     setIsLoading(true);
-    // Reload video source
-  };
+    setIsIframeReady(false);
+  }, []);
+
+  const handleIframeLoad = useCallback(() => {
+    setIsIframeReady(true);
+    setHasError(false);
+  }, []);
+
+  const handleIframeError = useCallback(() => {
+    setHasError(true);
+    setIsIframeReady(false);
+  }, []);
 
   const [startTime, setStartTime] = useState<number | null>(null);
 
   useEffect(() => {
-    // Simulate loading
+    setIsIframeReady(false);
     const timer = setTimeout(() => {
       setIsLoading(false);
       setStartTime(Date.now());
-    }, 2000);
-
+    }, 1500);
     return () => clearTimeout(timer);
   }, [selectedSource]);
 
@@ -89,9 +99,9 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
     <div className="relative bg-black rounded-lg overflow-hidden group max-h-[70vh] w-auto mx-auto aspect-video" role="region" aria-label="Video player">
       {/* Video Container */}
       <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black">
-        {/* Loading State */}
+        {/* Loading State — full spinner */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A1F]" role="status" aria-live="polite">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A1F] z-20" role="status" aria-live="polite">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <div className="h-16 w-16 netflix-spinner-thick" />
@@ -103,6 +113,31 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
                 <p className="text-gray-400 text-sm mt-2">
                   {selectedSource ? `Connecting to ${selectedSource.name}` : 'Preparing stream'}
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Iframe Skeleton — shimmer overlay while iframe loads behind the scenes */}
+        {!isLoading && !hasError && selectedSource && !isIframeReady && (
+          <div className="absolute inset-0 z-10 bg-[#0A0A1F]" aria-hidden="true">
+            {/* Shimmer skeleton mimicking player controls */}
+            <div className="w-full h-full flex flex-col">
+              {/* Main area shimmer */}
+              <div className="flex-1 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-shimmer" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-12 w-12 netflix-spinner-thick opacity-60" />
+                    <p className="text-gray-500 text-sm">Buffering stream...</p>
+                  </div>
+                </div>
+              </div>
+              {/* Bottom control bar skeleton */}
+              <div className="h-12 bg-black/40 flex items-center gap-3 px-4">
+                <div className="w-8 h-8 rounded-full bg-gray-800/60 animate-pulse" />
+                <div className="flex-1 h-1 bg-gray-800/60 rounded-full" />
+                <div className="w-16 h-4 bg-gray-800/60 rounded animate-pulse" />
               </div>
             </div>
           </div>
@@ -133,22 +168,22 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
         {!isLoading && !hasError && (
           <>
             {selectedSource ? (
-              /* Sandboxed streaming iframe — blocks top-navigation and popups */
+              /* Sandboxed streaming iframe — loads behind skeleton, crossfades on ready */
               <iframe
                 src={selectedSource.url}
-                className="w-full h-full streaming-iframe"
+                className="w-full h-full streaming-iframe transition-opacity duration-500 ease-out"
                 frameBorder="0"
                 allowFullScreen
                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups-to-escape-sandbox"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 referrerPolicy="no-referrer"
                 title={`${selectedSource.name} - ${'title' in content ? content.title : content.name}`}
-                onError={() => setHasError(true)}
-                onLoad={() => setHasError(false)}
+                onError={handleIframeError}
+                onLoad={handleIframeLoad}
                 style={{
-                  filter: 'none',
+                  opacity: isIframeReady ? 1 : 0,
                   isolation: 'isolate',
-                  pointerEvents: 'auto'
+                  pointerEvents: isIframeReady ? 'auto' : 'none'
                 }}
               />
             ) : (
