@@ -86,12 +86,12 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
 
 
   return (
-    <div className="relative bg-black rounded-lg overflow-hidden group max-h-[70vh] w-auto mx-auto aspect-video">
+    <div className="relative bg-black rounded-lg overflow-hidden group max-h-[70vh] w-auto mx-auto aspect-video" role="region" aria-label="Video player">
       {/* Video Container */}
       <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black">
         {/* Loading State */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A1F]">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A1F]" role="status" aria-live="polite">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <div className="h-16 w-16 netflix-spinner-thick" />
@@ -120,6 +120,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
               <button
                 onClick={handleReload}
                 className="flex items-center px-4 py-2 bg-[#ff0000] text-white rounded-lg hover:bg-red-700 transition-colors mx-auto"
+                aria-label="Retry loading video"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Retry

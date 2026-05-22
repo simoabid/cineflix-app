@@ -85,6 +85,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           <button
             onClick={onSelectAll}
             className="flex items-center gap-2 text-netflix-red hover:text-red-400 transition-colors"
+            aria-label={isAllSelected ? 'Deselect all items' : 'Select all items'}
           >
             {isAllSelected ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
             <span>{isAllSelected ? 'Deselect All' : 'Select All'}</span>
@@ -101,6 +102,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           <button
             onClick={handleMarkWatched}
             className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
+            aria-label={`Mark ${selectedItems.length} items as watched`}
           >
             <Eye className="w-4 h-4" />
             <span className="hidden sm:inline">Mark Watched</span>
@@ -110,6 +112,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           <button
             onClick={handleMarkUnwatched}
             className="flex items-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
+            aria-label={`Mark ${selectedItems.length} items as unwatched`}
           >
             <EyeOff className="w-4 h-4" />
             <span className="hidden sm:inline">Mark Unwatched</span>
@@ -120,6 +123,9 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             <button
               onClick={() => setShowPriorityMenu(!showPriorityMenu)}
               className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
+              aria-label="Set priority level"
+              aria-expanded={showPriorityMenu}
+              aria-haspopup="true"
             >
               <Flag className="w-4 h-4" />
               <span className="hidden sm:inline">Priority</span>
@@ -127,26 +133,29 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             </button>
 
             {showPriorityMenu && (
-              <div className="absolute top-10 left-0 bg-gray-800 rounded-lg shadow-lg py-2 min-w-40 z-20">
+              <div className="absolute top-10 left-0 bg-gray-800 rounded-lg shadow-lg py-2 min-w-40 z-20" role="menu" aria-label="Priority options">
                 <button
                   onClick={() => handleSetPriority('high')}
                   className="w-full text-left px-3 py-2 hover:bg-gray-700 text-white text-sm flex items-center gap-2"
+                  role="menuitem"
                 >
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-red-500 rounded-full" aria-hidden="true"></div>
                   High Priority
                 </button>
                 <button
                   onClick={() => handleSetPriority('medium')}
                   className="w-full text-left px-3 py-2 hover:bg-gray-700 text-white text-sm flex items-center gap-2"
+                  role="menuitem"
                 >
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full" aria-hidden="true"></div>
                   Medium Priority
                 </button>
                 <button
                   onClick={() => handleSetPriority('low')}
                   className="w-full text-left px-3 py-2 hover:bg-gray-700 text-white text-sm flex items-center gap-2"
+                  role="menuitem"
                 >
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full" aria-hidden="true"></div>
                   Low Priority
                 </button>
               </div>
@@ -158,6 +167,9 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             <button
               onClick={() => setShowTagMenu(!showTagMenu)}
               className="flex items-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+              aria-label="Add tag to selected items"
+              aria-expanded={showTagMenu}
+              aria-haspopup="true"
             >
               <Tag className="w-4 h-4" />
               <span className="hidden sm:inline">Add Tag</span>
@@ -171,12 +183,14 @@ const BulkActions: React.FC<BulkActionsProps> = ({
                     placeholder="Enter tag name..."
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                     className="flex-1 bg-gray-700 text-white px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-netflix-red"
+                    aria-label="Tag name"
                   />
                   <button
                     onClick={handleAddTag}
                     className="px-3 py-1 bg-netflix-red hover:bg-red-700 text-white rounded text-sm"
+                    aria-label="Add tag"
                   >
                     Add
                   </button>
@@ -189,6 +203,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           <button
             onClick={handleRemove}
             className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+            aria-label={`Remove ${selectedItems.length} selected items`}
           >
             <Trash2 className="w-4 h-4" />
             <span className="hidden sm:inline">Remove</span>
@@ -198,6 +213,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           <button
             onClick={onClearSelection}
             className="flex items-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
+            aria-label="Clear selection"
           >
             <X className="w-4 h-4" />
             <span className="hidden sm:inline">Clear</span>

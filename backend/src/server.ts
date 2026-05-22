@@ -3,7 +3,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import http from 'http';
+import swaggerUi from 'swagger-ui-express';
 import { connectDB } from './config/database.js';
+import { swaggerSpec } from './config/swagger.js';
 import authRoutes from './routes/authRoutes.js';
 import myListRoutes from './routes/myListRoutes.js';
 import collectionsRoutes from './routes/collectionsRoutes.js';
@@ -45,6 +47,13 @@ app.use('/api/preferences', preferencesRoutes);
 app.use('/api/watched-episodes', watchedEpisodeRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 
+// Swagger API documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: 'CineFlix API Docs',
+    customCss: '.swagger-ui .topbar { display: none }',
+}));
+app.get('/api/docs.json', (_req, res) => res.json(swaggerSpec));
+
 app.use((_req, res) => res.status(404).json({ success: false, error: 'Endpoint not found' }));
 
 // Wrap Express in an HTTP server for Socket.io support
@@ -59,6 +68,7 @@ const startServer = async () => {
                 logger.info(`🚀 Server running on http://localhost:${PORT}`);
                 logger.info(`📚 API: /api/my-list, /api/collections, /api/preferences`);
                 logger.info(`🔌 WebSocket: Watch party sync enabled`);
+                logger.info(`📖 Docs: http://localhost:${PORT}/api/docs`);
             });
         }
     } catch (error) {

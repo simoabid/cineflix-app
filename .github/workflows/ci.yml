@@ -1,0 +1,71 @@
+name: CineFlix CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # ─── Frontend Verification ───────────────────────────────────────
+  frontend:
+    name: Frontend — Lint, Type-check & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npx vite build
+
+  # ─── Backend Verification ────────────────────────────────────────
+  backend:
+    name: Backend — Type-check & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Type check
+        run: cd backend && npx tsc --noEmit
+
+      - name: Build
+        run: cd backend && npx tsc
+
+  # ─── Docker Build Smoke Test ─────────────────────────────────────
+  docker:
+    name: Docker — Build Image
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t cineflix:${{ github.sha }} .

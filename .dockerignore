@@ -1,0 +1,14 @@
+node_modules
+backend/node_modules
+dist
+backend/dist
+.git
+.gitignore
+*.md
+logs
+backend/logs
+.env
+backend/.env
+.gemini
+.agent
+CINEFLIX_ROADMAP
