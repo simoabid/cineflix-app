@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import WatchedEpisode from '../models/WatchedEpisode.js';
+import { logger } from '../utils/logger.js';
 
 export const getWatchedEpisodes = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -24,7 +25,7 @@ export const getWatchedEpisodes = async (req: Request, res: Response): Promise<v
 
         res.json({ success: true, data: formatted });
     } catch (error) {
-        console.error('Error fetching watched episodes:', error);
+        logger.error('Error fetching watched episodes:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch watched episodes' });
     }
 };
@@ -58,7 +59,7 @@ export const toggleWatchedEpisode = async (req: Request, res: Response): Promise
             res.json({ success: true, watched: true });
         }
     } catch (error) {
-        console.error('Error toggling watched episode:', error);
+        logger.error('Error toggling watched episode:', error);
         res.status(500).json({ success: false, error: 'Failed to toggle watched status' });
     }
 };

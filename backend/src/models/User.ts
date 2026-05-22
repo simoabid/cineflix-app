@@ -44,13 +44,12 @@ const userSchema = new Schema<IUser>(
 // Hash password before saving
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
-
     try {
         const salt = await bcrypt.genSalt(12);
         this.password = await bcrypt.hash(this.password, salt);
         next();
-    } catch (error: any) {
-        next(error);
+    } catch (error: unknown) {
+        next(error as Error);
     }
 });
 
@@ -59,8 +58,46 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
     return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Index for faster email lookups
-userSchema.index({ email: 1 });
+/**
+ * Cascading deletes — clean up all user-owned documents when a user is removed.
+ * Document middleware: triggered by userDoc.deleteOne()
+ */
+userSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const userId = this._id;
+    try {
+        await Promise.all([
+            mongoose.model('MyList').deleteMany({ userId }),
+            mongoose.model('Collection').deleteMany({ userId }),
+            mongoose.model('Preferences').deleteMany({ userId }),
+            mongoose.model('WatchedEpisode').deleteMany({ userId }),
+        ]);
+        next();
+    } catch (error: unknown) {
+        next(error as Error);
+    }
+});
+
+/**
+ * Query middleware: triggered by User.findOneAndDelete() or User.deleteOne({...})
+ */
+userSchema.pre('findOneAndDelete', async function (next) {
+    const filter = this.getFilter();
+    try {
+        await Promise.all([
+            mongoose.model('MyList').deleteMany({ userId: filter._id }),
+            mongoose.model('Collection').deleteMany({ userId: filter._id }),
+            mongoose.model('Preferences').deleteMany({ userId: filter._id }),
+            mongoose.model('WatchedEpisode').deleteMany({ userId: filter._id }),
+        ]);
+        next();
+    } catch (error: unknown) {
+        next(error as Error);
+    }
+});
+
+// Note: 'unique: true' on the email field already creates an index.
+// Explicitly calling schema.index({ email: 1 }) would create a duplicate.
 
 export const User = mongoose.model<IUser>('User', userSchema);
 export default User;
+

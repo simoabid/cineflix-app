@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Preferences, { IPreferences } from '../models/Preferences.js';
 import mongoose from 'mongoose';
+import { logger } from '../utils/logger.js';
 
 // Default preferences for new users
 const defaultPreferences = {
@@ -118,7 +119,7 @@ export const getPreferences = async (req: Request, res: Response): Promise<void>
 
         res.json({ success: true, data: formatPreferences(prefs) });
     } catch (error) {
-        console.error('Error getting preferences:', error);
+        logger.error('Error getting preferences:', error);
         res.status(500).json({ success: false, error: 'Failed to get preferences' });
     }
 };
@@ -145,7 +146,7 @@ export const savePreferences = async (req: Request, res: Response): Promise<void
 
         res.json({ success: true, data: formatPreferences(prefs) });
     } catch (error) {
-        console.error('Error saving preferences:', error);
+        logger.error('Error saving preferences:', error);
         res.status(500).json({ success: false, error: 'Failed to save preferences' });
     }
 };

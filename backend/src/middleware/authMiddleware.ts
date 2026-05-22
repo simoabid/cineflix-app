@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User.js';
+import { logger } from '../utils/logger.js';
 
 // Extend Express Request to include user
 declare global {
@@ -47,7 +48,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
         req.userId = user._id.toString();
         next();
     } catch (error) {
-        console.error('Auth middleware error:', error);
+        logger.error('Auth middleware error:', error);
         res.status(401).json({ success: false, error: 'Not authorized, token failed' });
     }
 };

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import http from 'http';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import myListRoutes from './routes/myListRoutes.js';
@@ -9,6 +10,8 @@ import collectionsRoutes from './routes/collectionsRoutes.js';
 import preferencesRoutes from './routes/preferencesRoutes.js';
 import watchedEpisodeRoutes from './routes/watchedEpisodeRoutes.js';
 import tmdbRoutes from './routes/tmdbRoutes.js';
+import { initializeSocketServer } from './sockets/watchParty.js';
+import { logger } from './utils/logger.js';
 
 dotenv.config();
 
@@ -33,7 +36,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/my-list', myListRoutes);
@@ -42,19 +45,24 @@ app.use('/api/preferences', preferencesRoutes);
 app.use('/api/watched-episodes', watchedEpisodeRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 
-app.use((req, res) => res.status(404).json({ success: false, error: 'Endpoint not found' }));
+app.use((_req, res) => res.status(404).json({ success: false, error: 'Endpoint not found' }));
+
+// Wrap Express in an HTTP server for Socket.io support
+const httpServer = http.createServer(app);
+initializeSocketServer(httpServer, allowedOrigins);
 
 const startServer = async () => {
     try {
         await connectDB();
         if (process.env.NODE_ENV !== 'production') {
-            app.listen(PORT, () => {
-                console.log(`🚀 Server running on http://localhost:${PORT}`);
-                console.log(`📚 API: /api/my-list, /api/collections, /api/preferences`);
+            httpServer.listen(PORT, () => {
+                logger.info(`🚀 Server running on http://localhost:${PORT}`);
+                logger.info(`📚 API: /api/my-list, /api/collections, /api/preferences`);
+                logger.info(`🔌 WebSocket: Watch party sync enabled`);
             });
         }
     } catch (error) {
-        console.error('Failed to start server:', error);
+        logger.error('Failed to start server:', error);
         if (process.env.NODE_ENV !== 'production') {
             process.exit(1);
         }
@@ -64,3 +72,4 @@ const startServer = async () => {
 startServer();
 
 export default app;
+

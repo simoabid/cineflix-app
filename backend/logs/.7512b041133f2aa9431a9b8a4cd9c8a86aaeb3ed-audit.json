@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/seemoo/Documents/CINEFLIX Project/backend/logs/.7512b041133f2aa9431a9b8a4cd9c8a86aaeb3ed-audit.json",
+    "files": [
+        {
+            "date": 1779410070974,
+            "name": "/home/seemoo/Documents/CINEFLIX Project/backend/logs/combined-2026-05-22.log",
+            "hash": "f0f0745bec5fb266ea08076b40b2457d93343b03f033216ed5e329db30b20294"
+        }
+    ],
+    "hashType": "sha256"
+}

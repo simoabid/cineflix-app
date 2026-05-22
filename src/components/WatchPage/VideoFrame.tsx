@@ -132,18 +132,18 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
         {!isLoading && !hasError && (
           <>
             {selectedSource ? (
-              /* Streaming Player */
+              /* Sandboxed streaming iframe — blocks top-navigation and popups */
               <iframe
                 src={selectedSource.url}
                 className="w-full h-full streaming-iframe"
                 frameBorder="0"
                 allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups-to-escape-sandbox"
+                referrerPolicy="no-referrer"
                 title={`${selectedSource.name} - ${'title' in content ? content.title : content.name}`}
                 onError={() => setHasError(true)}
                 onLoad={() => setHasError(false)}
-                sandbox="allow-scripts allow-same-origin allow-presentation allow-fullscreen"
-                referrerPolicy="no-referrer"
                 style={{
                   filter: 'none',
                   isolation: 'isolate',

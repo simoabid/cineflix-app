@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User.js';
 import { UpdateProfileRequestBody } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cineflix-super-secret-jwt-key-2024';
 const JWT_EXPIRE = '30d';
@@ -91,7 +92,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         sendTokenResponse(user, 201, res);
     } catch (error: unknown) {
-        console.error('Register error:', error);
+        logger.error('Register error:', error);
 
         // Handle mongoose validation errors
         if (error instanceof Error && error.name === 'ValidationError') {
@@ -137,7 +138,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
         sendTokenResponse(user, 200, res);
     } catch (error) {
-        console.error('Login error:', error);
+        logger.error('Login error:', error);
         res.status(500).json({ success: false, error: 'Failed to login' });
     }
 };
@@ -166,7 +167,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (error) {
-        console.error('Get me error:', error);
+        logger.error('Get me error:', error);
         res.status(500).json({ success: false, error: 'Failed to get user' });
     }
 };
@@ -212,7 +213,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
             }
         });
     } catch (error) {
-        console.error('Update profile error:', error);
+        logger.error('Update profile error:', error);
         res.status(500).json({ success: false, error: 'Failed to update profile' });
     }
 };
@@ -266,7 +267,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 
         res.json({ success: true, message: 'Password updated successfully' });
     } catch (error) {
-        console.error('Change password error:', error);
+        logger.error('Change password error:', error);
         res.status(500).json({ success: false, error: 'Failed to change password' });
     }
 };
@@ -317,7 +318,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
             message: 'If an account with that email exists, a password reset link has been sent.'
         });
     } catch (error) {
-        console.error('Forgot password error:', error);
+        logger.error('Forgot password error:', error);
         res.status(500).json({ success: false, error: 'Failed to process request' });
     }
 };
@@ -365,7 +366,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
             error: 'Password reset not yet implemented. Please contact support.'
         });
     } catch (error) {
-        console.error('Reset password error:', error);
+        logger.error('Reset password error:', error);
         res.status(500).json({ success: false, error: 'Failed to reset password' });
     }
 };

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import MyList, { IMyListItem } from '../models/MyList.js';
 import mongoose from 'mongoose';
 import { ContentPayload } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 const calculateRuntime = (content: ContentPayload, contentType: 'movie' | 'tv'): number => {
     if (contentType === 'movie') return content.runtime || 120;
@@ -147,7 +148,7 @@ export const updateProgress = async (req: Request, res: Response): Promise<void>
         }
         res.json({ success: true, item: formatItem(item) });
     } catch (error) {
-        console.error('Update progress error:', error);
+        logger.error('Update progress error:', error);
         res.status(500).json({ success: false, error: 'Failed to update progress' });
     }
 };
