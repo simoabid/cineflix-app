@@ -384,7 +384,7 @@ const Footer: React.FC = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`w-full bg-[#0B0B12] text-gray-300 px-4 py-3 flex items-center justify-between rounded-lg border transition-all duration-300 group shadow-lg ${isOpen ? 'border-[#E50914] ring-2 ring-[#E50914]/20' : 'border-gray-800 hover:border-gray-700'
+                    className={`w-full bg-surface-background text-gray-300 px-4 py-3 flex items-center justify-between rounded-lg border transition-all duration-300 group shadow-lg ${isOpen ? 'border-brand-red ring-2 ring-brand-red/20' : 'border-gray-800 hover:border-gray-700'
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -412,7 +412,7 @@ const Footer: React.FC = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 10, scale: 0.95 }}
                           transition={{ duration: 0.2, ease: "easeOut" }}
-                          className="absolute top-full left-0 w-full mt-2 bg-[#151520] border border-gray-800 rounded-xl overflow-hidden shadow-2xl z-[70] backdrop-blur-xl"
+                          className="absolute top-full left-0 w-full mt-2 bg-surface-accent border border-glass-border rounded-xl overflow-hidden shadow-2xl z-[70] backdrop-blur-xl"
                         >
                           <div className="p-1">
                             {languages.map((lang) => (

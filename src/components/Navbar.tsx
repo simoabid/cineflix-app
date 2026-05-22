@@ -172,7 +172,7 @@ const Navbar: React.FC = () => {
                       key={item.path}
                       to={item.path}
                       className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative group ${location.pathname === item.path
-                        ? 'text-white bg-netflix-red shadow-lg'
+                        ? 'text-white bg-white/10 backdrop-blur-sm border-b-2 border-brand-red shadow-lg shadow-brand-red/10'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
                     >
@@ -257,7 +257,7 @@ const Navbar: React.FC = () => {
                   </button>
 
                   {notificationsOpen && (
-                    <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-[#13132B]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-surface-card/95 backdrop-blur-xl rounded-xl shadow-2xl border border-glass-border py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-700/50">
                         <h3 className="text-white font-semibold">Notifications</h3>
                       </div>
@@ -299,7 +299,7 @@ const Navbar: React.FC = () => {
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-3 w-72 bg-[#13132B] backdrop-blur-xl rounded-2xl shadow-xl border border-white/10 py-2 z-50 transform origin-top-right transition-all duration-200 animate-scale-in">
+                    <div className="absolute right-0 mt-3 w-72 bg-surface-card backdrop-blur-xl rounded-2xl shadow-xl border border-glass-border py-2 z-50 transform origin-top-right transition-all duration-200 animate-scale-in">
                       {/* User Info */}
                       <div className="px-5 py-4 border-b border-gray-800/50">
                         <div className="flex items-center space-x-4">
@@ -408,7 +408,7 @@ const Navbar: React.FC = () => {
                       to={item.path}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center space-x-3 px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all duration-300 ${location.pathname === item.path
-                        ? 'text-white bg-netflix-red shadow-lg'
+                        ? 'text-white bg-white/10 backdrop-blur-sm border-l-2 border-brand-red shadow-lg shadow-brand-red/10'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
                     >

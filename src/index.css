@@ -318,6 +318,7 @@ html {
 
 @layer base {
   :root {
+    /* Legacy Netflix tokens — kept for backward compatibility */
     --netflix-black: #141414;
     --netflix-red: #E50914;
     --netflix-dark: #221F1F;
@@ -326,10 +327,29 @@ html {
     --netflix-gray: #808080;
     --netflix-lightgray: #B3B3B3;
 
+    /* Brand accent tokens */
+    --brand-red: #E50914;
+    --brand-red-hover: #C7000C;
+    --brand-red-light: #ff1a1a;
+    --brand-red-glow: rgba(229, 9, 20, 0.4);
+
+    /* Glassmorphic surface tokens */
+    --glass-bg: rgba(19, 19, 43, 0.7);
+    --glass-bg-dark: rgba(10, 10, 31, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-hover: rgba(255, 255, 255, 0.12);
+
+    /* Surface elevation tokens */
+    --surface-bg: #0A0A1F;
+    --surface-card: #13132B;
+    --surface-accent: #1F1F35;
+    --surface-elevated: #252540;
+
     /* Smooth scroll timing */
     --scroll-timing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --transition-smooth: 0.4s var(--scroll-timing);
     --transition-fast: 0.2s var(--scroll-timing);
+    --transition-bounce: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   * {
@@ -411,25 +431,40 @@ html {
         rgba(20, 20, 20, 0.4) 100%);
   }
 
+  /* ── Unified scrollbar system ── */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: var(--netflix-red) var(--netflix-darker);
+    scrollbar-color: var(--brand-red, #E50914) var(--surface-bg, #0A0A1F);
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: var(--netflix-darker);
+    background: var(--surface-bg, #0A0A1F);
+    border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--netflix-red);
-    border-radius: 4px;
+    background-color: rgba(229, 9, 20, 0.45);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(229, 9, 20, 0.75);
+  }
+
+  /* Alias for backward compatibility — maps to the unified system */
+  .netflix-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(229, 9, 20, 0.45) transparent;
   }
 
   .netflix-scrollbar::-webkit-scrollbar {
+    width: 4px;
     height: 4px;
   }
 
@@ -438,12 +473,25 @@ html {
   }
 
   .netflix-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(229, 9, 20, 0.5);
-    border-radius: 2px;
+    background: rgba(229, 9, 20, 0.45);
+    border-radius: 3px;
   }
 
   .netflix-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(229, 9, 20, 0.8);
+    background: rgba(229, 9, 20, 0.75);
+  }
+
+  /* Touch devices: prefer native scrollbar behavior */
+  @media (pointer: coarse) {
+    .scrollbar-thin,
+    .netflix-scrollbar {
+      scrollbar-width: none;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar,
+    .netflix-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 

@@ -18,7 +18,31 @@ export default {
           'dark-purple': '#0f0e14',
           'purple-blue': '#181524',
           'deep-blue': '#0d1117',
-        }
+        },
+        brand: {
+          red: '#E50914',
+          'red-hover': '#C7000C',
+          'red-light': '#ff1a1a',
+          'red-glow': 'rgba(229, 9, 20, 0.4)',
+        },
+        glass: {
+          background: 'rgba(19, 19, 43, 0.7)',
+          'background-dark': 'rgba(10, 10, 31, 0.85)',
+          border: 'rgba(255, 255, 255, 0.08)',
+          hover: 'rgba(255, 255, 255, 0.12)',
+        },
+        surface: {
+          background: '#0A0A1F',
+          card: '#13132B',
+          accent: '#1F1F35',
+          elevated: '#252540',
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
+        md: '12px',
+        xl: '24px',
+        '2xl': '40px',
       },
       fontFamily: {
         'netflix': ['Netflix Sans', 'Helvetica Neue', 'Arial', 'sans-serif']

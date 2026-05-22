@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { Movie, TVShow } from '../types';
 import { getImageUrl } from '../services/tmdb';
-import { handleImageError } from '../utils/imageLoader';
+import SafeImage from './SafeImage';
 // Removed in-card buttons; keep preview actions instead
 import HoverPreviewCard from './HoverPreviewCard';
 import { useScreenSize } from '../hooks/useScreenSize';
@@ -38,7 +38,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
   className = ''
 }) => {
   // No direct navigate on card overlay; handled in preview
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [isPreviewHovering, setIsPreviewHovering] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
   const { isMobile, isTablet } = useScreenSize();
@@ -79,19 +78,12 @@ const ContentCard: React.FC<ContentCardProps> = ({
         <div
           className="relative aspect-[2/3] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gray-800 transition-opacity duration-300"
         >
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-800">
-              <div className="absolute inset-0 animate-pulse bg-white/5"></div>
-            </div>
-          )}
-
-          <img
+          <SafeImage
             src={getImageUrl(item.poster_path || null, 'w500')}
             alt={title}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-            onError={handleImageError}
-            onLoad={() => setImageLoaded(true)}
+            title={title}
+            mediaType={derivedType}
+            className="w-full h-full"
             loading="lazy"
           />
 
