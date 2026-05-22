@@ -9,6 +9,11 @@
             "date": 1779410070974,
             "name": "/home/seemoo/Documents/CINEFLIX Project/backend/logs/combined-2026-05-22.log",
             "hash": "f0f0745bec5fb266ea08076b40b2457d93343b03f033216ed5e329db30b20294"
+        },
+        {
+            "date": 1779492904562,
+            "name": "/home/seemoo/Documents/CINEFLIX Project/backend/logs/combined-2026-05-23.log",
+            "hash": "2df4690173f8bcf1898d96093ea0b620c5360f87ee259bbdc29e7b50c0a7b88b"
         }
     ],
     "hashType": "sha256"

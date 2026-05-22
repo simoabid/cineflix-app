@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Play, Star } from 'lucide-react';
 import { Movie, TVShow } from '../types';
 import { getImageUrl } from '../services/tmdb';
-import SafeImage from './SafeImage';
+import { handleImageError } from '../utils/imageLoader';
 import AddToListButton from './AddToListButton';
 import LikeButton from './LikeButton';
 import { useNavigate } from 'react-router-dom';
@@ -153,12 +153,11 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
       >
         {/* Media banner */}
         <div className="relative h-36 w-full">
-          <SafeImage
+          <img
             src={getImageUrl(item.backdrop_path || item.poster_path || null, 'w780')}
             alt={title}
-            title={title}
-            mediaType={mediaType}
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={handleImageError}
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
@@ -173,12 +172,11 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
         {/* Content */}
         <div className="p-4">
           <div className="flex gap-3">
-            <SafeImage
+            <img
               src={getImageUrl(item.poster_path || null, 'w342')}
               alt={title}
-              title={title}
-              mediaType={mediaType}
-              className="w-20 h-28 rounded-lg ring-1 ring-white/10"
+              className="w-20 h-28 object-cover rounded-lg ring-1 ring-white/10"
+              onError={handleImageError}
               loading="lazy"
             />
             <div className="flex-1 min-w-0">
