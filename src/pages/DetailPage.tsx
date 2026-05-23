@@ -2,8 +2,6 @@ import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Play,
-  Share2,
-  ChevronLeft,
   Star,
   Clock,
   Calendar,
@@ -38,15 +36,13 @@ import {
   getMovieExternalIds,
   getTVShowExternalIds,
   getImageUrl,
-  getPosterUrl,
-  getBackdropUrl
+  getPosterUrl
 } from '../services/tmdb';
 import { Movie, TVShow, Video, MovieCredits, CastMember, PersonDetails, PersonMovieCredits } from '../types';
 import CastCrewSection from '../components/DetailPage/CastCrewSection';
-import AddToListButton from '../components/AddToListButton';
-import LikeButton from '../components/LikeButton';
+import DetailHero from '../components/DetailPage/DetailHero';
+import VideoTrailersSection from '../components/DetailPage/VideoTrailersSection';
 import EpisodesList from '../components/EpisodesList';
-import LogoImage from '../components/LogoImage';
 import SimilarContent from '../components/WatchPage/SimilarContent';
 
 interface DetailPageProps {
@@ -66,8 +62,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
   const [externalIds, setExternalIds] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const [showVideoModal, setShowVideoModal] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+
   const [selectedCastMember, setSelectedCastMember] = useState<CastMember | null>(null);
   const [showCastModal, setShowCastModal] = useState(false);
   const [showFilmographyModal, setShowFilmographyModal] = useState(false);
@@ -361,15 +356,9 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
 
 
-  const handleWatchTrailer = (video: Video) => {
-    setSelectedVideo(video);
-    setShowVideoModal(true);
-  };
 
-  const closeVideoModal = () => {
-    setShowVideoModal(false);
-    setSelectedVideo(null);
-  };
+
+
 
   // Download actor image function
   const downloadActorImage = async (imageUrl: string, actorName: string) => {
@@ -448,9 +437,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (showVideoModal) {
-          closeVideoModal();
-        } else if (showFilmographyModal) {
+        if (showFilmographyModal) {
           closeFilmographyModal();
         } else if (showActorDetailsModal) {
           closeActorDetailsModal();
@@ -462,7 +449,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
     document.addEventListener('keydown', handleEscapeKey);
     return () => document.removeEventListener('keydown', handleEscapeKey);
-  }, [showVideoModal, showCastModal, showFilmographyModal, showActorDetailsModal]);
+  }, [showCastModal, showFilmographyModal, showActorDetailsModal]);
 
   if (loading) {
     return (
@@ -495,171 +482,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
   return (
     <div className="min-h-screen bg-[#0A0A1F] text-white">
       {/* Hero Section */}
-      <div className="relative h-screen">
-        {/* Background Image - Responsive: Vertical poster for mobile/tablet, horizontal backdrop for desktop */}
-        <div className="absolute inset-0">
-          {/* Mobile/Tablet: Vertical Poster */}
-          <img
-            src={getPosterUrl(content.poster_path, 'w780')}
-            alt={getTitle()}
-            className="lg:hidden w-full h-full object-cover transition-all duration-1000"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-            }}
-          />
-          {/* Desktop: Horizontal Backdrop */}
-          <img
-            src={getBackdropUrl(content.backdrop_path, 'original')}
-            alt={getTitle()}
-            className="hidden lg:block w-full h-full object-cover transition-all duration-1000"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/fallback-backdrop.jpg';
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A1F] via-[#0A0A1F]/80 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-transparent to-transparent"></div>
-        </div>
-
-        {/* Back Button - Fixed Bubble */}
-        <div className="fixed top-24 left-6 sm:left-10 z-[100]">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 sm:gap-2 bg-black/60 backdrop-blur-xl px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full hover:bg-black/90 transition-all duration-300 border border-white/10 hover:border-netflix-red/50 shadow-[0_8px_32px_rgba(0,0,0,0.5)] group hover:scale-105 active:scale-95"
-          >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:-translate-x-1 transition-transform" />
-            <span className="text-white font-bold text-sm sm:text-base tracking-wide uppercase">Back</span>
-          </button>
-        </div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 h-full flex items-end pb-4 sm:pb-6 md:pb-16">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12 items-end">
-            {/* Movie Poster - Hidden on mobile and small screens */}
-            <div className="hidden lg:block lg:col-span-1">
-              <div className="max-w-2xl mx-auto lg:mx-0 transform lg:-translate-y-8">
-                <img
-                  src={getPosterUrl(content.poster_path, 'w780')}
-                  alt={getTitle()}
-                  className="w-full rounded-xl shadow-2xl border-4 border-white/10 hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Movie Info - Full width on mobile, 3/4 width on desktop */}
-            <div className="col-span-1 lg:col-span-3 space-y-4 md:space-y-6 lg:pl-8">
-              {/* Title with Logo */}
-              <div>
-                <div className="mb-2 md:mb-4">
-                  <LogoImage
-                    logoPath={content.logo_path}
-                    title={getTitle()}
-                    size="xl"
-                    className="justify-start"
-                    textClassName="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight"
-                    maxHeight="max-h-20 md:max-h-28 lg:max-h-32"
-                    contentId={content.id}
-                    contentType={type}
-                    enableOnDemandFetch={true}
-                  />
-                </div>
-                {content.tagline && (
-                  <p className="text-base md:text-lg lg:text-xl text-gray-300 italic mb-2 md:mb-4">
-                    "{content.tagline}"
-                  </p>
-                )}
-                {/* Movie Description - 2 lines max */}
-                <div className="mb-3 md:mb-6">
-                  <p className="text-sm md:text-base lg:text-lg text-gray-200 leading-relaxed line-clamp-2 max-w-4xl">
-                    {content.overview}
-                  </p>
-                </div>
-              </div>
-
-              {/* Metadata */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 lg:gap-6 text-xs sm:text-sm md:text-base lg:text-lg">
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-yellow-400 fill-current" />
-                  <span className="font-semibold">{formatRating(content.vote_average)}</span>
-                  <span className="text-gray-400 hidden sm:inline">({content.vote_count?.toLocaleString()} votes)</span>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-gray-400" />
-                  <span>{getReleaseYear()}</span>
-                </div>
-                {getRuntime() && (
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-gray-400" />
-                    <span>{getRuntime()}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1 sm:gap-2 hidden md:flex">
-                  <Users className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-gray-400" />
-                  <span className="text-xs sm:text-sm text-gray-400 mr-1 sm:mr-2">{type === 'movie' ? 'Director:' : 'Creator:'}</span>
-                  <span className="truncate max-w-32">{getDirector()}</span>
-                </div>
-              </div>
-
-              {/* Genres */}
-              <div className="flex flex-wrap gap-3">
-                {content.genres?.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="bg-netflix-red/20 border border-netflix-red/30 text-netflix-red px-4 py-2 rounded-full text-sm font-medium"
-                  >
-                    {genre.name}
-                  </span>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
-                <button
-                  onClick={() => navigate(`/watch/${type}/${id}`)}
-                  className="flex items-center justify-center gap-2 sm:gap-3 bg-netflix-red hover:bg-netflix-red/80 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 shadow-xl hover:scale-105 w-full sm:w-auto"
-                >
-                  <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
-                  <span>Watch Now</span>
-                </button>
-                <AddToListButton
-                  content={content}
-                  contentType={type}
-                  variant="button"
-                  showText={true}
-                  className="flex items-center justify-center gap-2 sm:gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 border border-white/20 hover:border-white/40 shadow-lg hover:scale-105 w-full sm:w-auto"
-                />
-                <LikeButton
-                  content={content}
-                  contentType={type}
-                  variant="button"
-                  showText={true}
-                  className="flex items-center justify-center gap-2 sm:gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 border border-white/20 hover:border-white/40 shadow-lg hover:scale-105 w-full sm:w-auto"
-                />
-                <button
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: getTitle(),
-                        text: content.overview,
-                        url: window.location.href,
-                      });
-                    } else {
-                      navigator.clipboard.writeText(window.location.href);
-                      // You could add a toast notification here
-                    }
-                  }}
-                  className="flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 border border-white/20 hover:border-white/40 shadow-lg hover:scale-105"
-                >
-                  <Share2 className="w-6 h-6" />
-                  <span>Share</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DetailHero content={content} type={type} credits={credits} />
 
       {/* Content Sections */}
       <div className="w-full px-8 py-16">
@@ -990,62 +813,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
             {/* Full-width sections below the 3-column layout for TV */}
             <div className="space-y-10 mt-10">
               {/* Videos & Trailers for TV */}
-              {videos.length > 0 && (
-                <section>
-                  <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos & Trailers</h2>
-                      </div>
-                      <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
-                    </div>
-
-                    {/* Horizontal Scrolling Video Grid */}
-                    <div className="relative -mx-6 sm:-mx-8 lg:-mx-12">
-                      <div className="flex gap-4 overflow-x-auto pb-4 px-6 sm:px-8 lg:px-12 scrollbar-hide">
-                        {videos.slice(0, 4).map((video) => (
-                          <div
-                            key={video.id}
-                            className="flex-shrink-0 w-80 group cursor-pointer"
-                            onClick={() => handleWatchTrailer(video)}
-                          >
-                            <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3">
-                              <img
-                                src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
-                                alt={video.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
-                                }}
-                              />
-
-                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                                  <Play className="w-8 h-8 text-white fill-current ml-1" />
-                                </div>
-                              </div>
-
-                              <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                                {video.type === 'Trailer' ? '2:30' : '1:45'}
-                              </div>
-                            </div>
-
-                            <div className="space-y-1">
-                              <h3 className="font-semibold text-white group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
-                                {video.name}
-                              </h3>
-                              <p className="text-sm text-gray-400">
-                                {video.type} • {new Date(video.published_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              )}
+              <VideoTrailersSection videos={videos} />
 
               {/* Cast & Crew for TV */}
               <CastCrewSection
@@ -1385,60 +1153,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
           <div className="space-y-10 mt-10">
             {/* Videos & Trailers for Movies */}
             {videos.length > 0 && (
-              <section>
-                <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos & Trailers</h2>
-                    </div>
-                    <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
-                  </div>
-
-                  {/* Horizontal Scrolling Video Grid */}
-                  <div className="relative -mx-6 sm:-mx-8 lg:-mx-12">
-                    <div className="flex gap-4 overflow-x-auto pb-4 px-6 sm:px-8 lg:px-12 scrollbar-hide">
-                      {videos.slice(0, 4).map((video) => (
-                        <div
-                          key={video.id}
-                          className="flex-shrink-0 w-80 group cursor-pointer"
-                          onClick={() => handleWatchTrailer(video)}
-                        >
-                          <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3">
-                            <img
-                              src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
-                              alt={video.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
-                              }}
-                            />
-
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <Play className="w-8 h-8 text-white fill-current ml-1" />
-                              </div>
-                            </div>
-
-                            <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                              {video.type === 'Trailer' ? '2:30' : '1:45'}
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <h3 className="font-semibold text-white group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
-                              {video.name}
-                            </h3>
-                            <p className="text-sm text-gray-400">
-                              {video.type} • {new Date(video.published_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <VideoTrailersSection videos={videos} />
             )}
 
             {/* Cast & Crew Carousel */}
@@ -1458,51 +1173,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
         </div>
       )}
 
-      {/* Video Modal */}
-      {showVideoModal && selectedVideo && (
-        <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={closeVideoModal}
-        >
-          <div
-            className="relative w-full max-w-4xl bg-[#0A0A1F] rounded-lg overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={closeVideoModal}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
 
-            {/* Video Player */}
-            <div className="aspect-video">
-              <iframe
-                src={`https://www.youtube.com/embed/${selectedVideo.key}?autoplay=1&controls=1&modestbranding=1&rel=0`}
-                className="w-full h-full"
-                allowFullScreen
-                title={selectedVideo.name}
-                allow="autoplay; encrypted-media"
-              />
-            </div>
-
-            {/* Video Info */}
-            <div className="p-6 bg-gradient-to-t from-[#0A0A1F] to-transparent">
-              <h3 className="text-xl font-bold text-white mb-2">{selectedVideo.name}</h3>
-              <div className="flex items-center gap-4 text-sm text-gray-400">
-                <span className="bg-netflix-red/20 text-netflix-red px-2 py-1 rounded">
-                  {selectedVideo.type}
-                </span>
-                <span>{new Date(selectedVideo.published_at).toLocaleDateString()}</span>
-                <span>{selectedVideo.official ? 'Official' : 'Fan Made'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Cast Member Detail Modal - Redesigned Extended Version */}
       {showCastModal && selectedCastMember && (

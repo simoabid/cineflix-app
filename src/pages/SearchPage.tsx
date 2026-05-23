@@ -4,6 +4,7 @@ import { Search as SearchIcon } from 'lucide-react';
 import { searchContent } from '../services/tmdb';
 import { Content } from '../types';
 import { getImageUrl } from '../services/tmdb';
+import { Container } from '../components/layout';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -54,7 +55,7 @@ const SearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-netflix-black pt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container>
         {/* Search Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-4">Search Results</h1>
@@ -141,7 +142,7 @@ const SearchPage: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 };

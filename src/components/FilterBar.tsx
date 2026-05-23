@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { Genre } from '../types';
+import { Container } from './layout';
 
 interface FilterBarProps {
   genres: Genre[];
@@ -266,7 +267,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
   return (
     <div className="sticky top-0 z-40 bg-[#0A0A1F]/95 backdrop-blur-sm border-b border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4">
+      <Container className="py-4">
         {/* Search Bar */}
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-1 relative">
@@ -415,7 +416,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             )}
           </div>
         )}
-      </div>
+      </Container>
     </div>
   );
 };

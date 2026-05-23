@@ -27,6 +27,8 @@ import {
   MessageSquare
 } from 'lucide-react';
 
+import { Container } from './layout';
+
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
@@ -246,7 +248,7 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-20">
+      <Container className="relative z-20">
 
 
         {/* Top Section - Brand and Quick Actions */}
@@ -554,7 +556,7 @@ const Footer: React.FC = () => {
             <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
           </div>
         </motion.button>
-      </div>
+      </Container>
     </footer>
   );
 };
