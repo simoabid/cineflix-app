@@ -104,7 +104,7 @@ const LoginPage: React.FC = () => {
             title={AUTH_STRINGS.login.title}
             subtitle={AUTH_STRINGS.login.subtitle}
         >
-            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4 sm:space-y-5">
                 {/* Server Error */}
                 {errors.server && (
                     <div

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Facebook,
@@ -212,6 +212,12 @@ const Footer: React.FC = () => {
       );
     };
   */
+
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  if (isAuthPage) {
+    return null;
+  }
 
   return (
     <footer

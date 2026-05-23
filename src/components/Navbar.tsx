@@ -151,6 +151,11 @@ const Navbar: React.FC = () => {
     { name: 'My List', path: '/my-list', icon: Bookmark },
   ];
 
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  if (isAuthPage) {
+    return null;
+  }
+
   return (
     <>
       <nav

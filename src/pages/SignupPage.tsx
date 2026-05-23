@@ -123,7 +123,7 @@ const SignupPage: React.FC = () => {
             title={AUTH_STRINGS.signup.title}
             subtitle={AUTH_STRINGS.signup.subtitle}
         >
-            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="space-y-3 sm:space-y-4">
                 {/* Server Error */}
                 {errors.server && (
                     <div
@@ -136,10 +136,10 @@ const SignupPage: React.FC = () => {
                 )}
 
                 {/* Avatar Selection */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-300">Choose your Avatar</label>
-                    <div className="flex justify-center">
-                        <div className="flex gap-4 p-2">
+                    <div className="w-full overflow-x-auto scrollbar-hide py-1">
+                        <div className="flex gap-3 sm:gap-4 px-2 min-w-max justify-start sm:justify-center">
                             {AVATARS.map((avatar) => {
                                 const AvatarComponent = avatar.Component;
                                 const isSelected = selectedAvatar === avatar.id;
@@ -193,7 +193,7 @@ const SignupPage: React.FC = () => {
                 />
 
                 {/* Two-column grid for passwords */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {/* Password */}
                     <PasswordInput
                         id="password"

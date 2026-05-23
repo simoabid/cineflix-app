@@ -70,27 +70,27 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
     };
 
     return (
-        <div className="space-y-4 mt-6">
+        <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
             {/* Divider */}
             <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                    <span className="px-4 text-gray-400 bg-transparent">or continue with</span>
+                    <span className="px-4 text-gray-400 bg-transparent text-xs sm:text-sm">or continue with</span>
                 </div>
             </div>
 
             {/* Social Buttons */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {/* Google Button */}
                 <button
                     type="button"
                     onClick={handleGoogleClick}
                     disabled={disabled || isLoading}
-                    className="flex items-center justify-center gap-3 px-4 py-3 
+                    className="flex items-center justify-center gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 
                      bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20
-                     rounded-lg text-white font-medium transition-all duration-200 
+                     rounded-lg text-white text-sm sm:font-medium transition-all duration-200 
                      focus:outline-none focus:ring-2 focus:ring-white/20
                      disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Continue with Google"
@@ -104,9 +104,9 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
                     type="button"
                     onClick={handleGithubClick}
                     disabled={disabled || isLoading}
-                    className="flex items-center justify-center gap-3 px-4 py-3 
+                    className="flex items-center justify-center gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 
                      bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20
-                     rounded-lg text-white font-medium transition-all duration-200 
+                     rounded-lg text-white text-sm sm:font-medium transition-all duration-200 
                      focus:outline-none focus:ring-2 focus:ring-white/20
                      disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Continue with GitHub"
