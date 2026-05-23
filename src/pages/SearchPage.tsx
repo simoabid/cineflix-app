@@ -5,11 +5,15 @@ import { searchContent } from '../services/tmdb';
 import { Content } from '../types';
 import { getImageUrl } from '../services/tmdb';
 import { Container } from '../components/layout';
+import LoadingScreen from '../components/feedback/LoadingScreen';
+import EmptyState from '../components/feedback/EmptyState';
+import ErrorState from '../components/feedback/ErrorState';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [results, setResults] = useState<Content[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
@@ -22,17 +26,20 @@ const SearchPage: React.FC = () => {
   const performSearch = async (query: string) => {
     if (!query.trim()) {
       setResults([]);
+      setError(null);
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       const response = await searchContent(query);
       setResults(response.results.filter(item => 
         item.media_type === 'movie' || item.media_type === 'tv'
       ));
-    } catch (error) {
-      console.error('Search error:', error);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('An error occurred while searching. Please try again.');
       setResults([]);
     } finally {
       setLoading(false);
@@ -76,29 +83,24 @@ const SearchPage: React.FC = () => {
 
         {/* Search Results */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="relative">
-              {/* Main thick spinner */}
-              <div className="h-16 w-16 netflix-spinner-thick" />
-              
-              {/* Ripple effects */}
-              <div className="h-16 w-16 netflix-ripple" />
-              <div className="h-16 w-16 netflix-ripple" style={{ animationDelay: '0.5s' }} />
-            </div>
-          </div>
+          <LoadingScreen inline message={`Searching for "${searchQuery}"...`} />
+        ) : error ? (
+          <ErrorState
+            inline
+            title="Search failed"
+            message={error}
+            onRetry={() => performSearch(searchQuery)}
+          />
         ) : results.length === 0 ? (
-          <div className="text-center py-12">
-            <SearchIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl text-gray-400 mb-2">
-              {searchQuery ? 'No results found' : 'Search for movies and TV shows'}
-            </h3>
-            <p className="text-gray-500">
-              {searchQuery 
-                ? `No results found for "${searchQuery}"`
-                : 'Enter a search term to get started'
-              }
-            </p>
-          </div>
+          <EmptyState
+            variant="search"
+            title={searchQuery ? 'No results found' : 'Search CineFlix'}
+            description={
+              searchQuery 
+                ? `We couldn't find any matches for "${searchQuery}". Please check your spelling or try another keyword.`
+                : 'Enter a search term above to discover movies and TV shows.'
+            }
+          />
         ) : (
           <div>
             <p className="text-gray-400 mb-6">

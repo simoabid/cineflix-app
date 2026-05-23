@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* ============================================
    PERFORMANCE & SMOOTH SCROLLING
    ============================================ */
@@ -59,23 +64,15 @@ html {
   will-change: transform;
 }
 
-/* Reduce motion for accessibility */
+/* Global reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .animate-fade-in-up {
-    animation: none;
-    opacity: 1;
-  }
-
-  .smooth-hover {
-    transition: none;
-  }
-
-  .carousel-item {
-    will-change: auto;
+  * {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
   }
 }
 

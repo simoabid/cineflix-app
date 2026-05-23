@@ -64,7 +64,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
   return (
     <div
       ref={anchorRef}
-      className={`relative flex-shrink-0 ${widthClass} ${className}`}
+      className={`relative flex-shrink-0 browse-card ${widthClass} ${className}`}
       onPointerEnter={shouldShowHover ? onPointerEnter : undefined}
       onPointerLeave={shouldShowHover ? onPointerLeave : undefined}
       onFocus={shouldShowHover ? onFocus : undefined}

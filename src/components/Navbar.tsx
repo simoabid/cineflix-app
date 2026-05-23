@@ -27,6 +27,17 @@ import { useAuth } from '../contexts/AuthContext';
 import SignUpPromoBubble from './SignUpPromoBubble';
 import { renderAvatarById } from '../constants/avatars';
 
+const NAVBAR_TRANSLATIONS = {
+  notifications: 'Notifications',
+  account: 'Account',
+  myProfile: 'My Profile',
+  myList: 'My List',
+  accountSettings: 'Account Settings',
+  signOut: 'Sign Out',
+  signUp: 'Sign Up',
+  searchLabel: 'Search Movies & TV Shows'
+};
+
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -259,7 +270,7 @@ const Navbar: React.FC = () => {
                   {notificationsOpen && (
                     <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-surface-card/95 backdrop-blur-xl rounded-xl shadow-2xl border border-glass-border py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-700/50">
-                        <h3 className="text-white font-semibold">Notifications</h3>
+                        <h3 className="text-white font-semibold">{NAVBAR_TRANSLATIONS.notifications}</h3>
                       </div>
                       {notifications.map((notification) => (
                         <div key={notification.id} className="px-4 py-3 hover:bg-gray-700/50 transition-colors">
@@ -294,7 +305,7 @@ const Navbar: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <span className="hidden md:block text-sm font-medium text-gray-200">Account</span>
+                    <span className="hidden md:block text-sm font-medium text-gray-200">{NAVBAR_TRANSLATIONS.account}</span>
                     <ChevronDown className={`hidden sm:block w-4 h-4 text-gray-300 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
 
@@ -327,7 +338,7 @@ const Navbar: React.FC = () => {
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
                         >
                           <User className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
-                          <span className="font-medium">My Profile</span>
+                          <span className="font-medium">{NAVBAR_TRANSLATIONS.myProfile}</span>
                         </Link>
                         <Link
                           to="/my-list"
@@ -335,7 +346,7 @@ const Navbar: React.FC = () => {
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
                         >
                           <Heart className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
-                          <span className="font-medium">My List</span>
+                          <span className="font-medium">{NAVBAR_TRANSLATIONS.myList}</span>
                         </Link>
                         <Link
                           to="/account"
@@ -343,7 +354,7 @@ const Navbar: React.FC = () => {
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
                         >
                           <Settings className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
-                          <span className="font-medium">Account Settings</span>
+                          <span className="font-medium">{NAVBAR_TRANSLATIONS.accountSettings}</span>
                         </Link>
                       </div>
 
@@ -354,7 +365,7 @@ const Navbar: React.FC = () => {
                           className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-red-500/10 rounded-xl transition-all duration-200 group"
                         >
                           <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors" />
-                          <span className="font-medium group-hover:text-red-400 transition-colors">Sign Out</span>
+                          <span className="font-medium group-hover:text-red-400 transition-colors">{NAVBAR_TRANSLATIONS.signOut}</span>
                         </button>
                       </div>
                     </div>
@@ -368,7 +379,7 @@ const Navbar: React.FC = () => {
                   >
                     <div className="spectrum-btn-inner px-3 sm:px-4 py-2 space-x-2">
                       <User className="w-4 h-4 text-white" />
-                      <span className="hidden sm:inline text-white font-medium text-sm">Sign Up</span>
+                      <span className="hidden sm:inline text-white font-medium text-sm">{NAVBAR_TRANSLATIONS.signUp}</span>
                     </div>
                   </Link>
                   <SignUpPromoBubble />
@@ -396,7 +407,7 @@ const Navbar: React.FC = () => {
                     className="flex items-center justify-center space-x-3 w-full px-6 py-4 text-base font-medium bg-netflix-red/20 hover:bg-netflix-red/30 text-white border border-netflix-red/40 hover:border-netflix-red/60 rounded-xl transition-all duration-300"
                   >
                     <Search className="w-6 h-6 text-netflix-red" />
-                    <span>Search Movies & TV Shows</span>
+                    <span>{NAVBAR_TRANSLATIONS.searchLabel}</span>
                   </button>
                 </div>
 
@@ -428,7 +439,7 @@ const Navbar: React.FC = () => {
                         className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
                         <Settings className="w-5 h-5" />
-                        <span>Account Settings</span>
+                        <span>{NAVBAR_TRANSLATIONS.accountSettings}</span>
                       </Link>
                       <button
                         onClick={() => {
@@ -438,7 +449,7 @@ const Navbar: React.FC = () => {
                         className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
                         <LogOut className="w-5 h-5" />
-                        <span>Sign Out</span>
+                        <span>{NAVBAR_TRANSLATIONS.signOut}</span>
                       </button>
                     </>
                   ) : (
@@ -448,7 +459,7 @@ const Navbar: React.FC = () => {
                       className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-white bg-netflix-red hover:bg-red-700 rounded-lg transition-colors"
                     >
                       <User className="w-5 h-5" />
-                      <span>Sign Up</span>
+                      <span>{NAVBAR_TRANSLATIONS.signUp}</span>
                     </Link>
                   )}
                 </div>

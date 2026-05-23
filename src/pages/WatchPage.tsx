@@ -21,15 +21,15 @@ import { myListService } from '../services/myListService';
 import { rivestreamService } from '../services/rivestreamService';
 import { SmashyStreamService } from '../services/smashystream';
 import { Movies111Service } from '../services/111movies';
-import LoadingSkeleton from '../components/LoadingSkeleton';
 import VideoFrame from '../components/WatchPage/VideoFrame';
 import StreamSources from '../components/WatchPage/StreamSources';
 import DownloadOptions from '../components/WatchPage/DownloadOptions';
 import TorrentSources from '../components/WatchPage/TorrentSources';
 import MovieDetails from '../components/WatchPage/MovieDetails';
 import SeasonsEpisodesSection from '../components/WatchPage/SeasonsEpisodesSection';
-
 import SimilarContent from '../components/WatchPage/SimilarContent';
+import LoadingScreen from '../components/feedback/LoadingScreen';
+import ErrorState from '../components/feedback/ErrorState';
 
 
 interface WatchPageProps {
@@ -402,27 +402,17 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0A0A1F] pt-16">
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingScreen message="Loading page details..." />;
   }
 
   if (error || !content) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F] pt-16 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Content Not Found</h2>
-          <p className="text-gray-400 mb-6">{error || 'The requested content could not be found.'}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-[#ff0000] text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        title="Content Not Found"
+        message={error || 'The requested content could not be found.'}
+        onRetry={() => navigate(-1)}
+        retryLabel="Go Back"
+      />
     );
   }
 
@@ -585,43 +575,18 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
           >
             {/* Loading State */}
             {sourcesLoading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative">
-                    <div className="h-16 w-16 netflix-spinner-thick" />
-                    <div className="h-16 w-16 netflix-ripple" />
-                    <div className="h-16 w-16 netflix-ripple" style={{ animationDelay: '0.5s' }} />
-                  </div>
-                  <div className="text-center loading-text">
-                    <p className="text-white text-lg font-medium">Loading streaming sources...</p>
-                    <p className="text-gray-400 text-sm mt-2">Connecting to servers</p>
-                    <div className="flex gap-2 justify-center mt-3">
-                      <div className="netflix-dot" />
-                      <div className="netflix-dot" />
-                      <div className="netflix-dot" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <LoadingScreen inline message="Loading streaming sources..." subMessage="Connecting to servers" />
             )}
 
             {/* Error State */}
             {sourcesError && !sourcesLoading && (
-              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 mb-6">
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
-                    <span className="text-white text-sm">!</span>
-                  </div>
-                  <h3 className="text-red-400 font-semibold">Streaming Sources Error</h3>
-                </div>
-                <p className="text-red-300 text-sm">{sourcesError}</p>
-                <button
-                  onClick={() => content && fetchStreamingSources(content.id)}
-                  className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                >
-                  Retry Loading Sources
-                </button>
-              </div>
+              <ErrorState
+                inline
+                title="Streaming Sources Error"
+                message={sourcesError}
+                onRetry={() => content && fetchStreamingSources(content.id)}
+                retryLabel="Retry Loading Sources"
+              />
             )}
 
             {/* Content Sections */}
