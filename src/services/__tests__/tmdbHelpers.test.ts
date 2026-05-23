@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getImageUrl, getPosterUrl, getBackdropUrl, getLogoUrl, clearApiCache } from '../../services/tmdb';
 
 describe('TMDB Image URL Helpers', () => {
@@ -80,19 +80,11 @@ describe('TMDB API Cache', () => {
 });
 
 describe('TMDB Security Helpers (via module re-import)', () => {
-  let sanitizePath: (path: string) => string;
-  let sanitizeParams: (params?: Record<string, any>) => Record<string, any>;
-  let shouldRetry: (err: any) => boolean;
-
   beforeEach(async () => {
     vi.resetModules();
-    // Access internal helpers via dynamic import — they're not exported,
-    // so we test them indirectly through the module's public behavior.
-    // For direct testing, we re-import and access via the module's internal scope.
-    // Since they're module-private, we test the public surface that exercises them.
   });
 
-  describe('sanitizePath (indirect via getImageUrl)', () => {
+  describe('sanitizePath behavior (indirect via getImageUrl)', () => {
     it('should handle paths with traversal attempts', () => {
       // getImageUrl uses the path directly, but the internal sanitizePath
       // is used in the API override. We test the public surface.

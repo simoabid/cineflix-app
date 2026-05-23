@@ -29,8 +29,8 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Unit tests
-        run: npm run test
+      - name: Unit tests (with coverage)
+        run: npm run test:coverage
 
       - name: Build
         run: npx vite build
@@ -51,6 +51,9 @@ jobs:
 
       - name: Install backend dependencies
         run: cd backend && npm ci
+
+      - name: Lint
+        run: cd backend && npm run lint
 
       - name: Type check
         run: cd backend && npx tsc --noEmit

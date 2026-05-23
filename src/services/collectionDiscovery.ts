@@ -3,9 +3,11 @@
  *
  * Extracted from tmdb.ts to reduce that file from ~2,360 lines to ~1,000.
  * Contains all collection discovery, pagination, search, and helper logic.
+ * Pure classification/extraction functions live in collectionHelpers.ts.
  */
 
-import type { Movie, CollectionDetails, CollectionType, CollectionStatus, ApiResponse, Collection } from '../types';
+import type { Movie, CollectionDetails, ApiResponse, Collection } from '../types';
+import { classifyCollectionType, determineCollectionStatus, extractGenreCategories, extractStudio } from './collectionHelpers';
 
 // ─── Internal Types ───────────────────────────────────────────────────────────
 
@@ -631,31 +633,22 @@ export const getNextCollectionsBatch = async (
     while (newCollections.size < batchSize && attempts < maxAttempts) {
       attempts++;
 
-      if (attempts === 1) {
-        await discoverFromPopularMovies(newCollections, paginationCache.moviePageIndex, 8);
-        paginationCache.moviePageIndex++;
-      } else if (attempts === 2) {
-        await discoverFromGenres(newCollections, paginationCache.genreIndex, 5);
-        paginationCache.genreIndex++;
-      } else if (attempts === 3) {
-        await discoverFromYears(newCollections, 5);
-      } else if (attempts === 4) {
-        await discoverFromSearchTerms(newCollections, paginationCache.searchTermIndex, 5);
-        paginationCache.searchTermIndex++;
-      } else if (attempts === 5) {
-        await discoverFromCurrentMovies(newCollections, 5);
-      } else if (attempts === 6) {
-        await discoverFromTopRatedMovies(newCollections, 1, 5);
-      } else if (attempts === 7) {
-        await discoverFromTrendingMovies(newCollections, 'week', 5);
-      } else if (attempts === 8) {
-        await discoverFromPopularActors(newCollections, 3);
-      } else if (attempts === 9) {
-        await discoverFromPopularDirectors(newCollections, 3);
-      } else if (attempts === 10) {
-        await discoverFromProductionCompanies(newCollections, 3);
-      } else if (attempts === 11) {
-        await discoverFromRandomDeepSearch(newCollections, 5);
+      const strategies: Array<() => Promise<void>> = [
+        async () => { await discoverFromPopularMovies(newCollections, paginationCache.moviePageIndex, 8); paginationCache.moviePageIndex++; },
+        async () => { await discoverFromGenres(newCollections, paginationCache.genreIndex, 5); paginationCache.genreIndex++; },
+        async () => { await discoverFromYears(newCollections, 5); },
+        async () => { await discoverFromSearchTerms(newCollections, paginationCache.searchTermIndex, 5); paginationCache.searchTermIndex++; },
+        async () => { await discoverFromCurrentMovies(newCollections, 5); },
+        async () => { await discoverFromTopRatedMovies(newCollections, 1, 5); },
+        async () => { await discoverFromTrendingMovies(newCollections, 'week', 5); },
+        async () => { await discoverFromPopularActors(newCollections, 3); },
+        async () => { await discoverFromPopularDirectors(newCollections, 3); },
+        async () => { await discoverFromProductionCompanies(newCollections, 3); },
+        async () => { await discoverFromRandomDeepSearch(newCollections, 5); },
+      ];
+      const strategyIndex = attempts - 1;
+      if (strategyIndex < strategies.length) {
+        await strategies[strategyIndex]();
       }
 
       if (newCollections.size === 0 && attempts >= 3) break;
@@ -828,47 +821,5 @@ export const getCollectionStats = async (): Promise<{
   };
 };
 
-// ─── Classification Helpers ───────────────────────────────────────────────────
-
-export const classifyCollectionType = (filmCount: number): CollectionType => {
-  if (filmCount === 3) return 'trilogy';
-  if (filmCount === 4) return 'quadrilogy';
-  if (filmCount === 5) return 'pentology';
-  if (filmCount === 6) return 'hexalogy';
-  if (filmCount === 7) return 'septology';
-  if (filmCount === 8) return 'octology';
-  if (filmCount === 9) return 'nonology';
-  if (filmCount > 9) return 'extended_series';
-  return 'incomplete_series';
-};
-
-export const determineCollectionStatus = (films: Movie[]): CollectionStatus => {
-  if (films.length < 3) return 'incomplete';
-  const currentYear = new Date().getFullYear();
-  const latestYear = Math.max(...films.map(f => new Date(f.release_date || '').getFullYear()));
-  if (currentYear - latestYear <= 3) return 'ongoing';
-  return 'complete';
-};
-
-const GENRE_MAP: Record<number, string> = {
-  28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime',
-  99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy', 36: 'History',
-  27: 'Horror', 10402: 'Music', 9648: 'Mystery', 10749: 'Romance', 878: 'Science Fiction',
-  10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western'
-};
-
-export const extractGenreCategories = (films: Movie[]): string[] => {
-  const genreSet = new Set<string>();
-  films.forEach(film => {
-    film.genre_ids?.forEach(genreId => {
-      if (GENRE_MAP[genreId]) genreSet.add(GENRE_MAP[genreId]);
-    });
-    // Also check genres (objects with id+name) from detail-endpoint responses
-    film.genres?.forEach(genre => {
-      if (genre.name) genreSet.add(genre.name);
-    });
-  });
-  return Array.from(genreSet);
-};
-
-export const extractStudio = (_films: Movie[]): string => 'Various Studios';
+// ─── Re-export helpers for backward compatibility ─────────────────────────────
+export { classifyCollectionType, determineCollectionStatus, extractGenreCategories, extractStudio } from './collectionHelpers';

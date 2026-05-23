@@ -43,6 +43,7 @@ export interface Movie {
   release_date: string;
   vote_average: number;
   vote_count: number;
+  popularity: number;
   genre_ids: number[];
   genres?: Genre[];
   runtime?: number;
@@ -113,6 +114,17 @@ export interface Episode {
   still_path: string | null;
   vote_average: number;
   vote_count: number;
+}
+
+/** Full season detail from /tv/{id}/season/{number} — includes embedded episodes */
+export interface SeasonDetails extends Season {
+  episodes: Episode[];
+}
+
+/** Full episode detail from /tv/{id}/season/{number}/episode/{number} */
+export interface EpisodeDetails extends Episode {
+  crew: CrewMember[];
+  guest_stars: CastMember[];
 }
 
 export interface Genre {

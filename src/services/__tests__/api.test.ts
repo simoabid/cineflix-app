@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setAuthToken, getAuthToken, authApi, myListApi, checkBackendHealth } from '../api';
 
 // Mock fetch globally
