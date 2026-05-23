@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+
 
 interface AuthCardProps {
     children: React.ReactNode;
@@ -19,16 +19,17 @@ const AuthCard: React.FC<AuthCardProps> = ({ children, title, subtitle }) => {
 
             {/* Card Container */}
             <div className="relative z-10 w-full max-w-xl animate-fade-in">
-                {/* Logo */}
-                <div className="flex justify-center -mb-6 mt-4 relative z-20">
+                {/* Logo — temporarily hidden
+                <div className="flex justify-center -mb-4 sm:-mb-5 mt-4 relative z-20">
                     <Link to="/" className="transition-transform hover:scale-105">
                         <img
                             src={`${import.meta.env.BASE_URL}cineflix-logo.png`}
                             alt="CINEFLIX - Your Streaming Destination"
-                            className="h-20 sm:h-24 w-auto logo-glow"
+                            className="h-9 sm:h-11 w-auto logo-glow"
                         />
                     </Link>
                 </div>
+                */}
 
                 {/* Card */}
                 <div className="auth-card rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10">
