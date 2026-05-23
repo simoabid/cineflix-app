@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import NodeCache from 'node-cache';
+import { env } from '../config/env.js';
 
 const router = Router();
 
@@ -7,7 +8,7 @@ const router = Router();
 const tmdbCache = new NodeCache({ stdTTL: 600, checkperiod: 120 });
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const { TMDB_API_KEY } = env;
 
 /**
  * GET /api/tmdb/*
@@ -18,11 +19,6 @@ router.get('/*', async (req: Request, res: Response): Promise<void> => {
     const path = req.params[0];
     if (!path) {
         res.status(400).json({ success: false, error: 'TMDB API path is required' });
-        return;
-    }
-
-    if (!TMDB_API_KEY) {
-        res.status(503).json({ success: false, error: 'TMDB API key not configured on server' });
         return;
     }
 

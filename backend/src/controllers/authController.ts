@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User.js';
+import { env } from '../config/env.js';
 import { UpdateProfileRequestBody } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cineflix-super-secret-jwt-key-2024';
+const { JWT_SECRET } = env;
 const JWT_EXPIRE = '30d';
 const COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -22,7 +23,7 @@ const buildCookieOptions = (): {
     path: string;
 } => ({
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: COOKIE_MAX_AGE_MS,
     path: '/',
@@ -279,7 +280,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 export const logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie('auth_token', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
         path: '/',
     });

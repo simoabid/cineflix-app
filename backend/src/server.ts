@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import http from 'http';
 import swaggerUi from 'swagger-ui-express';
 import { connectDB } from './config/database.js';
+import { env } from './config/env.js';
 import { swaggerSpec } from './config/swagger.js';
 import authRoutes from './routes/authRoutes.js';
 import myListRoutes from './routes/myListRoutes.js';
@@ -15,14 +15,10 @@ import tmdbRoutes from './routes/tmdbRoutes.js';
 import { initializeSocketServer } from './sockets/watchParty.js';
 import { logger } from './utils/logger.js';
 
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT;
 
-const allowedOrigins: string[] = process.env.CORS_ALLOWED_ORIGINS
-    ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((o: string) => o.trim())
-    : ['http://localhost:5173'];
+const allowedOrigins: string[] = env.CORS_ALLOWED_ORIGINS.split(',').map((o: string) => o.trim());
 
 app.use(cors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -63,7 +59,7 @@ initializeSocketServer(httpServer, allowedOrigins);
 const startServer = async () => {
     try {
         await connectDB();
-        if (process.env.NODE_ENV !== 'production') {
+        if (env.NODE_ENV !== 'production') {
             httpServer.listen(PORT, () => {
                 logger.info(`🚀 Server running on http://localhost:${PORT}`);
                 logger.info(`📚 API: /api/my-list, /api/collections, /api/preferences`);
@@ -73,7 +69,7 @@ const startServer = async () => {
         }
     } catch (error) {
         logger.error('Failed to start server:', error);
-        if (process.env.NODE_ENV !== 'production') {
+        if (env.NODE_ENV !== 'production') {
             process.exit(1);
         }
     }

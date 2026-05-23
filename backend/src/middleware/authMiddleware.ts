@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User.js';
+import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
 
 // Extend Express Request to include user
@@ -13,7 +14,7 @@ declare global {
     }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cineflix-super-secret-jwt-key-2024';
+const { JWT_SECRET } = env;
 
 export const protect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

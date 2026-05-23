@@ -1,10 +1,11 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import path from 'path';
+import { env } from '../config/env.js';
 
 const LOG_DIR = path.resolve(process.cwd(), 'logs');
-const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const { LOG_LEVEL } = env;
+const IS_PRODUCTION = env.NODE_ENV === 'production';
 
 /** Structured JSON format for production, colorized CLI format for development */
 const devFormat = winston.format.combine(
