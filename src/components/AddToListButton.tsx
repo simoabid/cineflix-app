@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Check, Loader2 } from 'lucide-react';
 import { Movie, TVShow } from '../types';
 import { useMyList } from '../hooks/useMyList';
@@ -24,6 +25,12 @@ const AddToListButton: React.FC<AddToListButtonProps> = ({
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
+
+  const isReducedMotion = useMemo(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
 
   const inList = isInList(content.id, contentType);
 
@@ -39,12 +46,17 @@ const AddToListButton: React.FC<AddToListButtonProps> = ({
     setIsLoading(true);
     try {
       await toggleInList(content, contentType);
+      setAnimationKey(prev => prev + 1);
     } catch (error) {
       console.error('Error toggling list item:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const popTransition = isReducedMotion
+    ? {}
+    : { scale: [1, 1.3, 0.9, 1], transition: { duration: 0.35 } };
 
   const getButtonContent = () => {
     if (isLoading) {
@@ -59,7 +71,11 @@ const AddToListButton: React.FC<AddToListButtonProps> = ({
     if (inList) {
       return (
         <>
-          <Check className="w-4 h-4" />
+          <AnimatePresence mode="wait">
+            <motion.span key={`check-${animationKey}`} animate={popTransition} className="inline-flex">
+              <Check className="w-4 h-4" />
+            </motion.span>
+          </AnimatePresence>
           {showText && variant !== 'icon' && <span>In My List</span>}
         </>
       );
@@ -67,7 +83,11 @@ const AddToListButton: React.FC<AddToListButtonProps> = ({
 
     return (
       <>
-        <Plus className="w-4 h-4" />
+        <AnimatePresence mode="wait">
+          <motion.span key={`plus-${animationKey}`} animate={popTransition} className="inline-flex">
+            <Plus className="w-4 h-4" />
+          </motion.span>
+        </AnimatePresence>
         {showText && variant !== 'icon' && <span>Add to List</span>}
       </>
     );

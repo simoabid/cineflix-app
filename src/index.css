@@ -52,6 +52,13 @@ html {
   transform: scale(1.03) translateZ(0);
 }
 
+/* GPU-accelerated carousel items — prevent clipping on hover scale */
+.carousel-item {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -65,6 +72,10 @@ html {
 
   .smooth-hover {
     transition: none;
+  }
+
+  .carousel-item {
+    will-change: auto;
   }
 }
 

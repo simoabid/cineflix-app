@@ -26,7 +26,7 @@ const ContentCarouselItems = React.memo<ContentCarouselItemsProps>(({ items, typ
     {items.map((item) => (
       <div
         key={item.id}
-        className={`transition-opacity duration-300 ${cardsLoaded ? 'opacity-100' : 'opacity-0'
+        className={`transition-opacity duration-300 carousel-item ${cardsLoaded ? 'opacity-100' : 'opacity-0'
           }`}
       >
         <ContentCard
@@ -219,7 +219,7 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, items, type })
         {/* Navigation Buttons */}
         <button
           onClick={() => scroll('left')}
-          className={`absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 ${!canScrollLeft ? 'opacity-0 pointer-events-none' : isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          className={`absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hidden md:flex items-center justify-center ${!canScrollLeft ? 'md:opacity-0 md:pointer-events-none' : isHovered ? 'md:opacity-100' : 'md:opacity-0 md:pointer-events-none'
             } backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-xl hover:scale-110`}
           aria-label="Scroll left"
         >
@@ -228,7 +228,7 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, items, type })
 
         <button
           onClick={() => scroll('right')}
-          className={`absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 ${!canScrollRight ? 'opacity-0 pointer-events-none' : isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          className={`absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hidden md:flex items-center justify-center ${!canScrollRight ? 'md:opacity-0 md:pointer-events-none' : isHovered ? 'md:opacity-100' : 'md:opacity-0 md:pointer-events-none'
             } backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-xl hover:scale-110`}
           aria-label="Scroll right"
         >

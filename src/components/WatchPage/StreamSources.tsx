@@ -263,6 +263,17 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
     [loadSource, onSourceSelect]
   );
 
+  /** Keyboard handler for stream source cards (WCAG 2.1.1 Keyboard). */
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent, source: StreamSource) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleSelectSource(source);
+      }
+    },
+    [handleSelectSource]
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -426,11 +437,18 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            tabIndex={0}
+            role="tab"
+            aria-selected={otherSources.some(s => s.id === 'vidjoy_player' && selectedSource?.id === s.id)}
             onClick={() => {
               const vidjoySource = otherSources.find(s => s.id === 'vidjoy_player');
               if (vidjoySource && vidjoySource.url !== '') handleSelectSource(vidjoySource);
             }}
-            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${otherSources.some(s => s.id === 'vidjoy_player' && selectedSource?.id === s.id)
+            onKeyDown={(e) => {
+              const vidjoySource = otherSources.find(s => s.id === 'vidjoy_player');
+              if (vidjoySource && vidjoySource.url !== '') handleKeyDown(e, vidjoySource);
+            }}
+            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${otherSources.some(s => s.id === 'vidjoy_player' && selectedSource?.id === s.id)
               ? 'border-[#ff0000] bg-[#ff0000]/10'
               : 'bg-[#13132B] border-gray-700 hover:border-gray-600 hover:bg-gray-750'
               }`}
@@ -485,11 +503,18 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
+            tabIndex={0}
+            role="tab"
+            aria-selected={otherSources.some(s => s.id === 'cinemaos_player' && selectedSource?.id === s.id)}
             onClick={() => {
               const cinemaosSource = otherSources.find(s => s.id === 'cinemaos_player');
               if (cinemaosSource && cinemaosSource.url !== '') handleSelectSource(cinemaosSource);
             }}
-            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${otherSources.some(s => s.id === 'cinemaos_player' && selectedSource?.id === s.id)
+            onKeyDown={(e) => {
+              const cinemaosSource = otherSources.find(s => s.id === 'cinemaos_player');
+              if (cinemaosSource && cinemaosSource.url !== '') handleKeyDown(e, cinemaosSource);
+            }}
+            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${otherSources.some(s => s.id === 'cinemaos_player' && selectedSource?.id === s.id)
               ? 'border-[#ff0000] bg-[#ff0000]/10'
               : 'bg-[#13132B] border-gray-700 hover:border-gray-600 hover:bg-gray-750'
               }`}
@@ -544,8 +569,12 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            tabIndex={0}
+            role="tab"
+            aria-selected={rivestreamS2Sources.some(s => selectedSource?.id === s.id)}
             onClick={() => rivestreamS2Sources.length > 0 && handleSelectSource(rivestreamS2Sources[0])}
-            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${rivestreamS2Sources.some(s => selectedSource?.id === s.id)
+            onKeyDown={(e) => rivestreamS2Sources.length > 0 && handleKeyDown(e, rivestreamS2Sources[0])}
+            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${rivestreamS2Sources.some(s => selectedSource?.id === s.id)
               ? 'border-[#ff0000] bg-[#ff0000]/10'
               : 'bg-[#13132B] border-gray-700 hover:border-gray-600 hover:bg-gray-750'
               }`}
@@ -602,8 +631,12 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
+            tabIndex={0}
+            role="tab"
+            aria-selected={vidsrcPremiumSources.some(s => selectedSource?.id === s.id)}
             onClick={() => vidsrcPremiumSources.length > 0 && handleSelectSource(vidsrcPremiumSources[0])}
-            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${vidsrcPremiumSources.some(s => selectedSource?.id === s.id)
+            onKeyDown={(e) => vidsrcPremiumSources.length > 0 && handleKeyDown(e, vidsrcPremiumSources[0])}
+            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${vidsrcPremiumSources.some(s => selectedSource?.id === s.id)
               ? 'border-[#ff0000] bg-[#ff0000]/10'
               : 'bg-[#13132B] border-gray-700 hover:border-gray-600 hover:bg-gray-750'
               }`}
@@ -737,8 +770,12 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            tabIndex={0}
+            role="tab"
+            aria-selected={smashystreamSources.some(s => selectedSource?.id === s.id)}
             onClick={() => smashystreamSources.length > 0 && handleSelectSource(smashystreamSources[0])}
-            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${smashystreamSources.some(s => selectedSource?.id === s.id)
+            onKeyDown={(e) => smashystreamSources.length > 0 && handleKeyDown(e, smashystreamSources[0])}
+            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${smashystreamSources.some(s => selectedSource?.id === s.id)
               ? 'border-[#ff0000] bg-[#ff0000]/10'
               : 'bg-[#13132B] border-gray-700 hover:border-gray-600 hover:bg-gray-750'
               }`}
@@ -795,8 +832,12 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            tabIndex={0}
+            role="tab"
+            aria-selected={movies111Sources.some(s => selectedSource?.id === s.id)}
             onClick={() => movies111Sources.length > 0 && handleSelectSource(movies111Sources[0])}
-            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${movies111Sources.some(s => selectedSource?.id === s.id)
+            onKeyDown={(e) => movies111Sources.length > 0 && handleKeyDown(e, movies111Sources[0])}
+            className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${movies111Sources.some(s => selectedSource?.id === s.id)
               ? 'border-[#ff0000] bg-[#ff0000]/10'
               : 'bg-gray-800 border-gray-700 hover:border-gray-600 hover:bg-gray-750'
               }`}
@@ -861,8 +902,13 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: (index + 1) * 0.05 }}
+              tabIndex={isPlaceholder ? -1 : 0}
+              role="tab"
+              aria-selected={isSelected}
+              aria-disabled={isPlaceholder}
               onClick={() => !isPlaceholder && !isLoading && handleSelectSource(source)}
-              className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer ${isSelected
+              onKeyDown={(e) => !isPlaceholder && !isLoading && handleKeyDown(e, source)}
+              className={`relative rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red ${isSelected
                 ? 'border-[#ff0000] bg-[#ff0000]/10'
                 : isPlaceholder
                   ? 'bg-gray-800/50 border-gray-700/50 opacity-60 cursor-not-allowed'

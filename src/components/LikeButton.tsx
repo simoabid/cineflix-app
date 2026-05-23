@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { myListService } from '../services/myListService';
 import { Movie, TVShow } from '../types';
@@ -26,6 +27,16 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const { showToast } = useToast();
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [animationKey, setAnimationKey] = useState(0);
+
+  const isReducedMotion = useMemo(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    []
+  );
+
+  const popTransition = isReducedMotion
+    ? {}
+    : { scale: [1, 1.35, 0.9, 1.05, 1], transition: { duration: 0.4 } };
 
   // Check if content is liked on component mount - properly handle async
   useEffect(() => {
@@ -75,6 +86,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         await myListService.likeContent(content, contentType);
         setIsLiked(true);
       }
+      setAnimationKey(prev => prev + 1);
     } catch (error) {
       console.error('Error toggling like:', error);
     } finally {
@@ -108,10 +120,14 @@ const LikeButton: React.FC<LikeButtonProps> = ({
           : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'} ${className}`}
       >
-        <Heart
-          className={`${getIconSize()} transition-all duration-300 ${isLiked ? 'fill-current text-white' : 'text-white'
-            }`}
-        />
+        <AnimatePresence mode="wait">
+          <motion.span key={`heart-btn-${animationKey}`} animate={popTransition} className="inline-flex">
+            <Heart
+              className={`${getIconSize()} transition-all duration-300 ${isLiked ? 'fill-current text-white' : 'text-white'
+                }`}
+            />
+          </motion.span>
+        </AnimatePresence>
         {showText && (
           <span className="text-sm font-medium">
             {isLiked ? 'Liked' : 'Like'}
@@ -131,10 +147,14 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 hover:shadow-lg'} ${className}`}
       title={isLiked ? 'Unlike' : 'Like'}
     >
-      <Heart
-        className={`${getIconSize()} transition-all duration-300 ${isLiked ? 'fill-current text-white scale-110' : 'text-white'
-          }`}
-      />
+      <AnimatePresence mode="wait">
+        <motion.span key={`heart-icon-${animationKey}`} animate={popTransition} className="inline-flex">
+          <Heart
+            className={`${getIconSize()} transition-all duration-300 ${isLiked ? 'fill-current text-white scale-110' : 'text-white'
+              }`}
+          />
+        </motion.span>
+      </AnimatePresence>
       {showText && (
         <span className="ml-2 text-xs font-medium">
           {isLiked ? 'Liked' : 'Like'}
