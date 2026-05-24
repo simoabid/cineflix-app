@@ -31,12 +31,12 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
     <>
       <section>
         <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos &amp; Trailers</h2>
+              <div className="w-1 h-6 sm:h-8 bg-netflix-red rounded-full"></div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Videos &amp; Trailers</h2>
             </div>
-            <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm font-medium">{videos.length} videos</span>
+            <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit">{videos.length} videos</span>
           </div>
 
           {/* Horizontal Scrolling Video Grid */}

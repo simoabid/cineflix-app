@@ -485,7 +485,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
       <DetailHero content={content} type={type} credits={credits} />
 
       {/* Content Sections */}
-      <div className="w-full px-8 py-16">
+      <div className="w-full px-4 sm:px-8 py-10 sm:py-16">
         {type === 'tv' ? (
           // TV Show Layout: 3-column layout with main sections
           <>
@@ -493,19 +493,19 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
               {/* Column 1 (Left): Seasons & Episodes - Takes more space */}
               <div className="lg:col-span-5">
-                <section className="bg-gradient-to-br from-netflix-red/5 to-transparent rounded-2xl p-8 border border-netflix-red/20">
-                  <div className="flex items-center justify-between mb-8">
+                <section className="bg-gradient-to-br from-netflix-red/5 to-transparent rounded-2xl p-4 sm:p-6 md:p-8 border border-netflix-red/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div className="flex items-center gap-3">
-                      <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                      <div className="w-1 h-6 sm:h-8 bg-netflix-red rounded-full"></div>
+                      <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                         Seasons & Episodes
                       </h2>
                     </div>
                     {selectedSeason && (
-                      <div className="flex items-center gap-2 bg-black/30 rounded-lg px-4 py-2">
-                        <Film className="w-5 h-5 text-netflix-red" />
+                      <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-1.5 text-xs sm:text-sm w-fit">
+                        <Film className="w-4 h-4 sm:w-5 sm:h-5 text-netflix-red" />
                         <span className="text-white font-semibold">Season {selectedSeason.season_number}</span>
-                        <span className="text-gray-400">• {selectedSeasonDetails?.episodes?.length || 0} episodes</span>
+                        <span className="text-gray-400">• {selectedSeasonDetails?.episodes?.length || 0} eps</span>
                       </div>
                     )}
                   </div>
@@ -834,21 +834,21 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
       {/* Movie Layout: Enhanced 3-column layout matching TV shows */}
       {type === 'movie' && (
-        <div className="w-full px-8 pt-8 pb-16">
+        <div className="w-full px-4 sm:px-8 pt-6 sm:pt-8 pb-12 sm:pb-16">
           {/* Row 1: 3-Column Layout - Optimized for space usage */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
             {/* Column 1 (Left): Movie Details & Overview - Takes more space */}
             <div className="lg:col-span-5">
-              <section className="bg-gradient-to-br from-netflix-red/5 to-transparent rounded-2xl p-8 border border-netflix-red/20">
-                <div className="flex items-center justify-between mb-8">
+              <section className="bg-gradient-to-br from-netflix-red/5 to-transparent rounded-2xl p-4 sm:p-6 md:p-8 border border-netflix-red/20">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-8 bg-netflix-red rounded-full"></div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    <div className="w-1 h-6 sm:h-8 bg-netflix-red rounded-full"></div>
+                    <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       Movie Details
                     </h2>
                   </div>
-                  <div className="flex items-center gap-2 bg-black/30 rounded-lg px-4 py-2">
-                    <Film className="w-5 h-5 text-netflix-red" />
+                  <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-1.5 text-xs sm:text-sm w-fit">
+                    <Film className="w-4 h-4 sm:w-5 sm:h-5 text-netflix-red" />
                     <span className="text-white font-semibold">{getRuntime()}</span>
                     <span className="text-gray-400">• {getReleaseYear()}</span>
                   </div>

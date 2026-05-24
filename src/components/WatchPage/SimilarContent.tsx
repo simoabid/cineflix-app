@@ -104,48 +104,48 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
   }
 
   return (
-    <section className="py-20 bg-[#0A0A1F] relative overflow-hidden">
+    <section className="py-10 sm:py-20 bg-[#0A0A1F] relative overflow-hidden">
       {/* Decorative background glow */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#ff0000]/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-400 uppercase tracking-wider">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 sm:gap-6">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider">
               <Sparkles className="h-3 w-3 text-[#ff0000]" />
               Discover More
             </div>
-            <h2 className="text-4xl font-bold text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
               Because you watched <span className="text-[#ff0000]">"{title}"</span>
             </h2>
 
             {/* Custom Tab Switcher */}
-            <div className="flex p-1 bg-gray-900/50 backdrop-blur-md border border-white/5 rounded-2xl w-fit mt-6">
+            <div className="flex p-0.5 sm:p-1 bg-gray-900/50 backdrop-blur-md border border-white/5 rounded-xl sm:rounded-2xl w-fit mt-4 sm:mt-6">
               <button
                 onClick={() => switchTab('similar')}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'similar'
+                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${activeTab === 'similar'
                     ? 'bg-[#ff0000] text-white shadow-lg shadow-red-600/20'
                     : 'text-gray-400 hover:text-white'
                   }`}
               >
-                <Layers className="h-4 w-4" />
+                <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Similar Content
               </button>
               <button
                 onClick={() => switchTab('recommended')}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === 'recommended'
+                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${activeTab === 'recommended'
                     ? 'bg-[#ff0000] text-white shadow-lg shadow-red-600/20'
                     : 'text-gray-400 hover:text-white'
                   }`}
               >
-                <LayoutGrid className="h-4 w-4" />
+                <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Recommended for You
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => scroll('left')}
@@ -183,7 +183,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
               onMouseLeave={handleMouseUp}
               onMouseUp={handleMouseUp}
               onMouseMove={handleMouseMove}
-              className={`flex gap-8 overflow-x-auto scrollbar-hide pb-12 pt-4 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
+              className={`flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto scrollbar-hide pb-8 sm:pb-12 pt-4 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
               style={{
                 scrollSnapType: isDragging ? 'none' : 'x proximity',
                 WebkitOverflowScrolling: 'touch'
@@ -198,7 +198,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
                 return (
                   <div
                     key={`${activeTab}-${item.id}`}
-                    className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[260px] lg:w-[280px] relative group perspective-1000"
+                    className="flex-shrink-0 w-[140px] sm:w-[180px] md:w-[220px] lg:w-[260px] xl:w-[280px] relative group perspective-1000"
                     onMouseEnter={() => !isDragging && setHoveredItem(index)}
                     onMouseLeave={() => setHoveredItem(null)}
                     style={{ scrollSnapAlign: 'start' }}
@@ -277,17 +277,17 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
                       </div>
 
                       {/* Footer Info */}
-                      <div className="mt-5 space-y-1.5">
-                        <h3 className="text-white font-bold text-base leading-tight line-clamp-1 group-hover:text-[#ff0000] transition-colors duration-300">
+                      <div className="mt-3.5 sm:mt-5 space-y-1 sm:space-y-1.5">
+                        <h3 className="text-white font-bold text-xs sm:text-sm md:text-base leading-tight line-clamp-1 group-hover:text-[#ff0000] transition-colors duration-300">
                           {itemTitle}
                         </h3>
-                        <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[11px] font-medium text-gray-500">
                           <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 uppercase">
                             {itemDate ? new Date(itemDate).getFullYear() : 'N/A'}
                           </span>
                           <span>•</span>
                           <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-yellow-600" />
+                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-600" />
                             <span>{item.vote_count.toLocaleString()} votes</span>
                           </div>
                         </div>
@@ -301,19 +301,19 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
         </div>
 
         {/* Global Action Footer */}
-        <div className="mt-20 flex flex-col md:flex-row items-center justify-between p-8 bg-gray-900/30 backdrop-blur-lg border border-white/5 rounded-[32px] gap-6">
+        <div className="mt-10 sm:mt-20 flex flex-col md:flex-row items-center justify-between p-5 sm:p-8 bg-gray-900/30 backdrop-blur-lg border border-white/5 rounded-2xl sm:rounded-[32px] gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 flex items-center justify-center bg-[#ff0000]/10 rounded-2xl">
+            <div className="w-12 h-12 flex items-center justify-center bg-[#ff0000]/10 rounded-2xl flex-shrink-0">
               <Sparkles className="h-6 w-6 text-[#ff0000]" />
             </div>
-            <div>
-              <h4 className="text-white font-bold">Still looking for something?</h4>
-              <p className="text-gray-400 text-sm">Explore our full catalog of {type === 'movie' ? 'movies' : 'TV shows'} with advanced filters.</p>
+            <div className="text-left">
+              <h4 className="text-white font-bold text-sm sm:text-base">Still looking for something?</h4>
+              <p className="text-gray-400 text-xs sm:text-sm mt-0.5">Explore our full catalog of {type === 'movie' ? 'movies' : 'TV shows'} with advanced filters.</p>
             </div>
           </div>
           <button
             onClick={() => navigate(`/search?type=${type}&ref=recommendations`)}
-            className="px-8 py-3.5 bg-white text-black font-bold rounded-2xl hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
+            className="px-6 sm:px-8 py-3 sm:py-3.5 bg-white text-black font-bold rounded-xl sm:rounded-2xl hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5 text-sm sm:text-base w-full md:w-auto text-center"
           >
             Explore All {type === 'movie' ? 'Movies' : 'Series'}
           </button>

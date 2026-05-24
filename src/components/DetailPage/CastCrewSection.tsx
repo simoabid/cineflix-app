@@ -92,24 +92,24 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
         <section className="py-4 bg-transparent relative overflow-hidden group/section">
             <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
-                    <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-4 sm:gap-6">
+                    <div className="space-y-3 sm:space-y-4 text-left">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-wider">
                             <Users className="h-3 w-3 text-red-500" />
                             Talent Behind the Scenes
                         </div>
-                        <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-2.5">
                             Cast & Crew
-                            <span className="text-sm font-normal text-gray-500 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                            <span className="text-[10px] sm:text-xs font-normal text-gray-500 bg-white/5 px-2 py-0.5 rounded border border-white/10">
                                 {activeTab === 'cast' ? credits.cast.length : credits.crew.length} total
                             </span>
                         </h2>
 
                         {/* Tab Switcher */}
-                        <div className="flex p-1 bg-gray-900/50 backdrop-blur-md border border-white/5 rounded-xl w-fit">
+                        <div className="flex p-0.5 sm:p-1 bg-gray-900/50 backdrop-blur-md border border-white/5 rounded-lg sm:rounded-xl w-fit">
                             <button
                                 onClick={() => setActiveTab('cast')}
-                                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === 'cast'
+                                className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${activeTab === 'cast'
                                     ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
                                     : 'text-gray-400 hover:text-white'
                                     }`}
@@ -118,7 +118,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                             </button>
                             <button
                                 onClick={() => setActiveTab('crew')}
-                                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === 'crew'
+                                className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${activeTab === 'crew'
                                     ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
                                     : 'text-gray-400 hover:text-white'
                                     }`}
@@ -128,7 +128,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-4">
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={() => scroll('left')}
@@ -166,7 +166,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                             onMouseLeave={handleMouseUp}
                             onMouseUp={handleMouseUp}
                             onMouseMove={handleMouseMove}
-                            className={`flex gap-5 overflow-x-auto scrollbar-hide pb-8 pt-2 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
+                            className={`flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto scrollbar-hide pb-6 sm:pb-8 pt-2 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
                         >
                             {data.map((member, index) => {
                                 const isCast = 'character' in member;
@@ -250,15 +250,15 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
 
                 {/* Section Footer for Credits */}
                 <div className="mt-6 flex items-center justify-center">
-                    <div className="px-6 py-3 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm flex items-center gap-8">
+                    <div className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm flex flex-col sm:flex-row items-center gap-2 sm:gap-8 text-center sm:text-left">
                         <div className="flex items-center gap-2">
-                            <Award className="w-4 h-4 text-yellow-500" />
-                            <span className="text-xs text-gray-400"><strong className="text-white">Top Talent</strong> selected</span>
+                            <Award className="w-3.5 h-3.5 text-yellow-500" />
+                            <span className="text-[10px] sm:text-xs text-gray-400"><strong className="text-white">Top Talent</strong> selected</span>
                         </div>
-                        <div className="w-px h-4 bg-white/10" />
+                        <div className="hidden sm:block w-px h-4 bg-white/10" />
                         <div className="flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-red-500" />
-                            <span className="text-xs text-gray-400">IMDb Popularity Weighted</span>
+                            <TrendingUp className="w-3.5 h-3.5 text-red-500" />
+                            <span className="text-[10px] sm:text-xs text-gray-400">IMDb Popularity Weighted</span>
                         </div>
                     </div>
                 </div>
