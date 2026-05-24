@@ -73,6 +73,9 @@ export const authApi = {
     login: (email: string, password: string) =>
         apiRequest<AuthResponse>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
 
+    googleLogin: (token: string, type: 'id_token' | 'access_token' = 'access_token') =>
+        apiRequest<AuthResponse>('/auth/google', { method: 'POST', body: JSON.stringify({ token, type }) }),
+
     logout: () => apiRequest<void>('/auth/logout', { method: 'POST' }),
 
     getMe: () => apiRequest<{ user: User }>('/auth/me'),

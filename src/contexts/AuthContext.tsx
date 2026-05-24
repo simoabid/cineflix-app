@@ -8,6 +8,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     register: (email: string, password: string, name: string, avatar?: string) => Promise<{ success: boolean; error?: string }>;
+    googleLogin: (token: string, type?: 'id_token' | 'access_token') => Promise<{ success: boolean; error?: string }>;
     logout: () => Promise<void>;
     updateProfile: (data: { name?: string; avatar?: string }) => Promise<{ success: boolean; error?: string }>;
     changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -81,6 +82,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     }, []);
 
+    const googleLogin = useCallback(async (token: string, type: 'id_token' | 'access_token' = 'access_token') => {
+        try {
+            const response = await authApi.googleLogin(token, type);
+            if (response.success && response.data) {
+                setAuthToken(response.data.token);
+                setUser(response.data.user);
+                return { success: true };
+            }
+            return { success: false, error: response.error || 'Google login failed' };
+        } catch (error) {
+            return { success: false, error: 'An unexpected error occurred' };
+        }
+    }, []);
+
     const logout = useCallback(async () => {
         try {
             await authApi.logout();
@@ -121,6 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading,
         login,
         register,
+        googleLogin,
         logout,
         updateProfile,
         changePassword

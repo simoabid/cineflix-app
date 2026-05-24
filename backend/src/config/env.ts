@@ -27,4 +27,7 @@ export const env = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:5173',
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
+    // Reserved for future server-side OAuth authorization code exchange flows
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
 } as const;

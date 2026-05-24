@@ -1,9 +1,31 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User, { IUser } from '../models/User.js';
 import { env } from '../config/env.js';
 import { UpdateProfileRequestBody } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+
+interface GoogleUserPayload {
+    sub: string;
+    email: string;
+    email_verified: boolean | string;
+    name?: string;
+    picture?: string;
+    aud?: string;
+}
+
+function isValidGooglePayload(payload: unknown): payload is GoogleUserPayload {
+    if (typeof payload !== 'object' || payload === null) {
+        return false;
+    }
+    const p = payload as Record<string, unknown>;
+    return (
+        typeof p.sub === 'string' &&
+        typeof p.email === 'string' &&
+        (typeof p.email_verified === 'boolean' || typeof p.email_verified === 'string')
+    );
+}
 
 const { JWT_SECRET } = env;
 const JWT_EXPIRE = '30d';
@@ -374,31 +396,166 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
 /**
  * POST /api/auth/google
- * OAuth callback for Google
- * 
- * STUB: Implement Google OAuth flow
- * Required setup:
- * - Create OAuth app at https://console.cloud.google.com
- * - Configure OAuth consent screen
- * - Add client ID and secret to environment variables
- * - Implement passport-google-oauth20 or similar
+ * Authenticate user with Google OAuth (supports both ID Token and Access Token)
  */
 export const googleAuth = async (req: Request, res: Response): Promise<void> => {
-    // STUB: In production, implement:
-    // 1. Verify Google OAuth token
-    // 2. Extract user info from Google
-    // 3. Find or create user in database
-    // 4. Generate JWT token
-    // 5. Return user data and token
-
-    res.status(501).json({
-        success: false,
-        error: 'Google OAuth not configured. See AUTH_INTEGRATION.md for setup instructions.',
-        setupRequired: {
-            env: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
-            callbackUrl: '/api/auth/google/callback'
+    try {
+        // C3: Mandatory configuration check
+        if (!env.GOOGLE_CLIENT_ID) {
+            logger.error('Google OAuth: GOOGLE_CLIENT_ID not configured');
+            res.status(503).json({ success: false, error: 'Google authentication is not configured on this server' });
+            return;
         }
-    });
+
+        const { credential, token, type } = req.body;
+        const googleToken = credential || token;
+        const isAccessToken = type === 'access_token';
+
+        if (!googleToken) {
+            res.status(400).json({ success: false, error: 'Google token is required' });
+            return;
+        }
+
+        let email = '';
+        let name = '';
+        let avatar = '';
+        let googleId = '';
+
+        if (isAccessToken) {
+            // Verify access token by calling Google Userinfo API
+            const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${googleToken}` }
+            });
+
+            if (!response.ok) {
+                logger.error(`Google Access Token verification failed. Status: ${response.status}`);
+                res.status(400).json({ success: false, error: 'Invalid Google access token' });
+                return;
+            }
+
+            const payload: unknown = await response.json();
+            
+            // H1: Runtime validation
+            if (!isValidGooglePayload(payload)) {
+                logger.error('Google Access Token response failed type validation');
+                res.status(400).json({ success: false, error: 'Invalid payload structure received from Google' });
+                return;
+            }
+
+            // C2: Email verification check
+            const isEmailVerified = payload.email_verified === true || payload.email_verified === 'true';
+            if (!isEmailVerified) {
+                logger.warn(`Google login attempt with unverified email: ${payload.email}`);
+                res.status(400).json({ success: false, error: 'Google account email is not verified' });
+                return;
+            }
+
+            email = payload.email;
+            name = payload.name || '';
+            avatar = payload.picture || '';
+            googleId = payload.sub;
+        } else {
+            // Verify ID Token by calling Google Tokeninfo API
+            const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${googleToken}`);
+
+            if (!response.ok) {
+                logger.error(`Google ID Token verification failed. Status: ${response.status}`);
+                res.status(400).json({ success: false, error: 'Invalid Google ID token' });
+                return;
+            }
+
+            const payload: unknown = await response.json();
+
+            // H1: Runtime validation
+            if (!isValidGooglePayload(payload)) {
+                logger.error('Google ID Token response failed type validation');
+                res.status(400).json({ success: false, error: 'Invalid payload structure received from Google' });
+                return;
+            }
+
+            // C3: Unconditional audience verification for ID tokens
+            if (payload.aud !== env.GOOGLE_CLIENT_ID) {
+                logger.warn(`Google token audience mismatch. Expected: ${env.GOOGLE_CLIENT_ID}, Got: ${payload.aud}`);
+                res.status(400).json({ success: false, error: 'Google token security verification failed' });
+                return;
+            }
+
+            // C2: Email verification check
+            const isEmailVerified = payload.email_verified === true || payload.email_verified === 'true';
+            if (!isEmailVerified) {
+                logger.warn(`Google login attempt with unverified email: ${payload.email}`);
+                res.status(400).json({ success: false, error: 'Google account email is not verified' });
+                return;
+            }
+
+            email = payload.email;
+            name = payload.name || '';
+            avatar = payload.picture || '';
+            googleId = payload.sub;
+        }
+
+        if (!email || !googleId) {
+            res.status(400).json({ success: false, error: 'Failed to retrieve user profile from Google' });
+            return;
+        }
+
+        let user;
+        try {
+            // 1. Look up user by googleId
+            user = await User.findOne({ googleId });
+
+            if (!user) {
+                // 2. Fallback: look up user by email
+                user = await User.findOne({ email: email.toLowerCase() });
+
+                if (user) {
+                    // Link Google account to existing user
+                    user.googleId = googleId;
+                    if (!user.avatar && avatar) {
+                        user.avatar = avatar;
+                    }
+                    await user.save();
+                    logger.info(`Linked Google account for user: ${email}`);
+                } else {
+                    // 3. Create new user (password is optional for Google OAuth accounts)
+                    user = await User.create({
+                        email: email.toLowerCase(),
+                        name: name || email.split('@')[0],
+                        avatar: avatar || '',
+                        googleId
+                    });
+                    logger.info(`Created new user via Google Sign-In: ${email}`);
+                }
+            } else {
+                // Update profile avatar if not set
+                if (!user.avatar && avatar) {
+                    user.avatar = avatar;
+                    await user.save();
+                }
+                logger.info(`Logged in user via Google: ${email}`);
+            }
+        } catch (dbError: any) {
+            // H2: Handle duplicate key race conditions during creation/linking
+            if (dbError && dbError.code === 11000) {
+                logger.warn(`Conflict (duplicate key) during Google login for: ${email}. Retrying lookup.`);
+                user = await User.findOne({ googleId });
+                if (!user) {
+                    user = await User.findOne({ email: email.toLowerCase() });
+                }
+                if (!user) {
+                    res.status(500).json({ success: false, error: 'Conflict occurred during database login' });
+                    return;
+                }
+            } else {
+                throw dbError; // Rethrow other database exceptions to main catch
+            }
+        }
+
+        sendTokenResponse(user, 200, res);
+    } catch (error) {
+        logger.error('Google Auth Error:', error);
+        res.status(500).json({ success: false, error: 'Authentication failed' });
+    }
 };
 
 /**

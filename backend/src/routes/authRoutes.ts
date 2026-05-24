@@ -165,9 +165,10 @@ router.post('/reset-password', passwordResetLimiter, resetPassword);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [credential]
  *             properties:
- *               credential: { type: string, description: Google ID token }
+ *               token: { type: string, description: Google Access Token or ID Token }
+ *               type: { type: string, enum: [access_token, id_token], description: Type of token provided }
+ *               credential: { type: string, description: Legacy Google ID Token }
  *     responses:
  *       200:
  *         description: Authenticated successfully.

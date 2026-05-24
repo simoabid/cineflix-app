@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 // Google Icon SVG
 const GoogleIcon = () => (
@@ -49,13 +52,108 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
     disabled = false,
     isLoading = false,
 }) => {
+    const navigate = useNavigate();
+    const { googleLogin } = useAuth();
+    const { showToast } = useToast();
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+    // Dynamically load Google Identity Services Script
+    useEffect(() => {
+        const scriptId = 'google-gsi-client';
+        let script = document.getElementById(scriptId) as HTMLScriptElement;
+        let isLocalScript = false;
+
+        if (!script) {
+            script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.id = scriptId;
+            script.async = true;
+            script.defer = true;
+            script.onerror = () => {
+                if (import.meta.env.DEV) {
+                    console.error('Failed to load Google Identity Services script');
+                }
+            };
+            document.body.appendChild(script);
+            isLocalScript = true;
+        }
+
+        return () => {
+            if (isLocalScript) {
+                const el = document.getElementById(scriptId);
+                if (el) {
+                    document.body.removeChild(el);
+                }
+            }
+        };
+    }, []);
+
     const handleGoogleClick = () => {
         if (onGoogleClick) {
             onGoogleClick();
-        } else {
-            // Placeholder - show toast or console message
-            console.log('Google OAuth not configured. See AUTH_INTEGRATION.md for setup instructions.');
-            alert('Google sign-in will be available soon. Please use email/password for now.');
+            return;
+        }
+
+        const googleClient = (window as any).google;
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+        // C1: Verify client ID configuration exists
+        if (!clientId) {
+            if (import.meta.env.DEV) {
+                console.warn('Google OAuth: VITE_GOOGLE_CLIENT_ID not configured');
+            }
+            showToast('Google Sign-In is not configured. Please contact the administrator.', 'warning');
+            return;
+        }
+
+        if (!googleClient || !googleClient.accounts || !googleClient.accounts.oauth2) {
+            showToast('Google Sign-In is still loading. Please try again in a moment.', 'info');
+            return;
+        }
+
+        try {
+            setIsGoogleLoading(true);
+            const client = googleClient.accounts.oauth2.initTokenClient({
+                client_id: clientId,
+                scope: 'email profile openid',
+                callback: async (tokenResponse: any) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        try {
+                            const result = await googleLogin(tokenResponse.access_token, 'access_token');
+                            if (result.success) {
+                                showToast('Successfully signed in with Google!', 'success');
+                                navigate('/', { replace: true });
+                            } else {
+                                showToast(result.error || 'Google Authentication failed', 'error');
+                            }
+                        } catch (err) {
+                            if (import.meta.env.DEV) {
+                                console.error('Google login api error:', err);
+                            }
+                            showToast('An unexpected error occurred connecting to server.', 'error');
+                        } finally {
+                            setIsGoogleLoading(false);
+                        }
+                    } else {
+                        setIsGoogleLoading(false);
+                    }
+                },
+                error_callback: (err: any) => {
+                    if (import.meta.env.DEV) {
+                        console.error('Google token client error:', err);
+                    }
+                    showToast('Google Sign-in failed. Please try again.', 'error');
+                    setIsGoogleLoading(false);
+                }
+            });
+
+            client.requestAccessToken();
+        } catch (error) {
+            if (import.meta.env.DEV) {
+                console.error('Error starting Google auth client:', error);
+            }
+            showToast('Could not start Google auth process. Please try again.', 'error');
+            setIsGoogleLoading(false);
         }
     };
 
@@ -63,11 +161,14 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
         if (onGithubClick) {
             onGithubClick();
         } else {
-            // Placeholder - show toast or console message
-            console.log('GitHub OAuth not configured. See AUTH_INTEGRATION.md for setup instructions.');
-            alert('GitHub sign-in will be available soon. Please use email/password for now.');
+            if (import.meta.env.DEV) {
+                console.log('GitHub OAuth not configured. See AUTH_INTEGRATION.md for setup instructions.');
+            }
+            showToast('GitHub sign-in will be available soon. Please use email/password for now.', 'info');
         }
     };
+
+    const isButtonDisabled = disabled || isLoading || isGoogleLoading;
 
     return (
         <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
@@ -87,7 +188,7 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
                 <button
                     type="button"
                     onClick={handleGoogleClick}
-                    disabled={disabled || isLoading}
+                    disabled={isButtonDisabled}
                     className="flex items-center justify-center gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 
                      bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20
                      rounded-lg text-white text-sm sm:font-medium transition-all duration-200 
@@ -95,7 +196,11 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
                      disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Continue with Google"
                 >
-                    <GoogleIcon />
+                    {isGoogleLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        <GoogleIcon />
+                    )}
                     <span>Google</span>
                 </button>
 
@@ -103,7 +208,7 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
                 <button
                     type="button"
                     onClick={handleGithubClick}
-                    disabled={disabled || isLoading}
+                    disabled={isButtonDisabled}
                     className="flex items-center justify-center gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 
                      bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20
                      rounded-lg text-white text-sm sm:font-medium transition-all duration-200 
@@ -120,4 +225,3 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
 };
 
 export default SocialAuthButtons;
-

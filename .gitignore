@@ -56,6 +56,11 @@ LOGO_SYSTEM_README.md
 RIVESTREAM_INTEGRATION.md
 WATCHPAGE_README.md
 DEPLOY.md
+Google-Auth-Code-Review.md
+google-auth-setup.md
+Google-Auth_Walkthrough_Guide.md
+
+# IDE
 logs_result.json
 .agent/*
 .agent
