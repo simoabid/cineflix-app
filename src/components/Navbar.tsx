@@ -175,24 +175,24 @@ const Navbar: React.FC = () => {
                 <img
                   src={`${import.meta.env.BASE_URL}cineflix-logo.png`}
                   alt="CINEFLIX"
-                  className="h-8 sm:h-10 lg:h-12 w-auto"
+                  className="h-8 sm:h-10 lg:h-9.5 2xl:h-11 w-auto"
                 />
               </Link>
 
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center space-x-1">
+              <div className="hidden lg:flex items-center space-x-0.5 2xl:space-x-1.5">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative group ${location.pathname === item.path
+                      className={`flex items-center space-x-1 2xl:space-x-2 px-2.5 py-1.5 2xl:px-4 2xl:py-2 rounded-lg text-xs 2xl:text-sm font-medium transition-all duration-300 relative group ${location.pathname === item.path
                         ? 'text-white bg-white/10 backdrop-blur-sm border-b-2 border-brand-red shadow-lg shadow-brand-red/10'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
                     >
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-4 h-4 hidden 2xl:block flex-shrink-0" />
                       <span>{item.name}</span>
                     </Link>
                   );
@@ -211,20 +211,22 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-1.5 sm:space-x-3">
               {/* Search */}
               <div ref={searchRef} className="relative">
+                {/* Mobile, Tablet, and Small Laptop Search — Compact Icon Button */}
                 <button
                   onClick={() => setIsSearchModalOpen(true)}
-                  className="lg:hidden flex items-center justify-center min-w-[44px] min-h-[44px] bg-black/30 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/50 hover:scale-110 group relative"
+                  className="2xl:hidden flex items-center justify-center min-w-[44px] min-h-[44px] bg-black/30 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/50 hover:scale-110 group relative"
                   aria-label="Search"
                 >
                   <Search className="w-5 h-5 text-white group-hover:text-netflix-red transition-colors" />
                 </button>
 
+                {/* Large Desktop Search — Full Search Bar */}
                 <button
                   onClick={() => setIsSearchModalOpen(true)}
-                  className="hidden lg:flex items-center bg-black/20 backdrop-blur-md rounded-xl transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/30 group"
+                  className="hidden 2xl:flex items-center bg-black/20 backdrop-blur-md rounded-xl transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/30 group"
                 >
                   <Search className="w-5 h-5 text-gray-400 ml-3 group-hover:text-white transition-colors" />
                   <span className="text-gray-400 px-3 py-3 group-hover:text-white transition-colors text-sm">

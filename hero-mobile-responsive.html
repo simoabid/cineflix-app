@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+  <meta name="theme-color" content="#0A0A1F"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>CINEFLIX - Streaming Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    /* ============================================
+       DESIGN TOKENS & CSS VARIABLES
+       ============================================ */
+    :root {
+      --brand-red: #E50914;
+      --brand-red-hover: #C7000C;
+      --brand-red-glow: rgba(229, 9, 20, 0.4);
+      --surface-bg: #0A0A1F;
+      --surface-card: #13132B;
+      --glass-bg: rgba(19, 19, 43, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(255, 255, 255, 0.12);
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+      --safe-area-top: env(safe-area-inset-top, 0px);
+      --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+      --nav-height: 56px;
+      --bottom-nav-height: 64px;
+    }
+
+    /* ============================================
+       BASE RESET & TYPOGRAPHY
+       ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--surface-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+    }
+
+    /* ============================================
+       GLASSMORPHISM UTILITIES
+       ============================================ */
+    .glass-surface {
+      background: rgba(10, 10, 31, 0.6);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      border: 1px solid var(--glass-border);
+    }
+
+    .glass-button {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .glass-button:active {
+      transform: scale(0.97);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.92);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(229, 9, 20, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(229, 9, 20, 0.4); }
+    }
+
+    .animate-fade-in-up {
+      animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      opacity: 0;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+      opacity: 0;
+    }
+
+    .animate-scale-in {
+      animation: scaleIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      opacity: 0;
+    }
+
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+    .delay-400 { animation-delay: 400ms; }
+    .delay-500 { animation-delay: 500ms; }
+    .delay-600 { animation-delay: 600ms; }
+    .delay-700 { animation-delay: 700ms; }
+
+    /* ============================================
+       TOP NAVIGATION BAR
+       ============================================ */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: calc(var(--nav-height) + var(--safe-area-top));
+      padding-top: var(--safe-area-top);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-left: 16px;
+      padding-right: 16px;
+      background: linear-gradient(to bottom, rgba(10, 10, 31, 0.9) 0%, rgba(10, 10, 31, 0.6) 60%, transparent 100%);
+      transition: background 0.4s ease, backdrop-filter 0.4s ease;
+    }
+
+    .top-nav.scrolled {
+      background: rgba(10, 10, 31, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-logo {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--brand-red);
+      text-decoration: none;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-icon-btn {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-icon-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-icon-btn .material-symbols-outlined {
+      font-size: 24px;
+    }
+
+    /* ============================================
+       CATEGORY FILTER PILLS (MOBILE)
+       ============================================ */
+    .category-pills {
+      position: fixed;
+      top: calc(var(--nav-height) + var(--safe-area-top));
+      left: 0;
+      right: 0;
+      z-index: 90;
+      padding: 8px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      background: linear-gradient(to bottom, rgba(10, 10, 31, 0.7) 0%, transparent 100%);
+      transition: opacity 0.3s ease;
+    }
+
+    .category-pills::-webkit-scrollbar { display: none; }
+
+    .category-pill {
+      flex-shrink: 0;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: transparent;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .category-pill.active {
+      background: var(--brand-red);
+      border-color: var(--brand-red);
+      box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+    }
+
+    .category-pill:active {
+      transform: scale(0.95);
+    }
+
+    /* ============================================
+       HERO SECTION
+       ============================================ */
+    .hero {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    /* Background poster image */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .hero-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    /* Cinematic gradient overlays */
+    .hero-gradient-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70%;
+      background: linear-gradient(
+        to top,
+        var(--surface-bg) 0%,
+        rgba(10, 10, 31, 0.95) 15%,
+        rgba(10, 10, 31, 0.7) 40%,
+        rgba(10, 10, 31, 0.3) 65%,
+        transparent 100%
+      );
+      z-index: 1;
+    }
+
+    .hero-gradient-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 30%;
+      background: linear-gradient(
+        to bottom,
+        rgba(10, 10, 31, 0.6) 0%,
+        transparent 100%
+      );
+      z-index: 1;
+    }
+
+    /* Subtle vignette for depth */
+    .hero-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 50%,
+        rgba(10, 10, 31, 0.4) 100%
+      );
+      z-index: 1;
+    }
+
+    /* ============================================
+       HERO CONTENT
+       ============================================ */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      padding: 0 20px;
+      padding-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* Movie title logo */
+    .hero-logo {
+      width: 70%;
+      max-width: 240px;
+      height: auto;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+      mix-blend-mode: screen;
+    }
+
+    /* Tagline */
+    .hero-tagline {
+      font-size: 14px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Metadata row */
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .meta-item .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    .meta-item .rating-value {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .meta-star {
+      color: #FFC107;
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .meta-separator {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+    }
+
+    /* Genre tags */
+    .hero-genres {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .genre-tag {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--brand-red);
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      background: rgba(229, 9, 20, 0.08);
+    }
+
+    /* Primary action buttons */
+    .hero-actions {
+      display: flex;
+      width: 100%;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-watch {
+      background: linear-gradient(135deg, var(--brand-red) 0%, #c7000c 100%);
+      color: white;
+      box-shadow: 0 4px 16px rgba(229, 9, 20, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-watch:active {
+      box-shadow: 0 2px 8px rgba(229, 9, 20, 0.25);
+    }
+
+    .btn-watch .material-symbols-outlined {
+      font-size: 20px;
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .btn-info {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .btn-info:active {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-info .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    /* Secondary action row */
+    .hero-secondary-actions {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      width: 100%;
+    }
+
+    .secondary-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+      padding: 4px 8px;
+    }
+
+    .secondary-action:active {
+      transform: scale(0.92);
+      color: var(--text-primary);
+    }
+
+    .secondary-action .material-symbols-outlined {
+      font-size: 24px;
+    }
+
+    .secondary-action span:last-child {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ============================================
+       CAROUSEL NAVIGATION DOTS
+       ============================================ */
+    .carousel-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 16px 0 8px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .carousel-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      -webkit-tap-highlight-color: transparent;
+      padding: 0;
+    }
+
+    .carousel-dot.inactive {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .carousel-dot.active {
+      background: var(--brand-red);
+      width: 20px;
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+    }
+
+    /* ============================================
+       BOTTOM NAVIGATION BAR
+       ============================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+      padding-bottom: var(--safe-area-bottom);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(10, 10, 31, 0.92);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-tertiary);
+      transition: all 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+      min-width: 56px;
+      position: relative;
+    }
+
+    .bottom-nav-item.active {
+      color: var(--brand-red);
+    }
+
+    .bottom-nav-item.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 3px;
+      border-radius: 0 0 3px 3px;
+      background: var(--brand-red);
+      box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
+    }
+
+    .bottom-nav-item .material-symbols-outlined {
+      font-size: 24px;
+    }
+
+    .bottom-nav-item span:last-child {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .bottom-nav-item:active {
+      transform: scale(0.92);
+    }
+
+    /* ============================================
+       SECTION HEADER (Continue Watching Teaser)
+       ============================================ */
+    .section-header {
+      position: relative;
+      z-index: 10;
+      padding: 24px 20px 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+    }
+
+    /* ============================================
+       RESPONSIVE BREAKPOINTS
+       ============================================ */
+
+    /* Very small phones (SE, 5s) — 320px */
+    @media (max-width: 359px) {
+      .hero-logo {
+        width: 60%;
+        max-width: 180px;
+        margin-bottom: 8px;
+      }
+
+      .hero-tagline {
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+
+      .hero-meta {
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .meta-item {
+        font-size: 11px;
+      }
+
+      .hero-genres {
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      .genre-tag {
+        font-size: 10px;
+        padding: 3px 10px;
+      }
+
+      .btn-primary {
+        padding: 11px 14px;
+        font-size: 13px;
+        border-radius: 10px;
+      }
+
+      .hero-secondary-actions {
+        gap: 20px;
+      }
+
+      .secondary-action span:last-child {
+        font-size: 9px;
+      }
+
+      .hero-content {
+        padding: 0 16px;
+        padding-bottom: 16px;
+      }
+
+      .nav-logo {
+        font-size: 20px;
+      }
+    }
+
+    /* Standard phones (iPhone 12/13/14, Pixel 5) — 360–413px */
+    @media (min-width: 360px) and (max-width: 413px) {
+      .hero-logo {
+        width: 65%;
+        max-width: 220px;
+      }
+
+      .hero-content {
+        padding: 0 20px;
+        padding-bottom: 20px;
+      }
+    }
+
+    /* Large phones (iPhone Pro Max, Samsung Ultra) — 414px+ */
+    @media (min-width: 414px) and (max-width: 480px) {
+      .hero-logo {
+        width: 68%;
+        max-width: 260px;
+        margin-bottom: 14px;
+      }
+
+      .hero-tagline {
+        font-size: 15px;
+      }
+
+      .meta-item {
+        font-size: 14px;
+      }
+
+      .genre-tag {
+        font-size: 12px;
+        padding: 5px 14px;
+      }
+
+      .btn-primary {
+        padding: 14px 24px;
+        font-size: 16px;
+      }
+
+      .hero-content {
+        max-width: 400px;
+        padding-bottom: 28px;
+      }
+    }
+
+    /* Small tablets / phablets (480-640px) */
+    @media (min-width: 481px) and (max-width: 640px) {
+      .hero-logo {
+        width: 50%;
+        max-width: 260px;
+        margin-bottom: 16px;
+      }
+
+      .hero-tagline {
+        font-size: 16px;
+      }
+
+      .hero-content {
+        max-width: 460px;
+        padding-bottom: 32px;
+      }
+
+      .btn-primary {
+        padding: 14px 28px;
+        font-size: 16px;
+      }
+
+      .hero-secondary-actions {
+        gap: 40px;
+      }
+
+      .genre-tag {
+        font-size: 12px;
+        padding: 5px 14px;
+      }
+    }
+
+    /* Tablets (641px+) — switch to landscape-aware layout */
+    @media (min-width: 641px) {
+      :root {
+        --nav-height: 64px;
+        --bottom-nav-height: 72px;
+      }
+
+      .hero-content {
+        max-width: 520px;
+        padding-bottom: 40px;
+      }
+
+      .hero-logo {
+        width: 55%;
+        max-width: 300px;
+        margin-bottom: 18px;
+      }
+
+      .hero-tagline {
+        font-size: 17px;
+      }
+
+      .meta-item {
+        font-size: 15px;
+      }
+
+      .hero-genres {
+        gap: 10px;
+      }
+
+      .genre-tag {
+        font-size: 13px;
+        padding: 6px 16px;
+      }
+
+      .btn-primary {
+        padding: 16px 32px;
+        font-size: 17px;
+        border-radius: 14px;
+      }
+
+      .nav-logo {
+        font-size: 26px;
+      }
+
+      .section-title {
+        font-size: 22px;
+      }
+    }
+
+    /* Landscape orientation on phones */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .hero {
+        min-height: auto;
+        height: auto;
+        padding-top: calc(var(--nav-height) + var(--safe-area-top) + 36px);
+      }
+
+      .hero-content {
+        padding-bottom: 16px;
+      }
+
+      .hero-gradient-bottom {
+        height: 80%;
+      }
+
+      .hero-logo {
+        width: 40%;
+        max-width: 200px;
+        margin-bottom: 8px;
+      }
+
+      .hero-tagline {
+        display: none;
+      }
+
+      .hero-genres {
+        margin-bottom: 12px;
+      }
+
+      .category-pills {
+        display: none;
+      }
+    }
+
+    /* ============================================
+       SCROLLBAR HIDING
+       ============================================ */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* ============================================
+       REDUCED MOTION
+       ============================================ */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================
+       TOP NAVIGATION BAR
+       ======================================== -->
+  <header class="top-nav" id="top-nav">
+    <a href="#" class="nav-logo" aria-label="CINEFLIX Home">CINEFLIX</a>
+    <div class="nav-actions">
+      <button class="nav-icon-btn" aria-label="Search">
+        <span class="material-symbols-outlined">search</span>
+      </button>
+      <button class="nav-icon-btn" aria-label="Notifications">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="nav-icon-btn" aria-label="Profile">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================
+       CATEGORY FILTER PILLS
+       ======================================== -->
+  <div class="category-pills no-scrollbar" id="category-pills">
+    <button class="category-pill active" aria-current="true">All</button>
+    <button class="category-pill">Movies</button>
+    <button class="category-pill">TV Shows</button>
+    <button class="category-pill">New & Popular</button>
+    <button class="category-pill">My List</button>
+  </div>
+
+  <!-- ========================================
+       HERO SECTION
+       ======================================== -->
+  <main class="hero" id="hero-section">
+    <!-- Background Image -->
+    <div class="hero-bg">
+      <img
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_8X0ZUXQ9YL5ubsWnGTH4BzJN75yGTVPULUb1j6wDLVLkqXw3BFKJZFGXM5LumXlP8TFcl3QnvZQZPd3D5PQcxaEkSTxAaY5E3XJkqQTDzRRFIwQavmVZIBjbDKH5m1iV2KQrljJnvPp7FnJjY9pSbLIvzP5CjcSoL3C-gUoI8KjC2v2fA6kJZP0s3YNixgbOFSJjD3rxHMwYKpkePdR-EH9r2QFwSd3Fg0X7Cf6BkPQ_i-y_6SB1qPxgRhB-r_jSI2nONOzY"
+        alt="The Super Mario Galaxy Movie — Mario gazing at a vibrant galaxy backdrop"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+
+    <!-- Cinematic gradient overlays -->
+    <div class="hero-gradient-top"></div>
+    <div class="hero-gradient-bottom"></div>
+    <div class="hero-vignette"></div>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <!-- Movie Title Logo -->
+      <img
+        class="hero-logo animate-scale-in delay-200"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZtbnZAqrMkxHa8zGJRtDm65wsdRxcSzQo0ZAfGGDV2jr1d3Z3i7vY9ufKpNDFWVKqvS-jg7PrGz8u5Wt4VOz4gHBgDG5elRPgfH3-UGPJPEgfN_QL3X7wOzaq-Mzw1GElvudHrv12MinIaHve4FFu3pe0vw9O4v3zt3w7_qWsmI_4PnMMuZjBo9fF1B7pk7o_PM0fnnaZlVaEe-x5j7WYN7Zq_zeQ_HeJwhfzYXnvBO3DQqkEEPJduu1am7nrIQY5JUEMYxm0N-Y"
+        alt="The Super Mario Galaxy Movie logo"
+      />
+
+      <!-- Tagline -->
+      <p class="hero-tagline animate-fade-in-up delay-300">"The galaxy awaits."</p>
+
+      <!-- Metadata -->
+      <div class="hero-meta animate-fade-in-up delay-300">
+        <div class="meta-item">
+          <span class="material-symbols-outlined meta-star">star</span>
+          <span class="rating-value">7.7</span>
+        </div>
+        <div class="meta-separator"></div>
+        <div class="meta-item">
+          <span class="material-symbols-outlined">calendar_today</span>
+          <span>2026</span>
+        </div>
+        <div class="meta-separator"></div>
+        <div class="meta-item">
+          <span class="material-symbols-outlined">schedule</span>
+          <span>1h 38m</span>
+        </div>
+      </div>
+
+      <!-- Genre Tags -->
+      <div class="hero-genres animate-fade-in-up delay-400">
+        <span class="genre-tag">Family</span>
+        <span class="genre-tag">Comedy</span>
+        <span class="genre-tag">Adventure</span>
+        <span class="genre-tag">Fantasy</span>
+      </div>
+
+      <!-- Primary Action Buttons -->
+      <div class="hero-actions animate-fade-in-up delay-500">
+        <button class="btn-primary btn-watch" aria-label="Watch The Super Mario Galaxy Movie now">
+          <span class="material-symbols-outlined">play_arrow</span>
+          Watch Now
+        </button>
+        <button class="btn-primary btn-info" aria-label="More info about The Super Mario Galaxy Movie">
+          <span class="material-symbols-outlined">info</span>
+          More Info
+        </button>
+      </div>
+
+      <!-- Secondary Actions -->
+      <div class="hero-secondary-actions animate-fade-in-up delay-600">
+        <button class="secondary-action" aria-label="Add to My List">
+          <span class="material-symbols-outlined">add</span>
+          <span>My List</span>
+        </button>
+        <button class="secondary-action" aria-label="Rate this movie">
+          <span class="material-symbols-outlined">thumb_up</span>
+          <span>Rate</span>
+        </button>
+        <button class="secondary-action" aria-label="Share this movie">
+          <span class="material-symbols-outlined">share</span>
+          <span>Share</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Carousel Navigation Dots -->
+    <div class="carousel-dots animate-fade-in delay-700">
+      <button class="carousel-dot active" aria-label="Slide 1" aria-current="true"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 2"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 3"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 4"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 5"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 6"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 7"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 8"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 9"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 10"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 11"></button>
+      <button class="carousel-dot inactive" aria-label="Slide 12"></button>
+    </div>
+  </main>
+
+  <!-- ========================================
+       CONTINUE WATCHING (Section Teaser)
+       ======================================== -->
+  <div class="section-header">
+    <h2 class="section-title">Continue Watching</h2>
+  </div>
+
+  <!-- ========================================
+       BOTTOM NAVIGATION BAR
+       ======================================== -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="#" class="bottom-nav-item active" aria-current="page">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+      <span>Home</span>
+    </a>
+    <a href="#" class="bottom-nav-item">
+      <span class="material-symbols-outlined">search</span>
+      <span>Search</span>
+    </a>
+    <a href="#" class="bottom-nav-item">
+      <span class="material-symbols-outlined">new_releases</span>
+      <span>New & Hot</span>
+    </a>
+    <a href="#" class="bottom-nav-item">
+      <span class="material-symbols-outlined">download</span>
+      <span>Downloads</span>
+    </a>
+    <a href="#" class="bottom-nav-item">
+      <span class="material-symbols-outlined">person</span>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <!-- ========================================
+       JAVASCRIPT
+       ======================================== -->
+  <script>
+    // --- Scroll-aware navigation ---
+    const topNav = document.getElementById('top-nav');
+    const categoryPills = document.getElementById('category-pills');
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+
+      if (scrollY > 60) {
+        topNav.classList.add('scrolled');
+      } else {
+        topNav.classList.remove('scrolled');
+      }
+
+      // Fade out category pills on scroll
+      if (scrollY > 120) {
+        categoryPills.style.opacity = '0';
+        categoryPills.style.pointerEvents = 'none';
+      } else {
+        categoryPills.style.opacity = '1';
+        categoryPills.style.pointerEvents = 'auto';
+      }
+    }, { passive: true });
+
+    // --- Category pill selection ---
+    document.querySelectorAll('.category-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.category-pill').forEach(p => {
+          p.classList.remove('active');
+          p.removeAttribute('aria-current');
+        });
+        pill.classList.add('active');
+        pill.setAttribute('aria-current', 'true');
+      });
+    });
+
+    // --- Carousel dot interaction ---
+    const dots = document.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        dots.forEach(d => {
+          d.classList.remove('active');
+          d.classList.add('inactive');
+          d.removeAttribute('aria-current');
+        });
+        dot.classList.remove('inactive');
+        dot.classList.add('active');
+        dot.setAttribute('aria-current', 'true');
+      });
+    });
+
+    // --- Carousel auto-rotate dots (demo only) ---
+    let currentDot = 0;
+    setInterval(() => {
+      dots.forEach(d => {
+        d.classList.remove('active');
+        d.classList.add('inactive');
+        d.removeAttribute('aria-current');
+      });
+      currentDot = (currentDot + 1) % dots.length;
+      dots[currentDot].classList.remove('inactive');
+      dots[currentDot].classList.add('active');
+      dots[currentDot].setAttribute('aria-current', 'true');
+    }, 5000);
+
+    // --- Secondary action feedback ---
+    document.querySelectorAll('.secondary-action').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const icon = this.querySelector('.material-symbols-outlined');
+        const currentFill = icon.style.fontVariationSettings;
+        if (currentFill === "'FILL' 1") {
+          icon.style.fontVariationSettings = '';
+          this.style.color = 'var(--text-secondary)';
+        } else {
+          icon.style.fontVariationSettings = "'FILL' 1";
+          this.style.color = 'var(--text-primary)';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

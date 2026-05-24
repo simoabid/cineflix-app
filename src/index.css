@@ -1307,3 +1307,162 @@ html {
 .spectrum-btn-inner:hover {
   background-color: #f40612;
 }
+
+/* ============================================
+   MOBILE HERO SECTION STYLES
+   ============================================ */
+
+/* Cinematic gradient overlays for mobile hero */
+.hero-gradient-bottom-mobile {
+  background: linear-gradient(
+    to top,
+    #020205 0%,
+    rgba(2, 2, 5, 0.95) 12%,
+    rgba(2, 2, 5, 0.7) 35%,
+    rgba(2, 2, 5, 0.3) 60%,
+    transparent 100%
+  );
+}
+
+.hero-gradient-top-mobile {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6) 0%,
+    transparent 100%
+  );
+}
+
+.hero-vignette-mobile {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(2, 2, 5, 0.35) 100%
+  );
+}
+
+/* Glassmorphic button for hero secondary action */
+.hero-glass-btn {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-glass-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Watch Now button gradient with glow */
+.hero-watch-btn {
+  background: linear-gradient(135deg, var(--brand-red, #E50914) 0%, #c7000c 100%);
+  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-watch-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.25);
+}
+
+/* Mobile genre tag styling */
+.hero-genre-tag {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--brand-red, #E50914);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  background: rgba(229, 9, 20, 0.08);
+}
+
+/* Mobile carousel dots */
+.hero-carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding: 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hero-carousel-dot.active {
+  background: var(--brand-red, #E50914);
+  width: 20px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+}
+
+/* Mobile secondary action icon button */
+.hero-icon-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 8px;
+}
+
+.hero-icon-action:active {
+  transform: scale(0.92);
+  color: white;
+}
+
+/* Category filter pills row */
+.hero-category-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding: 8px 16px;
+}
+
+.hero-category-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.hero-category-pill {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-category-pill.active {
+  background: var(--brand-red, #E50914);
+  border-color: var(--brand-red, #E50914);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+}
+
+.hero-category-pill:active {
+  transform: scale(0.95);
+}
+
+/* Mobile hero meta separator dot */
+.hero-meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
