@@ -138,31 +138,31 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
   };
 
   return (
-    <div className="bg-[#13132B] rounded-lg overflow-hidden">
+    <div className="bg-transparent flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="bg-[#1F1F35] px-4 py-3 border-b border-gray-700">
+      <div className="bg-white/[0.03] px-4 py-4 border-b border-white/5">
         <div className="flex items-center justify-between">
-          <h2 className="text-white font-semibold text-lg flex items-center">
-            <Film className="h-5 w-5 text-[#ff0000] mr-2" />
+          <h2 className="text-white font-semibold text-base flex items-center">
+            <Film className="h-4 w-4 text-red-500 mr-2" />
             Seasons & Episodes
           </h2>
           {selectedSeason && (
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-400">Season {selectedSeason.season_number}</span>
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-gray-400 font-medium">S{selectedSeason.season_number}</span>
               <span className="text-gray-500">•</span>
-              <span className="text-gray-400">{selectedSeasonDetails?.episodes?.length || 0} episodes</span>
+              <span className="text-gray-400 font-medium">{selectedSeasonDetails?.episodes?.length || 0} Ep</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 max-h-[600px] overflow-y-auto">
+      <div className="p-4 flex-1 flex flex-col min-h-0 overflow-y-auto custom-scrollbar">
         {/* Season Selector */}
         {seasons.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-white font-medium mb-3">Select Season</h3>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+          <div className="mb-6 flex-none">
+            <h3 className="text-white font-semibold text-sm mb-3">Select Season</h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {seasons
                 .filter(season => season.season_number >= 0)
                 .map((season) => (
@@ -218,9 +218,9 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
             </div>
           </div>
         ) : selectedSeasonDetails?.episodes ? (
-          <div className="space-y-3">
-            <h3 className="text-white font-medium">Episodes</h3>
-            <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+          <div className="space-y-3 flex-1 flex flex-col min-h-0">
+            <h3 className="text-white font-semibold text-sm px-1">Episodes</h3>
+            <div className="space-y-2 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {selectedSeasonDetails.episodes.map((episode: any) => {
                 const episodeId = `${selectedSeason.season_number}-${episode.episode_number}`;
                 const isWatched = watchedEpisodes.has(episodeId);
@@ -228,9 +228,9 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                 return (
                   <div
                     key={episode.id}
-                    className={`bg-gradient-to-r from-white/10 to-transparent rounded-lg border transition-all duration-300 ${isWatched
-                      ? 'border-green-500/30 bg-green-500/5'
-                      : 'border-gray-700/30 hover:border-[#ff0000]/30'
+                    className={`bg-white/[0.01] rounded-xl border transition-all duration-300 ${isWatched
+                      ? 'border-green-500/20 bg-green-500/[0.02]'
+                      : 'border-white/5 hover:border-red-500/20 hover:bg-white/[0.03]'
                       }`}
                   >
                     <div className="p-3">

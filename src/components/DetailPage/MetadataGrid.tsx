@@ -20,6 +20,10 @@ interface MetadataGridProps {
   readonly director?: string;
   readonly runtime?: string;
   readonly columns?: 1 | 2 | 3;
+  /** Real IMDb rating string from OMDb (e.g. "7.6"), or null if unavailable */
+  readonly imdbRating?: string | null;
+  /** Source of the rating: 'imdb' for real OMDb data, 'tmdb' for fallback */
+  readonly ratingSource?: 'imdb' | 'tmdb' | 'none';
 }
 
 const formatCurrency = (value: number): string => {
@@ -39,6 +43,8 @@ const MetadataGrid: React.FC<MetadataGridProps> = ({
   director,
   runtime,
   columns = 2,
+  imdbRating,
+  ratingSource,
 }) => {
   const cols = {
     1: 'grid-cols-1',
@@ -70,11 +76,21 @@ const MetadataGrid: React.FC<MetadataGridProps> = ({
 
       <InfoCard
         icon={Star}
-        label="Rating"
+        label="TMDB Rating"
         value={`${(Math.round(content.vote_average * 10) / 10).toFixed(1)} / 10`}
         subValue={`${content.vote_count?.toLocaleString() || 0} votes`}
         accent="yellow"
       />
+
+      {imdbRating && ratingSource === 'imdb' && (
+        <InfoCard
+          icon={Star}
+          label="IMDb Rating"
+          value={`${imdbRating} / 10`}
+          subValue="Source: IMDb via OMDb"
+          accent="yellow"
+        />
+      )}
 
       {runtime && (
         <InfoCard

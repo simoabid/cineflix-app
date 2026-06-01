@@ -16,16 +16,17 @@ import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
 import AddToListButton from '../AddToListButton';
 import LikeButton from '../LikeButton';
+import { useSmartPlayer } from '../../hooks/useSmartPlayer';
 
 interface SimilarContentProps {
   similar: (Movie | TVShow)[];
   recommended: (Movie | TVShow)[];
-  title: string;
   type: 'movie' | 'tv';
 }
 
-const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, title, type }) => {
+const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, type }) => {
   const navigate = useNavigate();
+  const { openPlayer } = useSmartPlayer();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'similar' | 'recommended'>('similar');
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
@@ -76,7 +77,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
   const handleWatchContent = (item: Movie | TVShow) => {
     if (isDragging) return;
     const contentType = 'title' in item ? 'movie' : 'tv';
-    navigate(`/watch/${contentType}/${item.id}`);
+    openPlayer({ tmdbId: item.id, type: contentType });
   };
 
   // Mouse Drag Logic
@@ -104,7 +105,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
   }
 
   return (
-    <section className="py-10 sm:py-20 bg-[#0A0A1F] relative overflow-hidden">
+    <section className="py-10 sm:py-20 bg-transparent relative overflow-hidden">
       {/* Decorative background glow */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#ff0000]/5 blur-[120px] rounded-full pointer-events-none" />
 
@@ -117,7 +118,7 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
               Discover More
             </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
-              Because you watched <span className="text-[#ff0000]">"{title}"</span>
+              More Like This
             </h2>
 
             {/* Custom Tab Switcher */}

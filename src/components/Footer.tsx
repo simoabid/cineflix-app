@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { Container } from './layout';
+import { useSmartPlayer } from '../hooks/useSmartPlayer';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -214,10 +215,13 @@ const Footer: React.FC = () => {
   */
 
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
-  if (isAuthPage) {
+  const { isOpen: isPlayerOpen } = useSmartPlayer();
+  const isHideFooter = location.pathname === '/login' || location.pathname === '/signup' || location.pathname.startsWith('/watch') || isPlayerOpen;
+  if (isHideFooter) {
     return null;
   }
+
+
 
   return (
     <footer

@@ -8,6 +8,7 @@ import SafeImage from './SafeImage';
 import HoverPreviewCard from './HoverPreviewCard';
 import { useScreenSize } from '../hooks/useScreenSize';
 import { useHoverIntent } from '../hooks/useHoverIntent';
+import { useImdbRating } from '../hooks/useImdbRating';
 
 type MinimalContent = Partial<Movie & TVShow> & {
   id?: number;
@@ -59,11 +60,21 @@ const ContentCard: React.FC<ContentCardProps> = ({
   })();
   const rating = typeof item.vote_average === 'number' ? item.vote_average : undefined;
 
+  // Lazy-load real IMDb rating from OMDb API (falls back to TMDB if rate-limited)
+  const { rating: resolvedRating, source: ratingSource, isLoading: isRatingLoading, containerRef: imdbContainerRef } = useImdbRating({
+    tmdbId: item.id,
+    mediaType: derivedType,
+    tmdbRating: rating,
+  });
+
   const widthClass = size === 'sm' ? 'w-32 sm:w-36 md:w-40 lg:w-48' : 'w-36 sm:w-40 md:w-48 lg:w-64';
 
   return (
     <div
-      ref={anchorRef}
+      ref={(node) => {
+        (anchorRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        (imdbContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      }}
       className={`relative flex-shrink-0 browse-card ${widthClass} ${className}`}
       onPointerEnter={shouldShowHover ? onPointerEnter : undefined}
       onPointerLeave={shouldShowHover ? onPointerLeave : undefined}
@@ -113,10 +124,22 @@ const ContentCard: React.FC<ContentCardProps> = ({
           </h5>
           <div className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-2">
             {year && <span>{year}</span>}
-            {typeof rating === 'number' && (
+            {resolvedRating && ratingSource === 'imdb' && (
               <>
                 <span>•</span>
-                <span>{(rating || 0).toFixed(1)} ★</span>
+                <span className="text-yellow-400 font-bold">IMDb {resolvedRating} ★</span>
+              </>
+            )}
+            {resolvedRating && ratingSource === 'tmdb' && (
+              <>
+                <span>•</span>
+                <span className="text-gray-300 font-semibold">TMDB {resolvedRating} ★</span>
+              </>
+            )}
+            {isRatingLoading && (
+              <>
+                <span>•</span>
+                <span className="text-yellow-400/50 font-bold animate-pulse">IMDb ···</span>
               </>
             )}
           </div>

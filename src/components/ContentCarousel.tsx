@@ -7,6 +7,8 @@ interface ContentCarouselProps {
   title: string;
   items: (Movie | TVShow)[];
   type: 'movie' | 'tv';
+  loading?: boolean;
+  headerAction?: React.ReactNode;
 }
 
 interface ContentCarouselItemsProps {
@@ -78,7 +80,13 @@ const ScrollDots = React.memo<ScrollDotsProps>(({ itemsLength, scrollProgress, o
 
 ScrollDots.displayName = 'ScrollDots';
 
-const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, items, type }) => {
+const ContentCarousel: React.FC<ContentCarouselProps> = ({
+  title,
+  items,
+  type,
+  loading = false,
+  headerAction
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -210,16 +218,26 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, items, type })
       className={`relative px-4 md:px-8 py-0 transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
     >
-      <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-6 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-        }`}>
-        {title}
-      </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 transition-all duration-700 delay-100">
+        <div className="flex items-center gap-2.5">
+          <span className="w-1.5 h-6 bg-[#E50914] rounded-full inline-block" />
+          <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+            }`}>
+            {title}
+          </h2>
+        </div>
+        {headerAction && (
+          <div className={`transition-all duration-700 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            {headerAction}
+          </div>
+        )}
+      </div>
 
       <div className="relative" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
         {/* Navigation Buttons */}
         <button
           onClick={() => scroll('left')}
-          className={`absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hidden md:flex items-center justify-center ${!canScrollLeft ? 'md:opacity-0 md:pointer-events-none' : isHovered ? 'md:opacity-100' : 'md:opacity-0 md:pointer-events-none'
+          className={`absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hidden md:flex items-center justify-center ${!canScrollLeft || loading ? 'md:opacity-0 md:pointer-events-none' : isHovered ? 'md:opacity-100' : 'md:opacity-0 md:pointer-events-none'
             } backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-xl hover:scale-110`}
           aria-label="Scroll left"
         >
@@ -228,7 +246,7 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, items, type })
 
         <button
           onClick={() => scroll('right')}
-          className={`absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hidden md:flex items-center justify-center ${!canScrollRight ? 'md:opacity-0 md:pointer-events-none' : isHovered ? 'md:opacity-100' : 'md:opacity-0 md:pointer-events-none'
+          className={`absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 hidden md:flex items-center justify-center ${!canScrollRight || loading ? 'md:opacity-0 md:pointer-events-none' : isHovered ? 'md:opacity-100' : 'md:opacity-0 md:pointer-events-none'
             } backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-xl hover:scale-110`}
           aria-label="Scroll right"
         >
@@ -236,16 +254,32 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, items, type })
         </button>
 
         {/* Content Items */}
-        <div
-          ref={scrollRef}
-          className="flex overflow-x-auto gap-2.5 scrollbar-hide pb-1"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <ContentCarouselItems items={items} type={type} cardsLoaded={cardsLoaded} />
-        </div>
+        {loading ? (
+          <div className="flex overflow-x-auto gap-2.5 scrollbar-hide pb-1 animate-pulse">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="w-32 sm:w-36 md:w-40 lg:w-48 flex-shrink-0">
+                <div className="aspect-[2/3] bg-gray-800/85 rounded-xl ring-1 ring-white/10" />
+                <div className="mt-2 space-y-2">
+                  <div className="h-4 bg-gray-800/85 rounded w-3/4" />
+                  <div className="h-3 bg-gray-800/85 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            ref={scrollRef}
+            className="flex overflow-x-auto gap-2.5 scrollbar-hide pb-1"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <ContentCarouselItems items={items} type={type} cardsLoaded={cardsLoaded} />
+          </div>
+        )}
 
         {/* Scroll Progress Dots */}
-        <ScrollDots itemsLength={items.length} scrollProgress={scrollProgress} onDotClick={handleDotClick} />
+        {!loading && (
+          <ScrollDots itemsLength={items.length} scrollProgress={scrollProgress} onDotClick={handleDotClick} />
+        )}
       </div>
     </div>
   );

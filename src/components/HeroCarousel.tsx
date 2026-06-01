@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Play, Star, Calendar } from 'lucide-react';
+import { useSmartPlayer } from '../hooks/useSmartPlayer';
 import { getImageUrl } from '../services/tmdb';
 import LogoImage from './LogoImage';
 
@@ -24,7 +24,7 @@ interface HeroCarouselProps {
 }
 
 const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type }) => {
-  const navigate = useNavigate();
+  const { openPlayer } = useSmartPlayer();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -116,7 +116,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
 
             <div className="flex gap-4">
               <button
-                onClick={() => navigate(`/watch/${type}/${currentItem.id}`)}
+                onClick={() => openPlayer({ tmdbId: currentItem.id, type })}
                 className="flex items-center gap-2 bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-md transition-colors font-semibold"
                 aria-label={`Watch ${currentItem.title} now`}
               >

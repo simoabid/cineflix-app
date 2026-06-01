@@ -20,11 +20,13 @@ import {
   Maximize,
   Minimize,
   LayoutGrid,
-  Heart
+  Heart,
+  Clock
 } from 'lucide-react';
 import SearchModal from './SearchModal';
 import { useAuth } from '../contexts/AuthContext';
 import SignUpPromoBubble from './SignUpPromoBubble';
+import { useSmartPlayer } from '../hooks/useSmartPlayer';
 import { renderAvatarById } from '../constants/avatars';
 
 const NAVBAR_TRANSLATIONS = {
@@ -32,6 +34,7 @@ const NAVBAR_TRANSLATIONS = {
   account: 'Account',
   myProfile: 'My Profile',
   myList: 'My List',
+  continueWatching: 'Continue Watching',
   accountSettings: 'Account Settings',
   signOut: 'Sign Out',
   signUp: 'Sign Up',
@@ -151,11 +154,11 @@ const Navbar: React.FC = () => {
     { name: 'My List', path: '/my-list', icon: Bookmark },
   ];
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
-  if (isAuthPage) {
+  const { isOpen: isPlayerOpen } = useSmartPlayer();
+  const isHideNavbar = location.pathname === '/login' || location.pathname === '/signup' || location.pathname.startsWith('/watch') || isPlayerOpen;
+  if (isHideNavbar) {
     return null;
   }
-
   return (
     <>
       <nav
@@ -164,10 +167,10 @@ const Navbar: React.FC = () => {
           : 'bg-black/10 backdrop-blur-md'
           }`}
       >
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo and Brand */}
-            <div className="flex items-center space-x-4 sm:space-x-8">
+            <div className="flex items-center space-x-2 xs:space-x-4 sm:space-x-8">
               <Link
                 to="/"
                 className="flex-shrink-0 transition-all duration-300 hover:scale-105 group"
@@ -175,58 +178,58 @@ const Navbar: React.FC = () => {
                 <img
                   src={`${import.meta.env.BASE_URL}cineflix-logo.png`}
                   alt="CINEFLIX"
-                  className="h-8 sm:h-10 lg:h-9.5 2xl:h-11 w-auto"
+                  className="h-7 xs:h-8 sm:h-10 laptop:h-11 w-auto"
                 />
               </Link>
 
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center space-x-0.5 2xl:space-x-1.5">
+              <div className="hidden lg:flex items-center space-x-1 laptop:space-x-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center space-x-1 2xl:space-x-2 px-2.5 py-1.5 2xl:px-4 2xl:py-2 rounded-lg text-xs 2xl:text-sm font-medium transition-all duration-300 relative group ${location.pathname === item.path
+                      className={`flex items-center space-x-1 laptop:space-x-2 px-2.5 py-1.5 laptop:px-4 laptop:py-2 rounded-lg text-xs laptop:text-sm font-medium transition-all duration-300 relative group ${location.pathname === item.path
                         ? 'text-white bg-white/10 backdrop-blur-sm border-b-2 border-brand-red shadow-lg shadow-brand-red/10'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
                     >
-                      <Icon className="w-4 h-4 hidden 2xl:block flex-shrink-0" />
+                      <Icon className="w-4 h-4 hidden xl:block flex-shrink-0" />
                       <span>{item.name}</span>
                     </Link>
                   );
                 })}
               </div>
 
-              {/* Mobile Menu Button — 44px minimum touch target */}
+              {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden text-white min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
+                className="lg:hidden text-white w-9 h-9 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
                 aria-label="Toggle mobile menu"
                 aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+                {mobileMenuOpen ? <X className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6" />}
               </button>
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-1.5 sm:space-x-3">
+            <div className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-3">
               {/* Search */}
               <div ref={searchRef} className="relative">
                 {/* Mobile, Tablet, and Small Laptop Search — Compact Icon Button */}
                 <button
                   onClick={() => setIsSearchModalOpen(true)}
-                  className="2xl:hidden flex items-center justify-center min-w-[44px] min-h-[44px] bg-black/30 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/50 hover:scale-110 group relative"
+                  className="laptop:hidden flex items-center justify-center w-9 h-9 xs:w-10 xs:h-10 sm:w-11 sm:h-11 bg-black/30 backdrop-blur-md rounded-full transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/50 hover:scale-110 group relative"
                   aria-label="Search"
                 >
-                  <Search className="w-5 h-5 text-white group-hover:text-netflix-red transition-colors" />
+                  <Search className="w-4 h-4 xs:w-5 h-5 text-white group-hover:text-netflix-red transition-colors" />
                 </button>
 
                 {/* Large Desktop Search — Full Search Bar */}
                 <button
                   onClick={() => setIsSearchModalOpen(true)}
-                  className="hidden 2xl:flex items-center bg-black/20 backdrop-blur-md rounded-xl transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/30 group"
+                  className="hidden laptop:flex items-center bg-black/20 backdrop-blur-md rounded-xl transition-all duration-300 border border-white/20 hover:border-netflix-red/50 hover:bg-black/30 group"
                 >
                   <Search className="w-5 h-5 text-gray-400 ml-3 group-hover:text-white transition-colors" />
                   <span className="text-gray-400 px-3 py-3 group-hover:text-white transition-colors text-sm">
@@ -239,20 +242,11 @@ const Navbar: React.FC = () => {
                 </button>
               </div>
 
-              {/* Theme Toggle — 44px touch target */}
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
-                title="Toggle theme"
-                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
 
-              {/* Fullscreen Toggle — 44px touch target */}
+              {/* Fullscreen Toggle */}
               <button
                 onClick={toggleFullscreen}
-                className="hidden sm:flex items-center justify-center min-w-[44px] min-h-[44px] text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                className="hidden sm:flex items-center justify-center w-11 h-11 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
                 title={isFullscreen ? "Exit fullscreen (F11)" : "Enter fullscreen (F11)"}
                 aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
               >
@@ -264,13 +258,13 @@ const Navbar: React.FC = () => {
                 <div ref={notificationsRef} className="relative">
                   <button
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                    className="relative w-9 h-9 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
                     aria-label={`Notifications (${notifications.length} unread)`}
                     aria-expanded={notificationsOpen}
                   >
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-netflix-red rounded-full flex items-center justify-center" aria-hidden="true">
-                      <span className="text-[10px] text-white font-bold">{notifications.length}</span>
+                    <Bell className="w-4 h-4 xs:w-5 h-5" />
+                    <span className="absolute top-0.5 right-0.5 xs:top-1 xs:right-1 w-3.5 h-3.5 xs:w-4 xs:h-4 bg-netflix-red rounded-full flex items-center justify-center" aria-hidden="true">
+                      <span className="text-[8px] xs:text-[10px] text-white font-bold">{notifications.length}</span>
                     </span>
                   </button>
 
@@ -301,9 +295,9 @@ const Navbar: React.FC = () => {
                 <div ref={userMenuRef} className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center space-x-2 p-2 hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                    className="flex items-center space-x-1 xs:space-x-2 p-1.5 xs:p-2 hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
                   >
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ring-2 ring-gray-700/50 overflow-hidden">
+                    <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ring-2 ring-gray-700/50 overflow-hidden">
                       {user?.avatar ? (
                         renderAvatarById(user.avatar, "w-full h-full")
                       ) : (
@@ -356,6 +350,14 @@ const Navbar: React.FC = () => {
                           <span className="font-medium">{NAVBAR_TRANSLATIONS.myList}</span>
                         </Link>
                         <Link
+                          to="/continue-watching"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
+                        >
+                          <Clock className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
+                          <span className="font-medium">{NAVBAR_TRANSLATIONS.continueWatching}</span>
+                        </Link>
+                        <Link
                           to="/account"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
@@ -363,6 +365,22 @@ const Navbar: React.FC = () => {
                           <Settings className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
                           <span className="font-medium">{NAVBAR_TRANSLATIONS.accountSettings}</span>
                         </Link>
+                        <button
+                          onClick={() => setIsDarkMode(!isDarkMode)}
+                          className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group text-left"
+                        >
+                          {isDarkMode ? (
+                            <>
+                              <Sun className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
+                              <span className="font-medium">Light Mode</span>
+                            </>
+                          ) : (
+                            <>
+                              <Moon className="w-4 h-4 text-gray-400 group-hover:text-netflix-red transition-colors" />
+                              <span className="font-medium">Dark Mode</span>
+                            </>
+                          )}
+                        </button>
                       </div>
 
                       {/* Footer Actions */}
@@ -438,8 +456,34 @@ const Navbar: React.FC = () => {
 
                 {/* Mobile Auth Actions */}
                 <div className="pt-4 border-t border-gray-700/50 mt-4">
+                  <button
+                    onClick={() => {
+                      setIsDarkMode(!isDarkMode);
+                    }}
+                    className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-left mb-1"
+                  >
+                    {isDarkMode ? (
+                      <>
+                        <Sun className="w-5 h-5 text-gray-400" />
+                        <span>Light Mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="w-5 h-5 text-gray-400" />
+                        <span>Dark Mode</span>
+                      </>
+                    )}
+                  </button>
                   {isAuthenticated ? (
                     <>
+                      <Link
+                        to="/continue-watching"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                      >
+                        <Clock className="w-5 h-5 text-gray-400" />
+                        <span>{NAVBAR_TRANSLATIONS.continueWatching}</span>
+                      </Link>
                       <Link
                         to="/account"
                         onClick={() => setMobileMenuOpen(false)}

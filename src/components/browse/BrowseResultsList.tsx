@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Play, Calendar, Info } from 'lucide-react';
+import { useSmartPlayer } from '../../hooks/useSmartPlayer';
 import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
 import AddToListButton from '../AddToListButton';
@@ -12,6 +13,7 @@ interface BrowseResultsListProps {
 
 const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
     const isMovie = (item: Movie | TVShow): item is Movie => 'title' in item;
+    const { openPlayer } = useSmartPlayer();
 
     return (
         <div className="space-y-4">
@@ -69,13 +71,13 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
 
                             {/* Actions */}
                             <div className="flex items-center gap-2 mt-4">
-                                <Link
-                                    to={`/watch/${type}/${item.id}`}
+                                <button
+                                    onClick={() => openPlayer({ tmdbId: item.id, type })}
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-netflix-red text-white text-sm font-medium hover:bg-red-700 transition-colors duration-150"
                                 >
                                     <Play className="w-4 h-4 fill-current" />
                                     <span className="hidden sm:inline">Watch Now</span>
-                                </Link>
+                                </button>
                                 <AddToListButton
                                     content={item}
                                     contentType={type}

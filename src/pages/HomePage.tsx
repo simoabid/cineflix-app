@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSmartPlayer } from '../hooks/useSmartPlayer';
 import {
   Play,
   Info,
@@ -19,6 +20,10 @@ import {
   getPopularMovies,
   getTopRatedMovies,
   getNowPlayingMovies,
+  getTrendingTVShows,
+  getPopularTVShows,
+  getTopRatedTVShows,
+  getAiringTodayTVShows,
   getMovieDetails,
   getMovieCredits,
   getImageUrl,
@@ -26,14 +31,49 @@ import {
   getBackdropUrl
 } from '../services/tmdb';
 import LogoImage from '../components/LogoImage';
-import { Movie, MovieCredits } from '../types';
+import { Movie, TVShow, MovieCredits } from '../types';
 import AddToListButton from '../components/AddToListButton';
 import LikeButton from '../components/LikeButton';
 import ContentCarousel from '../components/ContentCarousel';
 
 import ContinueWatching from '../components/Home/ContinueWatching';
+import BrowseByGenre from '../components/Home/BrowseByGenre';
+import PlatformsSection from '../components/Home/PlatformsSection';
+
+interface TypeToggleProps {
+  readonly selected: 'movie' | 'tv';
+  readonly onChange: (type: 'movie' | 'tv') => void;
+}
+
+const TypeToggle: React.FC<TypeToggleProps> = ({ selected, onChange }) => {
+  return (
+    <div className="flex items-center gap-1 bg-[#121216]/80 border border-white/5 p-1 rounded-xl w-fit shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+      <button
+        onClick={() => onChange('movie')}
+        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${
+          selected === 'movie'
+            ? 'bg-[#1e1e26] text-white shadow-[0_2px_8px_rgba(0,0,0,0.5)] border border-white/10'
+            : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
+        }`}
+      >
+        Movies
+      </button>
+      <button
+        onClick={() => onChange('tv')}
+        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 ${
+          selected === 'tv'
+            ? 'bg-[#1e1e26] text-white shadow-[0_2px_8px_rgba(0,0,0,0.5)] border border-white/10'
+            : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
+        }`}
+      >
+        TV Shows
+      </button>
+    </div>
+  );
+};
 
 const HomePage = (): JSX.Element => {
+  const { openPlayer } = useSmartPlayer();
   const [heroMovies, setHeroMovies] = useState<Movie[]>([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [heroMovie, setHeroMovie] = useState<Movie | null>(null);
@@ -45,6 +85,80 @@ const HomePage = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [isHeroAutoPlaying, setIsHeroAutoPlaying] = useState(true);
+
+  // Content Types
+  const [trendingType, setTrendingType] = useState<'movie' | 'tv'>('movie');
+  const [popularType, setPopularType] = useState<'movie' | 'tv'>('movie');
+  const [topRatedType, setTopRatedType] = useState<'movie' | 'tv'>('movie');
+  const [nowPlayingType, setNowPlayingType] = useState<'movie' | 'tv'>('movie');
+
+  // TV Show Lists
+  const [trendingTVShows, setTrendingTVShows] = useState<TVShow[]>([]);
+  const [popularTVShows, setPopularTVShows] = useState<TVShow[]>([]);
+  const [topRatedTVShows, setTopRatedTVShows] = useState<TVShow[]>([]);
+  const [nowPlayingTVShows, setNowPlayingTVShows] = useState<TVShow[]>([]);
+
+  // Section Loading states
+  const [isTrendingLoading, setIsTrendingLoading] = useState(false);
+  const [isPopularLoading, setIsPopularLoading] = useState(false);
+  const [isTopRatedLoading, setIsTopRatedLoading] = useState(false);
+  const [isNowPlayingLoading, setIsNowPlayingLoading] = useState(false);
+
+  const handleToggleSection = async (section: 'trending' | 'popular' | 'topRated' | 'nowPlaying', type: 'movie' | 'tv'): Promise<void> => {
+    if (section === 'trending') {
+      setTrendingType(type);
+      if (type === 'tv' && trendingTVShows.length === 0) {
+        setIsTrendingLoading(true);
+        try {
+          const response = await getTrendingTVShows();
+          setTrendingTVShows(response.results.slice(0, 20));
+        } catch (error) {
+          console.error('Error fetching trending TV shows:', error);
+        } finally {
+          setIsTrendingLoading(false);
+        }
+      }
+    } else if (section === 'popular') {
+      setPopularType(type);
+      if (type === 'tv' && popularTVShows.length === 0) {
+        setIsPopularLoading(true);
+        try {
+          const response = await getPopularTVShows();
+          setPopularTVShows(response.results.slice(0, 20));
+        } catch (error) {
+          console.error('Error fetching popular TV shows:', error);
+        } finally {
+          setIsPopularLoading(false);
+        }
+      }
+    } else if (section === 'topRated') {
+      setTopRatedType(type);
+      if (type === 'tv' && topRatedTVShows.length === 0) {
+        setIsTopRatedLoading(true);
+        try {
+          const response = await getTopRatedTVShows();
+          setTopRatedTVShows(response.results.slice(0, 20));
+        } catch (error) {
+          console.error('Error fetching top rated TV shows:', error);
+        } finally {
+          setIsTopRatedLoading(false);
+        }
+      }
+    } else if (section === 'nowPlaying') {
+      setNowPlayingType(type);
+      if (type === 'tv' && nowPlayingTVShows.length === 0) {
+        setIsNowPlayingLoading(true);
+        try {
+          const response = await getAiringTodayTVShows();
+          setNowPlayingTVShows(response.results.slice(0, 20));
+        } catch (error) {
+          console.error('Error fetching now playing TV shows:', error);
+        } finally {
+          setIsNowPlayingLoading(false);
+        }
+      }
+    }
+  };
 
 
   useEffect(() => {
@@ -183,7 +297,7 @@ const HomePage = (): JSX.Element => {
   }
 
   return (
-    <div className="min-h-screen bg-[#020205] bg-gradient-to-b from-black/80 via-[#050510] to-[#0A0A1F] overflow-x-hidden">
+    <div className="min-h-screen bg-[#020205] bg-gradient-to-b from-black/80 via-[#050510] to-[#0A0A1F]" style={{ overflowX: 'clip' }}>
       {/* Enhanced Hero Section */}
       {heroMovie && (
         <div
@@ -248,7 +362,7 @@ const HomePage = (): JSX.Element => {
           {/* ============================================
               MOBILE / TABLET HERO CONTENT (< lg) — Floating Card
               ============================================ */}
-          <div className="lg:hidden relative z-10 h-full flex flex-col items-center pt-24 sm:pt-28 px-5 pb-6 overflow-y-auto no-scrollbar">
+          <div className="lg:hidden relative z-10 h-full flex flex-col items-center pt-24 sm:pt-28 px-5 pb-6 no-scrollbar">
             {/* Floating Poster Card */}
             <div className="w-[58%] max-w-[220px] sm:max-w-[240px] flex-shrink-0 mb-4 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
               <img
@@ -304,14 +418,14 @@ const HomePage = (): JSX.Element => {
 
             {/* Primary Action Buttons */}
             <div className="flex w-full gap-2.5 max-w-xs mb-3 animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
-              <Link
-                to={`/watch/movie/${heroMovie.id}`}
+              <button
+                onClick={() => openPlayer({ tmdbId: heroMovie.id, type: 'movie' })}
                 className="hero-watch-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-sm text-white active:scale-[0.97] transition-transform"
                 aria-label={`Watch ${heroMovie.title} now`}
               >
                 <Play className="w-4 h-4 fill-current" />
                 Play
-              </Link>
+              </button>
               <Link
                 to={`/movie/${heroMovie.id}`}
                 className="hero-glass-btn flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold text-sm text-white active:scale-[0.97] transition-transform"
@@ -431,13 +545,13 @@ const HomePage = (): JSX.Element => {
                 <div className="space-y-4">
                   {/* Primary Actions */}
                   <div className="flex flex-row justify-start gap-4">
-                    <Link
-                      to={`/watch/movie/${heroMovie.id}`}
+                    <button
+                      onClick={() => openPlayer({ tmdbId: heroMovie.id, type: 'movie' })}
                       className="flex items-center justify-center gap-3 bg-netflix-red hover:bg-netflix-red/80 px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 shadow-xl hover:scale-105"
                     >
                       <Play className="w-6 h-6 fill-current" />
                       <span>Watch Now</span>
-                    </Link>
+                    </button>
                     <Link
                       to={`/movie/${heroMovie.id}`}
                       className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 border border-white/20 hover:border-white/40 shadow-lg hover:scale-105"
@@ -541,53 +655,82 @@ const HomePage = (): JSX.Element => {
             <ContinueWatching />
           </div>
 
-          {trendingMovies.length > 0 && (
+          {(trendingMovies.length > 0 || trendingTVShows.length > 0) && (
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
               <ContentCarousel
                 title="🔥 Trending Now"
-                items={trendingMovies}
-                type="movie"
+                items={trendingType === 'movie' ? trendingMovies : trendingTVShows}
+                type={trendingType}
+                loading={isTrendingLoading}
+                headerAction={
+                  <TypeToggle
+                    selected={trendingType}
+                    onChange={(type) => handleToggleSection('trending', type)}
+                  />
+                }
               />
             </div>
           )}
 
-          {popularMovies.length > 0 && (
+          {(popularMovies.length > 0 || popularTVShows.length > 0) && (
             <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
               <ContentCarousel
                 title="⭐ Popular on CINEFLIX"
-                items={popularMovies}
-                type="movie"
+                items={popularType === 'movie' ? popularMovies : popularTVShows}
+                type={popularType}
+                loading={isPopularLoading}
+                headerAction={
+                  <TypeToggle
+                    selected={popularType}
+                    onChange={(type) => handleToggleSection('popular', type)}
+                  />
+                }
               />
             </div>
           )}
 
-          {topRatedMovies.length > 0 && (
+          {(topRatedMovies.length > 0 || topRatedTVShows.length > 0) && (
             <div className="-mt-32 animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
               <ContentCarousel
                 title="🏆 Top Rated"
-                items={topRatedMovies}
-                type="movie"
+                items={topRatedType === 'movie' ? topRatedMovies : topRatedTVShows}
+                type={topRatedType}
+                loading={isTopRatedLoading}
+                headerAction={
+                  <TypeToggle
+                    selected={topRatedType}
+                    onChange={(type) => handleToggleSection('topRated', type)}
+                  />
+                }
               />
             </div>
           )}
 
-          {nowPlayingMovies.length > 0 && (
+          {(nowPlayingMovies.length > 0 || nowPlayingTVShows.length > 0) && (
             <div className="-mt-32 animate-fade-in-up" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
               <ContentCarousel
                 title="🎬 Now Playing"
-                items={nowPlayingMovies}
-                type="movie"
+                items={nowPlayingType === 'movie' ? nowPlayingMovies : nowPlayingTVShows}
+                type={nowPlayingType}
+                loading={isNowPlayingLoading}
+                headerAction={
+                  <TypeToggle
+                    selected={nowPlayingType}
+                    onChange={(type) => handleToggleSection('nowPlaying', type)}
+                  />
+                }
               />
             </div>
           )}
 
-          {/* Genre Collections - Now available on Browse page */}
-          {/* Commented out to avoid duplication - can be restored if needed */}
-          {/* 
-          <div className="-mt-32 animate-fade-in-up" style={{ animationDelay: '1.0s', animationFillMode: 'both' }}>
-            <GenreCollections />
+          <div className="-mt-24 md:-mt-28 animate-fade-in-up" style={{ animationDelay: '1.0s', animationFillMode: 'both' }}>
+            <BrowseByGenre />
           </div>
-          */}
+
+          {/* Platforms Logo Loop — bottom of page */}
+          <div className="-mt-16 md:-mt-20 animate-fade-in-up" style={{ animationDelay: '1.2s', animationFillMode: 'both' }}>
+            <PlatformsSection />
+          </div>
         </div>
       </div>
     </div>

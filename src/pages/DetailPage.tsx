@@ -7,6 +7,7 @@ import {
   getPersonMovieCredits,
 } from '../services/tmdb';
 import { useDetailPageData } from '../hooks/useDetailPageData';
+import { useImdbRating } from '../hooks/useImdbRating';
 import { logger } from '../utils/logger';
 
 import DetailHero from '../components/DetailPage/DetailHero';
@@ -51,6 +52,14 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
     loadingSeasons,
     error,
   } = data;
+
+  // Eagerly fetch real IMDb rating (no IntersectionObserver needed on a dedicated detail page)
+  const { rating: imdbRating, source: ratingSource, isLoading } = useImdbRating({
+    tmdbId: content?.id,
+    mediaType: type,
+    tmdbRating: content?.vote_average,
+    lazy: false,
+  });
 
   // ─── Cast / Person Modal State ──────────────────────────────────────────
   const [selectedCastMember, setSelectedCastMember] = useState<CastMember | null>(null);
@@ -160,11 +169,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
     }
   }, []);
 
-  // ─── Computed helpers ───────────────────────────────────────────────────
-  const title = useMemo((): string => {
-    if (!content) return '';
-    return type === 'movie' ? (content as Movie).title : (content as TVShow).name;
-  }, [content, type]);
+
 
   const runtime = useMemo((): string => {
     if (!content) return '';
@@ -242,7 +247,14 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
       {/* ═══════════════════════════════════════════════
           HERO
           ═══════════════════════════════════════════════ */}
-      <DetailHero content={content} type={type} credits={credits} />
+      <DetailHero
+        content={content}
+        type={type}
+        credits={credits}
+        imdbRating={imdbRating}
+        ratingSource={ratingSource}
+        isRatingLoading={isLoading}
+      />
 
       {/* ═══════════════════════════════════════════════
           MAIN CONTENT GRID
@@ -281,6 +293,8 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
                   type={type}
                   director={director}
                   runtime={runtime}
+                  imdbRating={imdbRating}
+                  ratingSource={ratingSource}
                   columns={2}
                 />
               </div>
@@ -311,7 +325,6 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
         <SimilarContent
           similar={similar}
           recommended={recommended}
-          title={title}
           type={type}
         />
       </div>

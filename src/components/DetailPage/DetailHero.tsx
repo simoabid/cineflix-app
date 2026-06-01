@@ -15,19 +15,27 @@ import AddToListButton from '../AddToListButton';
 import LikeButton from '../LikeButton';
 import LogoImage from '../LogoImage';
 import { Container } from '../layout';
+import { useSmartPlayer } from '../../hooks/useSmartPlayer';
 
 interface DetailHeroProps {
   readonly content: Movie | TVShow;
   readonly type: 'movie' | 'tv';
   readonly credits: MovieCredits | null;
+  /** Real IMDb rating from OMDb API (e.g. "7.6"), or null */
+  readonly imdbRating?: string | null;
+  /** Source indicator: 'imdb' = real OMDb data, 'tmdb' = fallback */
+  readonly ratingSource?: 'imdb' | 'tmdb' | 'none';
+  /** True while the OMDb fetch is in-flight */
+  readonly isRatingLoading?: boolean;
 }
 
 /**
  * Full-screen hero section for the detail page, displaying the backdrop,
  * poster, title logo, metadata badges, genres, and action buttons.
  */
-const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits }) => {
+const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRating, ratingSource, isRatingLoading }) => {
   const navigate = useNavigate();
+  const { openPlayer } = useSmartPlayer();
   const id = content.id;
 
   const getTitle = (): string => {
@@ -148,10 +156,28 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits }) => {
 
             {/* Metadata Row */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-white/90">
+              {/* TMDB Rating */}
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
                 <span className="font-bold">{formatRating(content.vote_average)}</span>
+                <span className="text-white/40 text-[10px] ml-0.5">TMDB</span>
               </div>
+              {/* IMDb Rating */}
+              {imdbRating && ratingSource === 'imdb' && (
+                <>
+                  <span className="text-white/40">•</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-yellow-400 font-bold">{imdbRating}</span>
+                    <span className="text-yellow-400/70 text-[10px] font-semibold">IMDb</span>
+                  </div>
+                </>
+              )}
+              {isRatingLoading && (
+                <>
+                  <span className="text-white/40">•</span>
+                  <span className="text-yellow-400/50 text-[10px] font-semibold animate-pulse">IMDb ···</span>
+                </>
+              )}
               <span className="text-white/40">•</span>
               <span>{getReleaseYear()}</span>
               {getRuntime() && (
@@ -182,7 +208,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits }) => {
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Watch Now button */}
             <button
-              onClick={() => navigate(`/watch/${type}/${id}`)}
+              onClick={() => openPlayer({ tmdbId: id, type })}
               className="hero-watch-btn flex items-center justify-center gap-2.5 py-3 px-6 rounded-xl font-bold text-sm sm:text-base text-white hover:scale-105 active:scale-[0.97] transition-all shadow-[0_4px_20px_rgba(229,9,20,0.3)] w-full sm:w-auto"
             >
               <Play className="w-4 h-4 fill-current" />
@@ -296,11 +322,27 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits }) => {
 
               {/* Metadata Row */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 lg:gap-6 text-xs sm:text-sm md:text-base lg:text-lg">
+                {/* TMDB Rating block */}
                 <div className="flex items-center gap-1 sm:gap-2">
                   <Star className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-yellow-400 fill-current" />
                   <span className="font-semibold">{formatRating(content.vote_average)}</span>
-                  <span className="text-gray-400 hidden sm:inline">({content.vote_count?.toLocaleString()} votes)</span>
+                  <span className="text-gray-400 text-xs">TMDB</span>
+                  <span className="text-gray-500 hidden sm:inline">({content.vote_count?.toLocaleString()} votes)</span>
                 </div>
+                {/* IMDb Rating block */}
+                {imdbRating && ratingSource === 'imdb' && (
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-yellow-400 fill-yellow-400" />
+                    <span className="font-bold text-yellow-400">{imdbRating}</span>
+                    <span className="text-yellow-500 text-xs font-semibold">IMDb</span>
+                  </div>
+                )}
+                {isRatingLoading && (
+                  <div className="flex items-center gap-1 sm:gap-2 animate-pulse">
+                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400/40 fill-yellow-400/40" />
+                    <span className="text-yellow-400/50 font-semibold text-xs">IMDb ···</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1 sm:gap-2">
                   <Calendar className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-gray-400" />
                   <span>{getReleaseYear()}</span>
@@ -333,7 +375,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits }) => {
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                 <button
-                  onClick={() => navigate(`/watch/${type}/${id}`)}
+                  onClick={() => openPlayer({ tmdbId: id, type })}
                   className="flex items-center justify-center gap-2 sm:gap-3 bg-netflix-red hover:bg-netflix-red/80 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 shadow-xl hover:scale-105 w-full sm:w-auto"
                 >
                   <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />

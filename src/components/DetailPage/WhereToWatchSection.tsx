@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Play, Sparkles, ExternalLink } from 'lucide-react';
 import SectionHeader from './SectionHeader';
+import { useSmartPlayer } from '../../hooks/useSmartPlayer';
 
 interface WhereToWatchSectionProps {
   readonly contentId: number;
@@ -23,7 +23,7 @@ interface Provider {
  * with a curated list of secondary providers shown for completeness.
  */
 const WhereToWatchSection: React.FC<WhereToWatchSectionProps> = ({ contentId, type }) => {
-  const navigate = useNavigate();
+  const { openPlayer } = useSmartPlayer();
 
   const providers: Provider[] = [
     {
@@ -53,7 +53,7 @@ const WhereToWatchSection: React.FC<WhereToWatchSectionProps> = ({ contentId, ty
   ];
 
   const handleWatch = () => {
-    navigate(`/watch/${type}/${contentId}`);
+    openPlayer({ tmdbId: contentId, type });
   };
 
   return (

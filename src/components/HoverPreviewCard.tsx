@@ -7,6 +7,7 @@ import { handleImageError } from '../utils/imageLoader';
 import AddToListButton from './AddToListButton';
 import LikeButton from './LikeButton';
 import { useNavigate } from 'react-router-dom';
+import { useSmartPlayer } from '../hooks/useSmartPlayer';
 
 type MinimalContent = Partial<Movie & TVShow> & {
   id?: number;
@@ -42,6 +43,7 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
   onMouseLeavePreview
 }) => {
   const navigate = useNavigate();
+  const { openPlayer } = useSmartPlayer();
   const [mounted, setMounted] = useState(false);
   const [animVisible, setAnimVisible] = useState(false);
   const showTimerRef = useRef<number | null>(null);
@@ -206,7 +208,7 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (item.id) navigate(`/watch/${mediaType}/${item.id}`);
+                if (item.id) openPlayer({ tmdbId: item.id, type: mediaType });
               }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black font-medium shadow hover:shadow-lg transition-all duration-300 hover:scale-105"
             >

@@ -96,7 +96,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
 
 
   return (
-    <div className="relative bg-black rounded-lg overflow-hidden group max-h-[70vh] w-auto mx-auto aspect-video" role="region" aria-label="Video player">
+    <div className="relative bg-black w-full h-full overflow-hidden group" role="region" aria-label="Video player">
       {/* Video Container */}
       <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black">
         {/* Loading State — full spinner */}
@@ -219,27 +219,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
         )}
 
 
-      </div>
-
-      {/* Video Info Footer */}
-      <div className="bg-[#13132B] p-4 border-t border-gray-700">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-white font-semibold text-lg">
-              {'title' in content ? content.title : content.name}
-            </h3>
-            <p className="text-gray-400 text-sm">
-              {selectedSource ? `Streaming from ${selectedSource.name}` : 'Select a source to start watching'}
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-400 text-sm">Quality:</span>
-            <span className="text-[#ff0000] text-sm font-medium">
-              {selectedSource?.quality || 'Auto'}
-            </span>
-          </div>
-        </div>
-      </div>
+    </div>
     </div>
   );
 };
