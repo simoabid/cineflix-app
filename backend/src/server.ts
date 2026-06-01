@@ -12,6 +12,8 @@ import collectionsRoutes from './routes/collectionsRoutes.js';
 import preferencesRoutes from './routes/preferencesRoutes.js';
 import watchedEpisodeRoutes from './routes/watchedEpisodeRoutes.js';
 import tmdbRoutes from './routes/tmdbRoutes.js';
+import proxyRoutes from './routes/proxyRoutes.js';
+import mediaProxyRoutes from './routes/mediaProxyRoutes.js';
 import { initializeSocketServer } from './sockets/watchParty.js';
 import { logger } from './utils/logger.js';
 
@@ -31,6 +33,8 @@ app.use(cors({
     },
     credentials: true
 }));
+app.use('/api/proxy', express.raw({ type: '*/*', limit: '10mb' }), proxyRoutes);
+app.use('/api/media-proxy', mediaProxyRoutes);
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
