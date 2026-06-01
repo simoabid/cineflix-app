@@ -164,14 +164,15 @@ export function getCountryCodeForLocale(locale: string): string | null {
   });
 
   if (!output) return null;
-  const priority = countryPriority[output.iso639_1.toLowerCase()];
-  if (output.countries.length === 0) {
+  const langObj = output as LanguageObj;
+  const priority = countryPriority[langObj.iso639_1.toLowerCase()];
+  if (langObj.countries.length === 0) {
     return priority ?? null;
   }
 
   if (priority) {
-    const prioritizedCountry = output.countries.find(
-      (v) => v.code_2.toLowerCase() === priority,
+    const prioritizedCountry = langObj.countries.find(
+      (v: any) => v.code_2.toLowerCase() === priority,
     );
     if (prioritizedCountry) return prioritizedCountry.code_2.toLowerCase();
   }
@@ -180,14 +181,14 @@ export function getCountryCodeForLocale(locale: string): string | null {
   // return the region if it matches
   const regionSubtag = tag?.region?.Subtag.toLowerCase();
   if (regionSubtag) {
-    const regionCode = output.countries.find(
-      (c) =>
+    const regionCode = langObj.countries.find(
+      (c: any) =>
         c.code_2.toLowerCase() === regionSubtag ||
         c.code_3.toLowerCase() === regionSubtag,
     );
     if (regionCode) return regionCode.code_2.toLowerCase();
   }
-  return output.countries[0].code_2.toLowerCase();
+  return langObj.countries[0].code_2.toLowerCase();
 }
 
 /**
@@ -217,6 +218,7 @@ export function getLocaleInfo(locale: string): LocaleInfo | null {
     if (lang) output = lang;
   });
   if (!output) return null;
+  const langObj = output as LanguageObj;
 
   const extras = [];
   if (tag.region?.Description) extras.push(tag.region.Description[0]);
@@ -225,9 +227,9 @@ export function getLocaleInfo(locale: string): LocaleInfo | null {
 
   return {
     code: tag.parts.langtag ?? realLocale,
-    isRtl: output.direction === "RTL",
-    name: output.name[0] + (extraStringified ? ` ${extraStringified}` : ""),
-    nativeName: output.nativeName[0] ?? undefined,
+    isRtl: langObj.direction === "RTL",
+    name: langObj.name[0] + (extraStringified ? ` ${extraStringified}` : ""),
+    nativeName: langObj.nativeName[0] ?? undefined,
   };
 }
 
