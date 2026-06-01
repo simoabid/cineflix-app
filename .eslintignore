@@ -1,0 +1,7 @@
+P-Stream_Project/
+mobile/
+backend/
+dist/
+coverage/
+node_modules/
+src/lib/providers/engine/

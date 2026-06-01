@@ -45,20 +45,7 @@ lerna-debug.log*
 *.sw?
 
 # Documentation & Implementation Guides
-ARCHITECTURE_EXPLANATION.md
-AUTH_INTEGRATION.md
-BACKEND_SETUP_GUIDE.md
-background_implementation.md
-FOOTER_REDESIGN.md
-HOVER_INTENT_README.md
-IMPLEMENTATION_STEPS.md
-LOGO_SYSTEM_README.md
-RIVESTREAM_INTEGRATION.md
-WATCHPAGE_README.md
-DEPLOY.md
-Google-Auth-Code-Review.md
-google-auth-setup.md
-Google-Auth_Walkthrough_Guide.md
+
 
 # IDE
 logs_result.json
@@ -68,11 +55,12 @@ logs_result.json
 .ai-code-review
 .cursor/*
 .cursor
-.vscode/*
-.vscode
 .gemini/*
 .gemini
 .windsurf/*
 .windsurf
 mobile
 mobile/*
+
+# Other
+cineflix-extension/

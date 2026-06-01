@@ -1,3 +1,7 @@
+import tailwindScrollbar from 'tailwind-scrollbar';
+
+import { defaultTheme as pstreamTheme } from './themes/default.js';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -6,7 +10,16 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: "350px",
+        ssm: "400px",
+        laptop: "1536px",
+        "2xl": "1921px",
+        "3xl": "2650px",
+        "4xl": "3840px",
+      },
       colors: {
+        ...pstreamTheme.extend.colors,
         netflix: {
           black: '#141414',
           red: '#E50914',
@@ -79,7 +92,8 @@ export default {
     },
   },
   plugins: [
-    function ({ addUtilities }) {
+    tailwindScrollbar,
+    function ({ addUtilities, addVariant }) {
       addUtilities({
         '.scrollbar-hide': {
           /* IE and Edge */
@@ -92,6 +106,7 @@ export default {
           }
         }
       })
+      addVariant("dir-neutral", "[dir] &")
     }
   ],
 }

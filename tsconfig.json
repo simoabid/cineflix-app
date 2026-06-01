@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "ES2021", "ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -29,7 +29,12 @@
       "@/services/*": ["services/*"],
       "@/types/*": ["types/*"],
       "@/utils/*": ["utils/*"],
-      "@/hooks/*": ["hooks/*"]
+      "@/hooks/*": ["hooks/*"],
+      "@/stores/*": ["stores/*"],
+      "@/lib/*": ["lib/*"],
+      "@providers": ["lib/providers"],
+      "@providers/*": ["lib/providers/*"],
+      "@p-stream/providers": ["lib/providers"]
     }
   },
   "include": ["src"],
