@@ -1,7 +1,7 @@
 import { serializeBody } from './body';
 import { makeFullUrl } from './common';
 import { FetchLike, FetchReply } from './fetch';
-import { Fetcher } from './types';
+import { Fetcher, DefaultedFetcherOptions, FetcherResponse } from './types';
 
 function getHeaders(list: string[], res: FetchReply): Headers {
   const output = new Headers();
@@ -17,7 +17,7 @@ function getHeaders(list: string[], res: FetchReply): Headers {
 }
 
 export function makeStandardFetcher(f: FetchLike): Fetcher {
-  const normalFetch: Fetcher = async (url, ops) => {
+  const normalFetch: Fetcher = async <T = any>(url: string, ops: DefaultedFetcherOptions): Promise<FetcherResponse<T>> => {
     const fullUrl = makeFullUrl(url, ops);
     const seralizedBody = serializeBody(ops.body);
 
@@ -62,7 +62,7 @@ export function makeStandardFetcher(f: FetchLike): Fetcher {
       }
 
       return {
-        body,
+        body: body as T,
         finalUrl: res.extraUrl ?? res.url,
         headers: getHeaders(ops.readHeaders, res),
         statusCode: res.status,

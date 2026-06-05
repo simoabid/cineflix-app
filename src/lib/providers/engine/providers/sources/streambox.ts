@@ -48,6 +48,7 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     url: track.url,
     language: track.code,
     type: 'srt' as const,
+    hasCorsRestrictions: false,
   }));
 
 
@@ -86,9 +87,9 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
           },
           type: 'file',
           flags: [flags.CORS_ALLOWED],
-          preferredHeaders: {
-            Referer: data.headers?.Referer,
-          },
+          preferredHeaders: data.headers?.Referer ? {
+            Referer: data.headers.Referer,
+          } : {},
         },
       ],
     };
@@ -104,9 +105,9 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
         playlist: hlsStream.link,
         type: 'hls',
         flags: [flags.CORS_ALLOWED],
-        preferredHeaders: {
-          Referer: data.headers?.Referer,
-        },
+        preferredHeaders: data.headers?.Referer ? {
+          Referer: data.headers.Referer,
+        } : {},
       },
     ],
   };

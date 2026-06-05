@@ -156,7 +156,7 @@ export function isDesktopApp(): boolean {
 }
 
 export function makeExtensionFetcher(): Fetcher {
-  return async (url, ops) => {
+  return async <T = any>(url: string, ops: DefaultedFetcherOptions): Promise<FetcherResponse<T>> => {
     const payload = buildExtensionFetchPayload(url, ops);
     const result = await sendExtensionMessage<ExtensionMakeRequestResponse>(
       'MAKE_REQUEST',
@@ -173,7 +173,7 @@ export function makeExtensionFetcher(): Fetcher {
       throw new Error('Extension returned a malformed response: missing statusCode or finalUrl');
     }
     return {
-      body,
+      body: body as T,
       finalUrl,
       statusCode,
       headers: makeFilteredHeaders(headers as Record<string, string>, ops.readHeaders),

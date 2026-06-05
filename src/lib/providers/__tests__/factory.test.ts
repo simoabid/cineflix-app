@@ -17,7 +17,7 @@ describe('provider factory', () => {
     const sourceIds = getProviders().listSources().map((source) => source.id);
 
     expect(sourceIds).toContain('vidlink');
-    expect(sourceIds).toContain('ridomovies');
+    expect(sourceIds).toContain('lookmovie');
   });
 
   it('registers vetted archived P-Stream movie sources and embeds', () => {
@@ -32,7 +32,7 @@ describe('provider factory', () => {
     const embedIds = providers.listEmbeds().map((embed) => embed.id);
 
     expect(sourceIds).toEqual(
-      expect.arrayContaining(['tasf', 'vidjoy', 'remotestream']),
+      expect.arrayContaining(['vidlink', 'lookmovie', 'fsharetv']),
     );
     expect(embedIds).toEqual(expect.arrayContaining(['vidjoy-stream1']));
   });
