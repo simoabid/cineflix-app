@@ -140,7 +140,7 @@ export const myanimeScraper = makeSourcerer({
   id: 'myanime',
   name: 'MyAnime',
   rank: 113,
-  disabled: false, // disabled since AI api is not privated
+  disabled: true, // disabled since AI api is not privated
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: universalScraper,
   scrapeShow: showScraper,

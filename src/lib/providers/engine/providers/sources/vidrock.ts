@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js';
 
 import { flags } from '../../entrypoint/utils/targets';
 import { SourcererOutput, makeSourcerer } from '../base';
-import { MovieScrapeContext, ShowScrapeContext } from '../../utils/context';
+import { MovieScrapeContext } from '../../utils/context';
 import { NotFoundError } from '../../utils/errors';
 
 const headers = {
@@ -10,23 +10,30 @@ const headers = {
   Referer: 'https://vidrock.net/',
 };
 
-const passphrase = 'x7k9mPqT2rWvY8zA5bC3nF6hJ2lK4mN9';
-const key = CryptoJS.enc.Utf8.parse(passphrase);
-const iv = CryptoJS.enc.Utf8.parse(passphrase.substring(0, 16));
+// C-1: Passphrase sourced from environment variable — never hardcoded in source
+const PASSPHRASE = import.meta.env.VITE_VIDROCK_PASSPHRASE as string | undefined;
 
 const baseUrl = 'https://vidrock.net/api';
 const userAgent =
   'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36';
 
-async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promise<SourcererOutput> {
-  const itemType = ctx.media.type;
-  let itemId: string;
-
-  if (itemType === 'movie') {
-    itemId = ctx.media.tmdbId;
-  } else {
-    itemId = `${ctx.media.tmdbId}_${ctx.media.season.number}_${ctx.media.episode.number}`;
+function buildCryptoParams(): { key: CryptoJS.lib.WordArray; iv: CryptoJS.lib.WordArray } {
+  if (!PASSPHRASE) {
+    throw new Error(
+      '[Vidrock] VITE_VIDROCK_PASSPHRASE env var is not set. Add it to your .env.local file.',
+    );
   }
+  return {
+    key: CryptoJS.enc.Utf8.parse(PASSPHRASE),
+    iv: CryptoJS.enc.Utf8.parse(PASSPHRASE.substring(0, 16)),
+  };
+}
+
+
+async function comboScraper(ctx: MovieScrapeContext): Promise<SourcererOutput> {
+  const { key, iv } = buildCryptoParams();
+  const itemType = 'movie';
+  const itemId = ctx.media.tmdbId;
 
   const encrypted = CryptoJS.AES.encrypt(itemId, key, {
     iv,
@@ -65,7 +72,7 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
 
   const embeds = [];
 
-  const createMirrorEmbed = (serverName: string, serverData: any) => {
+  const createMirrorEmbed = (serverName: string, serverData: { url?: string }) => {
     if (!serverData?.url) return null;
     if (serverName.includes('Astra') || serverData.url.includes('.workers.dev')) return null;
 
@@ -84,7 +91,7 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
   };
 
   for (const sourceKey of Object.keys(parsedRes)) {
-    const sourceData = parsedRes[sourceKey];
+    const sourceData = parsedRes[sourceKey] as { url?: string } | null;
     if (sourceData?.url && sourceData.url !== null) {
       // Handle Atlas server which returns a playlist URL
       if (sourceKey === 'Atlas' || sourceData.url.includes('cdn.vidrock.store/playlist/')) {
@@ -161,5 +168,4 @@ export const vidrockScraper = makeSourcerer({
   disabled: false,
   flags: [],
   scrapeMovie: comboScraper,
-  scrapeShow: comboScraper,
 });

@@ -1,22 +1,23 @@
 // Global interaction tracker for hover intent detection
 // Safe to import from many places - only initializes once
 
-type InteractionState = { 
-  lastPointerMove: number; 
-  lastWheel: number; 
+type InteractionState = {
+  lastPointerMove: number;
+  lastWheel: number;
 };
 
-const state: InteractionState = { 
-  lastPointerMove: Date.now(), 
-  lastWheel: 0 
+const state: InteractionState = {
+  lastPointerMove: Date.now(),
+  lastWheel: 0,
 };
 
 let initialized = false;
 
 export function initInteractionTracker(): void {
-  if (initialized) return;
+  // M-8: Guard against SSR / non-browser environments where `document` is undefined
+  if (initialized || typeof document === 'undefined') return;
   initialized = true;
-  
+
   // Track pointer movement globally
   document.addEventListener('pointermove', () => {
     state.lastPointerMove = Date.now();
@@ -31,4 +32,4 @@ export function initInteractionTracker(): void {
 export function getInteractionState(): InteractionState {
   initInteractionTracker();
   return state;
-} 
+}

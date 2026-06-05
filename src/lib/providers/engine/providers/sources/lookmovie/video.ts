@@ -32,7 +32,7 @@ export async function getVideo(
 ): Promise<{ playlist: string | null; captions: Caption[] }> {
   // Get sources
   const data = await getVideoSources(ctx, id, media);
-  const videoSources = data.streams;
+  const videoSources = data.streams ?? {};
 
   // Find video URL and return it
   const opts = ['auto', '1080p', '1080', '720p', '720', '480p', '480', '240p', '240', '360p', '360', '144', '144p'];
@@ -46,7 +46,7 @@ export async function getVideo(
 
   let captions: Caption[] = [];
 
-  for (const sub of data.subtitles) {
+  for (const sub of data.subtitles ?? []) {
     const language = labelToLanguageCode(sub.language);
     if (!language) continue;
     captions.push({

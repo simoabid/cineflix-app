@@ -3,13 +3,13 @@ import { load } from 'cheerio';
 import { SourcererOutput, makeSourcerer } from '../base';
 import { FileBasedStream } from '../streams';
 import { compareMedia } from '../../utils/compare';
-import { MovieScrapeContext, ShowScrapeContext } from '../../utils/context';
+import { MovieScrapeContext } from '../../utils/context';
 import { NotFoundError } from '../../utils/errors';
 import { getValidQualityFromString } from '../../utils/quality';
 
 const baseUrl = 'https://fsharetv.co';
 
-async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promise<SourcererOutput> {
+async function comboScraper(ctx: MovieScrapeContext): Promise<SourcererOutput> {
   const searchPage = await ctx.proxiedFetcher('/search', {
     baseUrl,
     query: {

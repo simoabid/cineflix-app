@@ -45,6 +45,7 @@ export const zunimeScraper = makeSourcerer({
   id: 'zunime',
   name: 'Zunime',
   rank: 114,
+  disabled: true,
   flags: [],
   scrapeShow: comboScraper,
 });

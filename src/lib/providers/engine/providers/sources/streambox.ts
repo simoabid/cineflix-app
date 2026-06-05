@@ -1,13 +1,32 @@
-/* eslint-disable no-console */
 import { flags } from '../../entrypoint/utils/targets';
 import { SourcererOutput, makeSourcerer } from '../base';
 import { MovieScrapeContext, ShowScrapeContext } from '../../utils/context';
 import { NotFoundError } from '../../utils/errors';
 
+interface StreamEntry {
+  resulation: string;
+  link: string;
+  type?: string;
+}
+
+interface CaptionTrack {
+  lang: string;
+  url: string;
+  code: string;
+}
+
+interface StreamBoxResponse {
+  url: StreamEntry[];
+  tracks: CaptionTrack[];
+  provider?: string;
+  headers?: { Referer?: string };
+}
+
+
 const streamboxBase = 'https://vidjoy.pro/embed/api/fastfetch';
 
 async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promise<SourcererOutput> {
-  const apiRes = await ctx.proxiedFetcher(
+  const apiRes = await ctx.proxiedFetcher<StreamBoxResponse>(
     ctx.media.type === 'movie'
       ? `${streamboxBase}/${ctx.media.tmdbId}?sr=0`
       : `${streamboxBase}/${ctx.media.tmdbId}/${ctx.media.season.number}/${ctx.media.episode.number}?sr=0`,
@@ -17,21 +36,20 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     throw new NotFoundError('Failed to fetch StreamBox data');
   }
 
-  console.log(apiRes);
-
-  const data = await apiRes;
+  const data = apiRes;
 
   const streams: Record<string, string> = {};
-  data.url.forEach((stream: any) => {
+  data.url.forEach((stream: StreamEntry) => {
     streams[stream.resulation] = stream.link;
   });
 
-  const captions = data.tracks.map((track: any) => ({
+  const captions = data.tracks.map((track: CaptionTrack) => ({
     id: track.lang,
     url: track.url,
     language: track.code,
-    type: 'srt',
+    type: 'srt' as const,
   }));
+
 
   if (data.provider === 'MovieBox') {
     return {
@@ -76,7 +94,7 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     };
   }
 
-  const hlsStream = data.url.find((stream: any) => stream.type === 'hls') || data.url[0];
+  const hlsStream = data.url.find((stream: StreamEntry) => stream.type === 'hls') ?? data.url[0];
   return {
     embeds: [],
     stream: [
@@ -98,7 +116,7 @@ export const streamboxScraper = makeSourcerer({
   id: 'streambox',
   name: 'StreamBox',
   rank: 119,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

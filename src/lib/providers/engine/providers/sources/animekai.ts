@@ -56,8 +56,9 @@ async function scrapeAnimekai(ctx: ShowScrapeContext): Promise<SourcererOutput> 
 
 export const animekaiScraper = makeSourcerer({
   id: 'animekai',
-  name: 'AnimeKai 🔥',
+  name: 'AnimeKai',
   rank: 180,
+  disabled: true,
   flags: [],
   scrapeShow: scrapeAnimekai,
 });

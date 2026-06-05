@@ -38,7 +38,7 @@ export function getProviders(): ProviderControls {
 
   // Desktop app → native target (no CORS restrictions, MKV support)
   if (isDesktopApp()) {
-    console.log('[CINEFLIX Providers] Mode: NATIVE (desktop app)');
+    if (import.meta.env.DEV) console.log('[CINEFLIX Providers] Mode: NATIVE (desktop app)');
     return makeProviders({
       fetcher: makeStandardFetcher(fetch),
       proxiedFetcher: makeStandardFetcher(fetch),
@@ -49,7 +49,7 @@ export function getProviders(): ProviderControls {
 
   // Extension active → browser-extension target (all sources available)
   if (hasExtension()) {
-    console.log('[CINEFLIX Providers] Mode: BROWSER_EXTENSION (extension detected ✅)');
+    if (import.meta.env.DEV) console.log('[CINEFLIX Providers] Mode: BROWSER_EXTENSION (extension detected ✅)');
     return makeProviders({
       fetcher: makeStandardFetcher(fetch),
       proxiedFetcher: makeExtensionFetcher(),
@@ -60,7 +60,7 @@ export function getProviders(): ProviderControls {
 
   // Browser only → CORS-limited mode with optional proxy fallback
   if (proxyUrl) {
-    console.log('[CINEFLIX Providers] Mode: BROWSER with proxy-backed streams');
+    if (import.meta.env.DEV) console.log('[CINEFLIX Providers] Mode: BROWSER with proxy-backed streams');
     return makeProviders({
       fetcher: makeStandardFetcher(fetch),
       proxiedFetcher: makeSimpleProxyFetcher(proxyUrl, fetch),
@@ -71,7 +71,7 @@ export function getProviders(): ProviderControls {
   }
 
   // Browser only, no proxy → most limited mode (CORS-allowed sources only)
-  console.log('[CINEFLIX Providers] Mode: BROWSER (no extension, no proxy — CORS-limited ⚠️)');
+  if (import.meta.env.DEV) console.log('[CINEFLIX Providers] Mode: BROWSER (no extension, no proxy — CORS-limited ⚠️)');
   return makeProviders({
     fetcher: makeStandardFetcher(fetch),
     target: targets.BROWSER,

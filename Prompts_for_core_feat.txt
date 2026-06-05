@@ -1,0 +1,25 @@
+Can I use this project and integrate it somehow in my Movie streaming platform to fetch all the   
+  movies/shows contents directly inside my app? I already have a website with react + typescript +  
+  vite + express + MongoDB + A lot of features...
+  
+  
+  
+  The thing is that I already use another project called "providers" to fetch and scrape sources of 
+  movies and shows, it scrapes M3U8 and valid urls of movies and plays them inside a comprehensive  
+  video player. But the issue is that this project is old and all the scrappers are not working     
+  anymore maybe because of the websites changing their structure or other problems. All of the      
+  scrapers are dead somehow that's why I'm searching for alternatives when I found this core        
+  project. Here is the project I was using: @providers/ I totally cloned it here inside this core   
+  project so you can read both and tell me more about the possibility of merging them and make a    
+  one unified and strong fetcher/scraper that I can use in my app. Please read the entire providers 
+  project, identify and understand how it works so we can figure out how to apply the same thing    
+  that core project uses in my old providers project @providers/ . 
+  
+  
+  
+  This sounds like a great solid and a huge plan, I want you to use all your available skills, use the sub-agents feature to..
+  
+  
+  
+  
+  

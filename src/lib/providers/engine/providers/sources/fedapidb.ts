@@ -95,9 +95,8 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
   try {
     await getTurnstileToken('0x4AAAAAABgPwhrOT6x6sTjI');
   } catch (error) {
-    // eslint-disable-next-line no-alert
-    alert('FED DB Turnstile verification failed. Please refresh the page and try again.');
-    throw new NotFoundError(`Turnstile verification failed: ${error}`);
+    // H-1: Never use alert() in library code — throw a descriptive error for the UI layer to handle
+    throw new NotFoundError(`Turnstile verification failed — please reload and try again: ${String(error)}`);
   }
 
   ctx.progress(50);
@@ -139,11 +138,8 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     return acc;
   }, {});
 
-  // Filter qualities based on provider type
-  const filteredStreams = Object.entries(streams).reduce((acc: Record<string, string>, [quality, url]) => {
-    acc[quality] = url;
-    return acc;
-  }, {});
+  // M-6: Replace the no-op reduce with a simple object spread — semantically identical
+  const filteredStreams = { ...streams };
 
   // Rewrite final URLs based on selected region -> subdomain mapping
   const selectedSubdomain = selectSubdomainByRegion(region);
@@ -232,8 +228,9 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
 
 export const FedAPIDBScraper = makeSourcerer({
   id: 'fedapidb',
-  name: 'FED DB 🔥',
+  name: 'FED DB',
   rank: 299,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

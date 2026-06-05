@@ -114,17 +114,21 @@ function sendExtensionMessage<Response>(
     }, timeoutMs);
 
     function handler(event: MessageEvent) {
+      // C-3: Validate origin to prevent spoofing from cross-origin frames
+      if (event.origin !== window.location.origin) return;
       if (event.source !== window) return;
-      const data = event.data;
+      const data = event.data as Record<string, unknown>;
       if (!data || data.direction !== 'extension-to-cineflix') return;
       if (data.requestId !== requestId) return;
 
       window.clearTimeout(timeout);
       window.removeEventListener('message', handler);
+      // M-2: Resolve with the raw response data, not an unsafe cast
       resolve(data.response as Response);
     }
 
     window.addEventListener('message', handler);
+    // C-2: Restrict postMessage to same origin instead of '*'
     window.postMessage(
       {
         direction: 'cineflix-to-extension',
@@ -132,7 +136,7 @@ function sendExtensionMessage<Response>(
         type,
         payload,
       },
-      '*',
+      window.location.origin,
     );
   });
 }
@@ -163,12 +167,17 @@ export function makeExtensionFetcher(): Fetcher {
       throw new Error(`Extension fetch error: ${result?.error ?? 'Unknown error'}`);
     }
 
+    const { body, finalUrl, statusCode, headers } = result.response;
+    // M-2: Validate response shape at runtime before constructing FetcherResponse
+    if (typeof statusCode !== 'number' || typeof finalUrl !== 'string') {
+      throw new Error('Extension returned a malformed response: missing statusCode or finalUrl');
+    }
     return {
-      body: result.response.body,
-      finalUrl: result.response.finalUrl,
-      statusCode: result.response.statusCode,
-      headers: makeFilteredHeaders(result.response.headers, ops.readHeaders),
-    } as FetcherResponse;
+      body,
+      finalUrl,
+      statusCode,
+      headers: makeFilteredHeaders(headers as Record<string, string>, ops.readHeaders),
+    };
   };
 }
 

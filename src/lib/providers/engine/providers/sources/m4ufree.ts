@@ -235,9 +235,9 @@ const comboScraper = async (ctx: MovieScrapeContext | ShowScrapeContext) => {
 
 export const m4ufreeScraper = makeSourcerer({
   id: 'm4ufree',
-  name: 'M4UFree 🔥',
+  name: 'M4UFree',
   rank: 182,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

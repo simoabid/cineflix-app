@@ -4,10 +4,11 @@ import { SourcererOutput, makeSourcerer } from '../base';
 import { ShowScrapeContext } from '../../utils/context';
 import { NotFoundError } from '../../utils/errors';
 
-const baseUrl = 'https://cinehdplus.gratis';
+const baseUrl = 'https://cinehdplus.zone';
 
 async function comboScraper(ctx: ShowScrapeContext): Promise<SourcererOutput> {
-  const searchUrl = `${baseUrl}/series/?story=${ctx.media.tmdbId}&do=search&subaction=search`;
+  // Search by title (the site uses Spanish titles, so search the original title)
+  const searchUrl = `${baseUrl}/index.php?do=search&subaction=search&story=${encodeURIComponent(ctx.media.title)}`;
 
   // Fetch the search results page
   const searchPage = await ctx.proxiedFetcher<string>(searchUrl, {
@@ -21,15 +22,40 @@ async function comboScraper(ctx: ShowScrapeContext): Promise<SourcererOutput> {
   const $search = load(searchPage);
 
   // Find the series page URL from search results
-  const seriesUrl = $search('.card__title a[href]:first').attr('href');
-  if (!seriesUrl) {
+  // HTML structure: <a href="..."> Title</a>
+  const searchResults: { title: string; url: string; year?: number }[] = [];
+  $search('a[href*="/peliculas/"]').each((_, el) => {
+    const $el = $search(el);
+    const url = $el.attr('href');
+    const title = $el.text().trim();
+    if (!url || !title || title.length < 2) return;
+    // Skip navigation links (e.g., "/peliculas/" without a specific movie)
+    if (url.endsWith('/peliculas/') || url.endsWith('/peliculas')) return;
+    // Try to extract year from URL pattern like -2024- or from sibling text
+    const yearMatch = url.match(/-(\d{4})(?:-|\.html)/) || $el.parent().text().match(/(\d{4})/);
+    searchResults.push({ title, url, year: yearMatch ? parseInt(yearMatch[1], 10) : undefined });
+  });
+
+  // Find the best match by title similarity
+  const normalizedTitle = ctx.media.title.toLowerCase();
+  const match = searchResults.find((r) => {
+    const rTitle = r.title.toLowerCase();
+    // Check if the search result title contains the media title or vice versa
+    return rTitle.includes(normalizedTitle) || normalizedTitle.includes(rTitle);
+  }) || searchResults.find((r) => {
+    // Fuzzy match: check if any word from the title appears in the result
+    const words = normalizedTitle.split(/\s+/).filter((w) => w.length > 3);
+    return words.some((w) => r.title.toLowerCase().includes(w));
+  }) || searchResults[0];
+
+  if (!match?.url) {
     throw new NotFoundError('Series not found in search results');
   }
 
   ctx.progress(30);
 
   // Fetch the series page
-  const seriesPageUrl = new URL(seriesUrl, baseUrl);
+  const seriesPageUrl = new URL(match.url, baseUrl);
   const seriesPage = await ctx.proxiedFetcher<string>(seriesPageUrl.href, {
     headers: {
       'User-Agent':
@@ -60,7 +86,7 @@ async function comboScraper(ctx: ShowScrapeContext): Promise<SourcererOutput> {
         return null;
       }
     })
-    .filter((url): url is URL => url !== null && url.hostname !== 'cinehdplus.gratis');
+    .filter((url): url is URL => url !== null && url.hostname !== 'cinehdplus.zone');
 
   if (!mirrorUrls.length) {
     throw new NotFoundError('No streaming links found for this episode');
@@ -101,7 +127,7 @@ export const cinehdplusScraper = makeSourcerer({
   id: 'cinehdplus',
   name: 'CineHDPlus (Latino)',
   rank: 4,
-  disabled: false,
+  disabled: true,
   flags: [],
   scrapeShow: comboScraper,
 });

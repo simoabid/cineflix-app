@@ -45,8 +45,9 @@ export function makeSimpleProxyFetcher(proxyUrl: string, f: FetchLike): Fetcher 
         // set correct final url
         res.extraUrl = res.headers.get('X-Final-Destination') ?? res.url;
         return res;
-      } catch (error: any) {
-        if (error.name === 'AbortError') {
+      } catch (error: unknown) {
+        // M-4: Use `unknown` in catch clause and narrow with instanceof
+        if (error instanceof Error && error.name === 'AbortError') {
           throw new Error(`Fetch request to ${a} timed out after ${timeout}ms`);
         }
         throw error;

@@ -6,7 +6,7 @@ import { createM3U8ProxyUrl } from '../../../utils/proxy';
 
 import { decodeAtom, decodeDeanEdwards, decodeHex, extractPackerParams, rtt, unescapeString } from './decrypt';
 
-const baseUrl = 'https://www.fullhdfilmizlesene.tv';
+const baseUrl = 'https://www.fullhdfilmizlesene.life';
 
 const headers = {
   Referer: baseUrl,
@@ -51,12 +51,9 @@ function extractAtom(body: string) {
 }
 
 async function scrapeMovie(ctx: MovieScrapeContext): Promise<SourcererOutput> {
-  if (!ctx.media.imdbId) {
-    throw new NotFoundError('IMDb id not provided');
-  }
-
-  const searchJson = await ctx.proxiedFetcher<{ prefix: string; dizilink: string }[]>(
-    `/autocomplete/q.php?q=${ctx.media.imdbId}`,
+  // Search by title (the autocomplete endpoint no longer supports IMDB ID lookup)
+  const searchJson = await ctx.proxiedFetcher<Array<{ baslik: string; yil: string; dizilink: string; prefix: string }>>(
+    `/autocomplete/q.php?q=${encodeURIComponent(ctx.media.title)}`,
     {
       baseUrl,
       headers,
@@ -66,7 +63,9 @@ async function scrapeMovie(ctx: MovieScrapeContext): Promise<SourcererOutput> {
   ctx.progress(30);
   if (!searchJson.length) throw new NotFoundError('Media not found');
 
-  const searchResult = searchJson[0];
+  // Match by year to find the correct movie
+  const targetYear = ctx.media.releaseYear.toString();
+  const searchResult = searchJson.find((r) => r.yil === targetYear) || searchJson[0];
 
   const mediaUrl = `/${searchResult.prefix}/${searchResult.dizilink}`;
   const mediaPage = await ctx.proxiedFetcher<string>(mediaUrl, {

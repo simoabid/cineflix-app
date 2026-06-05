@@ -114,9 +114,9 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
 
 export const primewireScraper = makeSourcerer({
   id: 'primewire',
-  name: 'PrimeWire 🔥',
+  name: 'PrimeWire',
   rank: 206,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

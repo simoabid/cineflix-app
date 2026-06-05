@@ -47,7 +47,7 @@ async function getEmbeds(id: string, servers: string, ctx: ScrapeContext): Promi
 export const warezcdnScraper = makeSourcerer({
   id: 'warezcdn',
   name: 'WarezCDN',
-  disabled: false,
+  disabled: true,
   rank: 115,
   flags: [],
   scrapeMovie: async (ctx) => {

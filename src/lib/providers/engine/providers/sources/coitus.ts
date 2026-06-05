@@ -24,15 +24,14 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
       const urlParts = processedUrl.split(/orbitproxy\.[^/]+\//);
       if (urlParts.length >= 2) {
         const encryptedPart = urlParts[1].split('.m3u8')[0];
-
         try {
-          const decodedData = Buffer.from(encryptedPart, 'base64').toString('utf-8');
-
+          // H-2: Use browser-native atob + TextDecoder instead of Node.js Buffer
+          const binaryStr = atob(encryptedPart);
+          const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+          const decodedData = new TextDecoder().decode(bytes);
           const jsonData = JSON.parse(decodedData);
-
-          const originalUrl = jsonData.u;
-          const referer = jsonData.r || '';
-
+          const originalUrl = jsonData.u as string;
+          const referer = (jsonData.r as string) || '';
           streamHeaders = { referer };
           processedUrl = createM3U8ProxyUrl(originalUrl, ctx.features, streamHeaders);
         } catch (jsonError) {
@@ -44,9 +43,8 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     }
   }
 
-  // eslint-disable-next-line no-console
-  console.log(apiRes);
   ctx.progress(90);
+
 
   return {
     embeds: [],
@@ -67,7 +65,7 @@ export const coitusScraper = makeSourcerer({
   id: 'coitus',
   name: 'Autoembed+',
   rank: 91,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

@@ -45,9 +45,8 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
   try {
     await getTurnstileToken('0x4AAAAAABgPwhrOT6x6sTjI');
   } catch (error) {
-    // eslint-disable-next-line no-alert
-    alert('FED API Turnstile verification failed. Please refresh the page and try again.');
-    throw new NotFoundError(`Turnstile verification failed: ${error}`);
+    // H-1: Never use alert() in library code — throw a descriptive error for the UI layer to handle
+    throw new NotFoundError(`Turnstile verification failed — please reload and try again: ${String(error)}`);
   }
 
   ctx.progress(50);
@@ -59,19 +58,17 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     apiUrl += `&season=${ctx.media.season.number}&episode=${ctx.media.episode.number}`;
   }
 
-  // Fetch data from the API
-  const res = await fetch(apiUrl, { credentials: 'omit' });
-  if (!res.ok) throw new NotFoundError('API request failed');
-  const data: StreamData = await res.json();
+  // H-6: Use ctx.proxiedFetcher — respects proxy layer, timeout, and CORS flags
+  const data: StreamData = await ctx.proxiedFetcher<StreamData>(apiUrl);
 
-  if (data?.error && data.error.endsWith('not found in database')) {
+  // H-4: Validate data before accessing its properties (null check must come first)
+  if (!data) throw new NotFoundError('No response from API');
+  if (data.error?.endsWith('not found in database')) {
     throw new NotFoundError('No stream found');
   }
-  if (!data) throw new NotFoundError('No response from API');
 
-  ctx.progress(90);
+  ctx.progress(75);
 
-  // Process streams data
   type StreamInfo = { url: string; type: 'hls' | 'mp4' };
   const streams = Object.entries(data.streams).reduce((acc: Record<string, StreamInfo>, [quality, entry]) => {
     const url = typeof entry === 'string' ? entry : entry.url;
@@ -161,8 +158,9 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
 
 export const FedAPIScraper = makeSourcerer({
   id: 'fedapi',
-  name: 'FED API (4K) 🔥',
+  name: 'FED API (4K)',
   rank: 300,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

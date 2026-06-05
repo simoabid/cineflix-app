@@ -30,7 +30,7 @@ export const multiembedScraper = makeSourcerer({
   id: 'multiembed',
   name: 'MultiEmbed 🔥',
   rank: 145,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

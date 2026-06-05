@@ -8,7 +8,7 @@ import { NotFoundError } from '../../../utils/errors';
 import { MovieData, VideoLinks } from './types';
 import { generateRandomFavs, parseSubtitleLinks, parseVideoLinks } from './utils';
 
-const rezkaBase = 'https://hdrezka.ag/';
+const rezkaBase = 'https://hdrezka.website/';
 const baseHeaders = {
   'X-Hdrezka-Android-App': '1',
   'X-Hdrezka-Android-App-Version': '2.2.0',
@@ -19,7 +19,7 @@ const baseHeaders = {
 };
 
 async function searchAndFindMediaId(ctx: ShowScrapeContext | MovieScrapeContext): Promise<MovieData | null> {
-  const searchData = await ctx.proxiedFetcher<string>(`/engine/ajax/search.php`, {
+  const searchData = await ctx.fetcher<string>(`/engine/ajax/search.php`, {
     baseUrl: rezkaBase,
     headers: baseHeaders,
     query: { q: ctx.media.title },
@@ -85,7 +85,7 @@ async function getStream(
 
   // console.log('Fetching stream with params:', Object.fromEntries(searchParams));
 
-  const response = await ctx.proxiedFetcher<string>('/ajax/get_cdn_series/', {
+  const response = await ctx.fetcher<string>('/ajax/get_cdn_series/', {
     baseUrl: rezkaBase,
     method: 'POST',
     body: searchParams,
@@ -126,7 +126,7 @@ async function getTranslatorId(
 ): Promise<string | null> {
   // console.log('Getting translator ID for:', { url, id });
 
-  const response = await ctx.proxiedFetcher<string>(url, {
+  const response = await ctx.fetcher<string>(url, {
     headers: baseHeaders,
   });
 
@@ -175,6 +175,7 @@ export const hdRezkaScraper = makeSourcerer({
   id: 'hdrezka',
   name: 'HDRezka',
   rank: 105,
+  disabled: true,
   flags: [flags.CORS_ALLOWED, flags.IP_LOCKED],
   scrapeShow: universalScraper,
   scrapeMovie: universalScraper,

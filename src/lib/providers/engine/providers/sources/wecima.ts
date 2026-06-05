@@ -4,7 +4,7 @@ import { SourcererOutput, makeSourcerer } from '../base';
 import { MovieScrapeContext, ShowScrapeContext } from '../../utils/context';
 import { NotFoundError } from '../../utils/errors';
 
-const baseUrl = 'https://wecima.tube';
+const baseUrl = 'https://wecima.cash';
 
 async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promise<SourcererOutput> {
   const searchPage = await ctx.proxiedFetcher(`/search/${encodeURIComponent(ctx.media.title)}/`, {
@@ -32,7 +32,7 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
 
     for (const element of seasonLinks) {
       const text = content$(element).text().trim();
-      if (text.includes(`موسم ${ctx.media.season}`)) {
+      if (text.includes(`موسم ${ctx.media.season.number}`)) {
         seasonUrl = content$(element).attr('href');
         break;
       }
@@ -46,7 +46,7 @@ async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promis
     const episodeLinks = season$('.Episodes--Seasons--Episodes a');
     for (const element of episodeLinks) {
       const epTitle = season$(element).find('episodetitle').text().trim();
-      if (epTitle === `الحلقة ${ctx.media.episode}`) {
+      if (epTitle === `الحلقة ${ctx.media.episode.number}`) {
         const episodeUrl = season$(element).attr('href');
         if (episodeUrl) {
           const episodePage = await ctx.proxiedFetcher(episodeUrl, { baseUrl });
@@ -95,7 +95,7 @@ export const wecimaScraper = makeSourcerer({
   id: 'wecima',
   name: 'Wecima (Arabic)',
   rank: 3,
-  disabled: false,
+  disabled: true,
   flags: [],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

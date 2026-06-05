@@ -55,7 +55,7 @@ export const TASFScraper = makeSourcerer({
   id: 'tasf',
   name: 'theyallsayflix.su',
   rank: 225,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie: comboScraper,
   scrapeShow: comboScraper,

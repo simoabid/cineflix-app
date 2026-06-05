@@ -56,17 +56,26 @@ async function extractVidhideEmbed(ctx: MovieScrapeContext | ShowScrapeContext, 
     playerLinks.push({ idx, langBtn, url });
   });
 
+  // Resolve all player URLs in parallel instead of sequentially.
+  // Movie pages can have 15-30+ player links; sequential resolution
+  // was causing 28s+ latency due to N serial HTTP round-trips.
+  const resolvedUrls = await Promise.all(
+    playerLinks.map(async (link) => {
+      if (link.url.includes('/player/')) {
+        return resolvePlayerUrl(ctx, link.url);
+      }
+      return link.url;
+    }),
+  );
+
   const results: { embedId: string; url: string }[] = [];
-  for (const link of playerLinks) {
-    let realUrl = link.url;
-    if (realUrl.includes('/player/')) {
-      realUrl = await resolvePlayerUrl(ctx, realUrl);
-    }
+  for (let i = 0; i < playerLinks.length; i++) {
+    const realUrl = resolvedUrls[i];
     if (/vidhide/i.test(realUrl)) {
       let embedId = 'vidhide';
-      if (link.langBtn.includes('latino')) embedId = 'vidhide-latino';
-      else if (link.langBtn.includes('castellano') || link.langBtn.includes('español')) embedId = 'vidhide-spanish';
-      else if (link.langBtn.includes('ingles') || link.langBtn.includes('english')) embedId = 'vidhide-english';
+      if (playerLinks[i].langBtn.includes('latino')) embedId = 'vidhide-latino';
+      else if (playerLinks[i].langBtn.includes('castellano') || playerLinks[i].langBtn.includes('español')) embedId = 'vidhide-spanish';
+      else if (playerLinks[i].langBtn.includes('ingles') || playerLinks[i].langBtn.includes('english')) embedId = 'vidhide-english';
 
       results.push({ embedId, url: realUrl });
     }

@@ -23,7 +23,7 @@ export function makeStandardFetcher(f: FetchLike): Fetcher {
 
     // AbortController
     const controller = new AbortController();
-    const timeout = 15000; // 15s timeout
+    const timeout = 30000; // 30s timeout — accommodates slow providers (pelisplushd ~28s)
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
@@ -40,7 +40,9 @@ export function makeStandardFetcher(f: FetchLike): Fetcher {
 
       clearTimeout(timeoutId);
 
-      let body: any;
+      // M-3: Use an explicit union type instead of `any`
+      type FetchBody = string | unknown | ArrayBuffer | null;
+      let body: FetchBody;
       const contentType = res.headers.get('content-type')?.toLowerCase();
       const isJson = contentType?.includes('application/json');
       const isBinary =
@@ -65,8 +67,9 @@ export function makeStandardFetcher(f: FetchLike): Fetcher {
         headers: getHeaders(ops.readHeaders, res),
         statusCode: res.status,
       };
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      // M-4: Use `unknown` in catch clause and narrow with instanceof
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error(`Fetch request to ${fullUrl} timed out after ${timeout}ms`);
       }
       throw error;

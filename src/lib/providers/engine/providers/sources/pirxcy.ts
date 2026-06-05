@@ -95,8 +95,9 @@ async function findMediaByTMDBId(
   for (const result of searchRes.data) {
     const detailUrl = `${baseUrl}/details/${type}/${result.id}`;
     const detailRes = await ctx.proxiedFetcher(detailUrl);
-
-    if (detailRes.data && detailRes.data.tmdb_id.toString() === tmdbId) {
+    // H-5: Guard against missing or malformed detail response before accessing tmdb_id
+    const remoteTmdbId = detailRes?.data?.tmdb_id?.toString();
+    if (remoteTmdbId === tmdbId) {
       return result.id;
     }
   }
@@ -129,7 +130,7 @@ async function scrapeMovie(ctx: MovieScrapeContext): Promise<SourcererOutput> {
   return {
     stream: [
       {
-        id: 'pirxcy',
+        id: 'primary',
         type: 'file',
         qualities,
         flags: [flags.CORS_ALLOWED],
@@ -182,7 +183,7 @@ export const pirxcyScraper = makeSourcerer({
   id: 'pirxcy',
   name: 'Pirxcy',
   rank: 290,
-  disabled: false,
+  disabled: true,
   flags: [flags.CORS_ALLOWED],
   scrapeMovie,
   scrapeShow,
