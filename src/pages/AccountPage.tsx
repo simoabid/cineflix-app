@@ -44,9 +44,10 @@ import { AUTH_STRINGS } from '../utils/strings';
 import { useAccountSettings, SaveStatus } from '../hooks/useAccountSettings';
 import { AVATARS, renderAvatarById } from '../constants/avatars';
 import DynamicBackground from '../components/DynamicBackground';
+import { CineProSettingsView } from '../components/CineProSettingsView';
 
 // Settings tabs
-type SettingsTab = 'profile' | 'playback' | 'notifications' | 'privacy' | 'devices' | 'subscription' | 'accessibility' | 'language';
+type SettingsTab = 'profile' | 'playback' | 'notifications' | 'privacy' | 'devices' | 'subscription' | 'accessibility' | 'language' | 'cinepro';
 
 interface TabItem {
     id: SettingsTab;
@@ -63,6 +64,7 @@ const tabs: TabItem[] = [
     { id: 'subscription', label: 'Subscription', icon: CreditCard },
     { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
     { id: 'language', label: 'Language', icon: Globe },
+    { id: 'cinepro', label: 'CinePro Core', icon: Settings },
 ];
 
 // Toggle Switch Component
@@ -993,6 +995,11 @@ const AccountPage: React.FC = () => {
                             </SettingRow>
                         </SettingsCard>
                     </div>
+                );
+
+            case 'cinepro':
+                return (
+                    <CineProSettingsView />
                 );
 
             default:

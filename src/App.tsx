@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -23,8 +24,16 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { SmartPlayerProvider } from './contexts/SmartPlayerContext';
 import { SmartPlayerModal } from './components/SmartPlayerModal';
 import WatchRedirect from './pages/WatchRedirect';
+import { CineProHealthService } from './services/cinepro-adapter';
 
 function App() {
+  useEffect(() => {
+    CineProHealthService.start();
+    return () => {
+      CineProHealthService.stop();
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       <HelmetProvider>

@@ -33,6 +33,8 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
   const displayMode = usePlayerStore((s) => s.displayMode);
   const iframeSource = usePlayerStore((s) => s.iframeSource);
   const switchToNative = usePlayerStore((s) => s.switchToNative);
+  const sourceOrigin = usePlayerStore((s) => s.sourceOrigin);
+  const cineproProviderName = usePlayerStore((s) => s.cineproProviderName);
   const { isMobile } = useIsMobile();
   const manualSourceSelection = usePreferencesStore(
     (s) => s.manualSourceSelection,
@@ -186,6 +188,12 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
                   season: meta?.season?.number,
                   episode: meta?.episode?.number,
                 })}
+              </span>
+            )}
+
+            {sourceOrigin === "cinepro" && cineproProviderName && (
+              <span className="ml-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-purple-600/20 text-purple-300 border border-purple-500/30 whitespace-nowrap">
+                CinePro: {cineproProviderName}
               </span>
             )}
 

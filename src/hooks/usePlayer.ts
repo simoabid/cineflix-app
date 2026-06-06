@@ -23,6 +23,8 @@ export interface UsePlayerReturn {
     captions: CaptionListItem[],
     sourceId: string | null,
     startAt?: number,
+    sourceOrigin?: 'pstream' | 'cinepro',
+    cineproProviderName?: string | null,
   ) => void;
   setScrapeNotFound: () => void;
   setScrapeStatus: () => void;
@@ -36,6 +38,7 @@ export interface UsePlayerReturn {
  * - Start playback with source/captions
  * - Handle error states
  * - Reset the player
+ * - Track source origins
  */
 export function usePlayer(): UsePlayerReturn {
   const setStatus = usePlayerStore((s) => s.setStatus);
@@ -54,8 +57,10 @@ export function usePlayer(): UsePlayerReturn {
       captions: CaptionListItem[],
       sourceId: string | null,
       startAt?: number,
+      sourceOrigin?: 'pstream' | 'cinepro',
+      cineproProviderName?: string | null,
     ) => {
-      setSource(source, captions, startAt ?? 0);
+      setSource(source, captions, startAt ?? 0, sourceOrigin, cineproProviderName);
       setSourceId(sourceId);
     },
     [setSource, setSourceId],

@@ -13,6 +13,13 @@ import { useOverlayRouter } from "@/hooks/useOverlayRouter";
 import { playerStatus } from "@/stores/player/slices/source";
 import { usePlayerStore } from "@/stores/player/store";
 import { usePreferencesStore } from "@/stores/preferences";
+import { useCineProStore, CineProCachedStream } from "@/stores/cinepro";
+import { usePlayer } from "@/hooks/usePlayer";
+import {
+  convertCaptions,
+  convertStreamToSource,
+} from "@/lib/providers/stream-utils";
+import { mapQuality } from "@/services/cinepro-adapter";
 
 export interface SourceSelectionViewProps {
   id: string;
@@ -206,6 +213,11 @@ export function SourceSelectionView({
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  const cineproStreams = useCineProStore((s) => s.scrapedStreams);
+  const isCineProEnabled = useCineProStore((s) => s.isEnabled);
+  const { playMedia } = usePlayer();
+  const currentTime = usePlayerStore((s) => s.progress.time);
+
   const sources = useMemo(() => {
     if (!metaType) return [];
     const allSources = getCachedMetadata()
@@ -262,14 +274,38 @@ export function SourceSelectionView({
     return sources.filter((s) => s.name.toLowerCase().includes(q));
   }, [sources, searchQuery]);
 
+  const filteredCineProStreams = useMemo(() => {
+    if (!isCineProEnabled) return [];
+    if (!searchQuery.trim()) return cineproStreams;
+    const q = searchQuery.toLowerCase();
+    return cineproStreams.filter((s) =>
+      s.providerName.toLowerCase().includes(q)
+    );
+  }, [cineproStreams, isCineProEnabled, searchQuery]);
+
+  const showCinePro = isCineProEnabled && cineproStreams.length > 0;
+  const noSourcesAvailable = sources.length === 0 && !showCinePro;
+
+  const handleSelectCineProStream = (cached: CineProCachedStream) => {
+    const sourceData = convertStreamToSource({ stream: cached.stream });
+    const captions = convertCaptions(cached.stream.captions ?? []);
+    playMedia(
+      sourceData,
+      captions,
+      cached.sourceId,
+      currentTime,
+      "cinepro",
+      cached.providerName,
+    );
+    router.close();
+  };
+
   const handleFindNextSource = () => {
     if (!currentSourceId) return;
     setResumeFromSourceId(currentSourceId);
     router.close();
     setStatus(playerStatus.SCRAPING);
   };
-
-  const noSourcesAvailable = sources.length === 0;
 
   return (
     <>
@@ -295,7 +331,7 @@ export function SourceSelectionView({
       {/* Scrollable body — must be exactly the 2nd direct child of CardWithScrollable */}
       <div className="overflow-y-auto overflow-x-hidden scrollbar-none pb-4">
         {/* Search/filter input */}
-        {sources.length > 4 && (
+        {(sources.length + (showCinePro ? cineproStreams.length : 0)) > 4 && (
           <div className="px-1 pt-3 pb-1">
             <input
               type="text"
@@ -307,52 +343,120 @@ export function SourceSelectionView({
           </div>
         )}
 
-        <Menu.Section>
-          {noSourcesAvailable ? (
+        {noSourcesAvailable ? (
+          <Menu.Section>
             <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
               <p className="text-video-context-type-main text-sm font-medium opacity-70">
-                No sources available
+                {t("player.menus.sources.noSources.title") ?? "No sources available"}
               </p>
               <p className="text-video-context-type-main text-xs opacity-40">
-                Sources will appear here once the player is ready
+                {t("player.menus.sources.noSources.text") ?? "Sources will appear here once the player is ready"}
               </p>
             </div>
-          ) : filteredSources.length === 0 ? (
+          </Menu.Section>
+        ) : filteredSources.length === 0 && filteredCineProStreams.length === 0 ? (
+          <Menu.Section>
             <div className="flex items-center justify-center py-6">
               <p className="text-video-context-type-main text-sm opacity-50">
                 No sources match &ldquo;{searchQuery}&rdquo;
               </p>
             </div>
-          ) : (
-            filteredSources.map((v) => {
-              const quality = getSourceQuality(v.flags, v.rank);
-              const isLastSuccessful =
-                enableLastSuccessfulSource && v.id === lastSuccessfulSource;
-              return (
-                <SelectableLink
-                  key={v.id}
-                  onClick={() => {
-                    onChoose?.(v.id);
-                    router.navigate("/source/embeds");
-                  }}
-                  selected={v.id === currentSourceId}
-                  rightSide={
-                    <div className="flex items-center gap-1.5">
-                      {isLastSuccessful && (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border text-green-300 bg-green-300/10 border-green-300/30">
-                          last used
-                        </span>
-                      )}
-                      {quality && <QualityBadge quality={quality} />}
+          </Menu.Section>
+        ) : (
+          <>
+            {showCinePro && (
+              <>
+                <Menu.SectionTitle>
+                  {t("player.menus.sources.cineproSectionTitle") ??
+                    "Server Streams (CinePro)"}
+                </Menu.SectionTitle>
+                <Menu.Section>
+                  {filteredCineProStreams.length === 0 ? (
+                    <div className="flex items-center justify-center py-4">
+                      <p className="text-video-context-type-main text-xs opacity-50">
+                        No server streams match &ldquo;{searchQuery}&rdquo;
+                      </p>
                     </div>
-                  }
-                >
-                  {v.name}
-                </SelectableLink>
-              );
-            })
-          )}
-        </Menu.Section>
+                  ) : (
+                    filteredCineProStreams.map((c, idx) => {
+                      const qVal = mapQuality(c.quality);
+                      const qualityLabel =
+                        qVal === "4k"
+                          ? "4K"
+                          : qVal !== "unknown"
+                            ? qVal + "p"
+                            : "";
+                      return (
+                        <SelectableLink
+                          key={`${c.sourceId}-${idx}`}
+                          onClick={() => handleSelectCineProStream(c)}
+                          selected={c.sourceId === currentSourceId}
+                          rightSide={
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border text-purple-300 bg-purple-300/10 border-purple-300/30">
+                                server
+                              </span>
+                              {qualityLabel && (
+                                <QualityBadge quality={qualityLabel} />
+                              )}
+                            </div>
+                          }
+                        >
+                          {c.providerName}
+                        </SelectableLink>
+                      );
+                    })
+                  )}
+                </Menu.Section>
+              </>
+            )}
+
+            {showCinePro && (
+              <Menu.SectionTitle>
+                {t("player.menus.sources.localSectionTitle") ??
+                  "Client-side Scrapers"}
+              </Menu.SectionTitle>
+            )}
+
+            <Menu.Section>
+              {filteredSources.length === 0 ? (
+                <div className="flex items-center justify-center py-4">
+                  <p className="text-video-context-type-main text-xs opacity-50">
+                    No client-side scrapers match &ldquo;{searchQuery}&rdquo;
+                  </p>
+                </div>
+              ) : (
+                filteredSources.map((v) => {
+                  const quality = getSourceQuality(v.flags, v.rank);
+                  const isLastSuccessful =
+                    enableLastSuccessfulSource && v.id === lastSuccessfulSource;
+                  return (
+                    <SelectableLink
+                      key={v.id}
+                      onClick={() => {
+                        onChoose?.(v.id);
+                        router.navigate("/source/embeds");
+                      }}
+                      selected={v.id === currentSourceId}
+                      rightSide={
+                        <div className="flex items-center gap-1.5">
+                          {isLastSuccessful && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border text-green-300 bg-green-300/10 border-green-300/30">
+                              last used
+                            </span>
+                          )}
+                          {quality && <QualityBadge quality={quality} />}
+                        </div>
+                      }
+                    >
+                      {v.name}
+                    </SelectableLink>
+                  );
+                })
+              )}
+            </Menu.Section>
+          </>
+        )}
       </div>
     </>
   );

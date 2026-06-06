@@ -20,6 +20,7 @@ import type { Movie, TVShow, StreamSource } from '@/types';
 import { setCachedMetadata } from '@/backend/helpers/providerApi';
 import { getProviders } from '@/backend/providers/providers';
 import { useSmartPlayer } from '@/hooks/useSmartPlayer';
+import { useCineProStore } from '@/stores/cinepro';
 
 type NativePlayerPhase = 'idle' | 'scraping' | 'playing' | 'error' | 'notfound' | 'classic';
 
@@ -211,7 +212,24 @@ export function SmartPlayerModal(): React.ReactElement | null {
       const captions = convertCaptions(result.stream.captions ?? []);
       clearFailedSources();
       clearFailedEmbeds();
-      playMedia(sourceData, captions, result.sourceId, startTime);
+      
+      const isCinePro = result.sourceId?.startsWith('cinepro-') ?? false;
+      let cineproProviderName: string | null = null;
+      if (isCinePro && result.sourceId) {
+        const cached = useCineProStore.getState().scrapedStreams.find(
+          (s) => s.sourceId === result.sourceId
+        );
+        cineproProviderName = cached?.providerName ?? result.sourceId.replace('cinepro-', '');
+      }
+
+      playMedia(
+        sourceData,
+        captions,
+        result.sourceId,
+        startTime,
+        isCinePro ? 'cinepro' : 'pstream',
+        cineproProviderName
+      );
       setPhase('playing');
     } catch (err) {
       console.error('Scraping failed:', err);

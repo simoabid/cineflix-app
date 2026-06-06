@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  cineflix:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_CINEPRO_URL=http://localhost:3005
+    depends_on:
+      - cinepro
+
+  cinepro:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - HOST=0.0.0.0
+      - CORS_ORIGIN=http://localhost:5173
+      - CACHE_TYPE=memory

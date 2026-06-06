@@ -109,11 +109,15 @@ export interface SourceSlice {
   failedSourcesPerMedia: Record<string, string[]>;
   failedEmbedsPerMedia: Record<string, Record<string, string[]>>;
   resumeFromSourceId: string | null;
+  sourceOrigin: 'pstream' | 'cinepro' | null;
+  cineproProviderName: string | null;
   setStatus(status: PlayerStatus): void;
   setSource(
     stream: SourceSliceSource,
     captions: CaptionListItem[],
     startAt: number,
+    sourceOrigin?: 'pstream' | 'cinepro',
+    cineproProviderName?: string | null,
   ): void;
   switchQuality(quality: SourceQuality): void;
   setMeta(meta: PlayerMeta, status?: PlayerStatus): void;
@@ -197,6 +201,8 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set, get) => ({
   failedSourcesPerMedia: {},
   failedEmbedsPerMedia: {},
   resumeFromSourceId: null,
+  sourceOrigin: null,
+  cineproProviderName: null,
   caption: {
     selected: null,
     asTrack: false,
@@ -260,6 +266,8 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set, get) => ({
     stream: SourceSliceSource,
     captions: CaptionListItem[],
     startAt: number,
+    sourceOrigin?: 'pstream' | 'cinepro',
+    cineproProviderName?: string | null,
   ) {
     let qualities: string[] = [];
     if (stream.type === 'file') qualities = Object.keys(stream.qualities);
@@ -274,6 +282,8 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set, get) => ({
       s.status = playerStatus.PLAYING;
       s.audioTracks = [];
       s.currentAudioTrack = null;
+      s.sourceOrigin = sourceOrigin ?? 'pstream';
+      s.cineproProviderName = cineproProviderName ?? null;
     });
     const store = get();
     store.redisplaySource(startAt);
@@ -520,6 +530,8 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set, get) => ({
       s.resumeFromSourceId = null;
       s.displayMode = 'native';
       s.iframeSource = null;
+      s.sourceOrigin = null;
+      s.cineproProviderName = null;
       s.caption = {
         selected: null,
         asTrack: false,
