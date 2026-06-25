@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 
 import { Container } from './layout';
-import { useSmartPlayer } from '../hooks/useSmartPlayer';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -44,18 +43,20 @@ const Footer: React.FC = () => {
     { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
   ];
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-
-    const footerElement = document.querySelector('#cineflix-footer');
-    if (footerElement) observer.observe(footerElement);
-
-    return () => {
-      observer.disconnect();
-    };
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const footerRef = useCallback((node: HTMLElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (node) {
+      const observer = new IntersectionObserver(
+        ([entry]) => setIsVisible(entry.isIntersecting),
+        { threshold: 0.1 }
+      );
+      observer.observe(node);
+      observerRef.current = observer;
+    }
   }, []);
 
   /*
@@ -215,8 +216,7 @@ const Footer: React.FC = () => {
   */
 
   const location = useLocation();
-  const { isOpen: isPlayerOpen } = useSmartPlayer();
-  const isHideFooter = location.pathname === '/login' || location.pathname === '/signup' || location.pathname.startsWith('/watch') || isPlayerOpen;
+  const isHideFooter = location.pathname === '/login' || location.pathname === '/signup' || location.pathname.startsWith('/watch');
   if (isHideFooter) {
     return null;
   }
@@ -225,6 +225,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer
+      ref={footerRef}
       id="cineflix-footer"
       className="relative bg-[#020205] overflow-hidden"
     >
