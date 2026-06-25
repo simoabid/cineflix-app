@@ -170,10 +170,11 @@ export function useScrape(): UseScrapeReturn {
 
         setSources(initialSources);
 
-        const initialOrder = evt.sourceIds.map((id) => ({ id, children: [] }));
+        const initialOrder = [];
         if (isCineProEnabled) {
           initialOrder.push({ id: 'cinepro', children: [] });
         }
+        initialOrder.push(...evt.sourceIds.map((id) => ({ id, children: [] })));
         setSourceOrder(initialOrder);
       },
       start: (id) => {
@@ -268,108 +269,75 @@ export function useScrape(): UseScrapeReturn {
         const isCineProEnabled = useCineProStore.getState().isEnabled;
         const disabledProviderIds = useCineProStore.getState().disabledProviderIds;
 
-        const cineproPromise = isCineProEnabled
-          ? (async () => {
-              setSources((prev) => {
-                const updated = { ...prev };
-                if (updated['cinepro']) {
-                  updated['cinepro'] = {
-                    ...updated['cinepro'],
-                    status: 'pending',
-                    percentage: 10,
-                  };
-                }
-                return updated;
-              });
-
-              try {
-                const req = mapScrapeMediaToRequest(media);
-                const serverUrl = useCineProStore.getState().serverUrl;
-                const res = await fetchCineProStreams(req, serverUrl);
-                
-                // Filter out disabled providers
-                const activeSources = res.sources.filter(
-                  (src) => !disabledProviderIds.includes(src.provider.id)
-                );
-
-                setSources((prev) => {
-                  const updated = { ...prev };
-                  if (updated['cinepro']) {
-                    updated['cinepro'] = {
-                      ...updated['cinepro'],
-                      status: activeSources.length > 0 ? 'success' : 'notfound',
-                      percentage: 100,
-                    };
-                  }
-                  return updated;
-                });
-
-                return mapCineProResultToStreamsWithMeta(activeSources, res.subtitles);
-              } catch (err) {
-                if (import.meta.env.DEV) {
-                  console.error('[useScrape] CinePro scraping failed:', err);
-                }
-                setSources((prev) => {
-                  const updated = { ...prev };
-                  if (updated['cinepro']) {
-                    updated['cinepro'] = {
-                      ...updated['cinepro'],
-                      status: 'failure',
-                      percentage: 100,
-                      reason: err instanceof Error ? err.message : 'Failed',
-                    };
-                  }
-                  return updated;
-                });
-                return null;
-              }
-            })()
-          : Promise.resolve(null);
-
-        const [pstreamResult, cineproResult] = await Promise.all([
-          providers.runAll({
-            media,
-            sourceOrder,
-            embedOrder,
-            events,
-          }).catch((err) => {
-            if (import.meta.env.DEV) {
-              console.error('P-Stream scraping failed:', err);
-            }
-            return null;
-          }),
-          cineproPromise
-        ]);
-
-        // Build CinePro cached streams from the enriched metadata (C-4 fix)
+        let cineproResult = null;
         let cachedStreams: CineProCachedStream[] = [];
-        if (cineproResult && cineproResult.length > 0) {
-          cachedStreams = cineproResult.map((mapped) => ({
-            sourceId: `cinepro-${mapped.providerId}`,
-            providerName: mapped.providerName,
-            stream: mapped.stream,
-            quality: mapped.quality,
-          }));
+
+        if (isCineProEnabled) {
+          setCurrentSource('cinepro');
+          setSources((prev) => {
+            const updated = { ...prev };
+            if (updated['cinepro']) {
+              updated['cinepro'] = {
+                ...updated['cinepro'],
+                status: 'pending',
+                percentage: 10,
+              };
+            }
+            return updated;
+          });
+
+          try {
+            const req = mapScrapeMediaToRequest(media);
+            const serverUrl = useCineProStore.getState().serverUrl;
+            const res = await fetchCineProStreams(req, serverUrl);
+            
+            // Filter out disabled providers
+            const activeSources = res.sources.filter(
+              (src) => !disabledProviderIds.includes(src.provider.id)
+            );
+
+            setSources((prev) => {
+              const updated = { ...prev };
+              if (updated['cinepro']) {
+                updated['cinepro'] = {
+                  ...updated['cinepro'],
+                  status: activeSources.length > 0 ? 'success' : 'notfound',
+                  percentage: 100,
+                };
+              }
+              return updated;
+            });
+
+            cineproResult = mapCineProResultToStreamsWithMeta(activeSources, res.subtitles);
+            
+            if (cineproResult && cineproResult.length > 0) {
+              cachedStreams = cineproResult.map((mapped) => ({
+                sourceId: `cinepro-${mapped.providerId}`,
+                providerName: mapped.providerName,
+                stream: mapped.stream,
+                quality: mapped.quality,
+              }));
+            }
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.error('[useScrape] CinePro scraping failed:', err);
+            }
+            setSources((prev) => {
+              const updated = { ...prev };
+              if (updated['cinepro']) {
+                updated['cinepro'] = {
+                  ...updated['cinepro'],
+                  status: 'failure',
+                  percentage: 100,
+                  reason: err instanceof Error ? err.message : 'Failed',
+                };
+              }
+              return updated;
+            });
+          }
         }
 
-        // Deduplicate CinePro streams against P-Stream result (H-3 fix)
-        if (pstreamResult?.stream && cachedStreams.length > 0) {
-          cachedStreams = cachedStreams.filter(
-            (c) => !isDuplicateStream(pstreamResult.stream, c.stream)
-          );
-        }
-
-        // Persist the deduplicated CinePro streams
-        if (cachedStreams.length > 0) {
-          useCineProStore.getState().setScrapedStreams(cachedStreams);
-        } else {
-          useCineProStore.getState().clearScrapedStreams();
-        }
-
-        // Determine which stream to return
-        const preferCinePro = useCineProStore.getState().preferCinePro;
-
-        // Quality weights for sorting (M-5: sort AFTER dedup)
+        // Quality weights for sorting
         const qualityWeight: Record<string, number> = {
           '4k': 5,
           '1080': 4,
@@ -385,8 +353,9 @@ export function useScrape(): UseScrapeReturn {
           return (qualityWeight[qB] ?? 0) - (qualityWeight[qA] ?? 0);
         });
 
-        // 1. If preferCinePro is true, and we have CinePro streams, play CinePro first
-        if (preferCinePro && sortedCinePro.length > 0) {
+        // 1. If we have CinePro streams, play CinePro first and skip pstream scanning entirely
+        if (sortedCinePro.length > 0) {
+          useCineProStore.getState().setScrapedStreams(cachedStreams);
           const bestCinePro = sortedCinePro[0];
           return {
             sourceId: bestCinePro.sourceId,
@@ -394,18 +363,23 @@ export function useScrape(): UseScrapeReturn {
           };
         }
 
-        // 2. Otherwise play P-Stream if it found something
+        // 2. Otherwise run P-Stream fallback
+        useCineProStore.getState().clearScrapedStreams();
+
+        const pstreamResult = await providers.runAll({
+          media,
+          sourceOrder,
+          embedOrder,
+          events,
+        }).catch((err) => {
+          if (import.meta.env.DEV) {
+            console.error('P-Stream scraping failed:', err);
+          }
+          return null;
+        });
+
         if (pstreamResult) {
           return pstreamResult;
-        }
-
-        // 3. Fallback to CinePro if P-Stream failed
-        if (sortedCinePro.length > 0) {
-          const bestCinePro = sortedCinePro[0];
-          return {
-            sourceId: bestCinePro.sourceId,
-            stream: bestCinePro.stream,
-          };
         }
 
         return null;
