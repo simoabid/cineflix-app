@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getMovieDetails, getTVShowDetails } from '@/services/tmdb';
 import { rivestreamService } from '@/services/rivestreamService';
 import { SmashyStreamService } from '@/services/smashystream';
@@ -44,6 +45,7 @@ interface SmartPlayerProviderProps {
  * to launch, fetch details, and manage streaming fallback sources for the Smart Player.
  */
 export const SmartPlayerProvider: React.FC<SmartPlayerProviderProps> = ({ children }) => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentRequest, setCurrentRequest] = useState<SmartPlayerRequest | null>(null);
   const [content, setContent] = useState<Movie | TVShow | null>(null);
@@ -63,7 +65,13 @@ export const SmartPlayerProvider: React.FC<SmartPlayerProviderProps> = ({ childr
     setSelectedSeason(request.season ?? 1);
     setSelectedEpisode(request.episode ?? 1);
     setIsOpen(true);
-  }, []);
+
+    const path = `/watch/${request.type}/${request.tmdbId}`;
+    const search = request.type === 'tv' ? `?season=${request.season ?? 1}&episode=${request.episode ?? 1}` : '';
+    if (window.location.pathname + window.location.search !== path + search) {
+      navigate(path + search);
+    }
+  }, [navigate]);
 
   const closePlayer = useCallback(() => {
     setIsOpen(false);

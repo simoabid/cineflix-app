@@ -28,9 +28,12 @@ export function useQueryParam(
       const parsed = new URLSearchParams(location.search);
       if (value) parsed.set(param, value);
       else parsed.delete(param);
-      navigate({
-        search: parsed.toString(),
-      });
+      navigate(
+        {
+          search: parsed.toString(),
+        },
+        { replace: true }
+      );
     },
     [param, location.search, navigate],
   );

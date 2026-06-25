@@ -22,8 +22,7 @@ import BrowsePage from './pages/BrowsePage';
 import ContinueWatchingPage from './pages/ContinueWatchingPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SmartPlayerProvider } from './contexts/SmartPlayerContext';
-import { SmartPlayerModal } from './components/SmartPlayerModal';
-import WatchRedirect from './pages/WatchRedirect';
+import { SmartPlayerPage } from './pages/SmartPlayerPage';
 import { CineProHealthService } from './services/cinepro-adapter';
 
 function App() {
@@ -39,8 +38,8 @@ function App() {
       <HelmetProvider>
         <AuthProvider>
           <ToastProvider>
-            <SmartPlayerProvider>
-              <Router>
+            <Router>
+              <SmartPlayerProvider>
                 <div className="min-h-screen bg-netflix-black">
                   <Navbar />
                   <main>
@@ -55,8 +54,8 @@ function App() {
                       <Route path="/collection/:id" element={<CollectionDetailPage />} />
                       <Route path="/movie/:id" element={<DetailPage type="movie" />} />
                       <Route path="/tv/:id" element={<DetailPage type="tv" />} />
-                      <Route path="/watch/movie/:id" element={<WatchRedirect type="movie" />} />
-                      <Route path="/watch/tv/:id" element={<WatchRedirect type="tv" />} />
+                      <Route path="/watch/movie/:id" element={<SmartPlayerPage type="movie" />} />
+                      <Route path="/watch/tv/:id" element={<SmartPlayerPage type="tv" />} />
                       <Route path="/search" element={<SearchPage />} />
 
                       {/* Auth Routes */}
@@ -85,10 +84,9 @@ function App() {
                     </Routes>
                   </main>
                   <Footer />
-                  <SmartPlayerModal />
                 </div>
-              </Router>
-            </SmartPlayerProvider>
+              </SmartPlayerProvider>
+            </Router>
           </ToastProvider>
         </AuthProvider>
       </HelmetProvider>
