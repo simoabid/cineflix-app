@@ -44,7 +44,8 @@ lerna-debug.log*
 *.sln
 *.sw?
 
-# Documentation & Implementation Guides
+# Documentation & Implementation Guides (may contain secrets — never commit)
+docs/
 
 
 # IDE

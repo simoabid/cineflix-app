@@ -56,6 +56,7 @@ app.get('/api/docs.json', (_req, res) => res.json(swaggerSpec));
 
 app.use((_req, res) => res.status(404).json({ success: false, error: 'Endpoint not found' }));
 
+
 // Wrap Express in an HTTP server for Socket.io support
 const httpServer = http.createServer(app);
 initializeSocketServer(httpServer, allowedOrigins);
@@ -63,23 +64,18 @@ initializeSocketServer(httpServer, allowedOrigins);
 const startServer = async () => {
     try {
         await connectDB();
-        if (env.NODE_ENV !== 'production') {
-            httpServer.listen(PORT, () => {
-                logger.info(`🚀 Server running on http://localhost:${PORT}`);
-                logger.info(`📚 API: /api/my-list, /api/collections, /api/preferences`);
-                logger.info(`🔌 WebSocket: Watch party sync enabled`);
-                logger.info(`📖 Docs: http://localhost:${PORT}/api/docs`);
-            });
-        }
+        httpServer.listen(PORT, () => {
+            logger.info(`🚀 Server running on http://localhost:${PORT}`);
+            logger.info(`📚 API: /api/my-list, /api/collections, /api/preferences`);
+            logger.info(`🔌 WebSocket: Watch party sync enabled`);
+            logger.info(`📖 Docs: http://localhost:${PORT}/api/docs`);
+        });
     } catch (error) {
         logger.error('Failed to start server:', error);
-        if (env.NODE_ENV !== 'production') {
-            process.exit(1);
-        }
+        process.exit(1);
     }
 };
 
 startServer();
 
 export default app;
-
