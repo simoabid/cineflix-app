@@ -147,41 +147,39 @@ export function useScrape(): UseScrapeReturn {
   const buildEvents = useCallback(
     (sourceMetas: MetaOutput[]): FullScraperEvents => ({
       init: (evt) => {
-        const isCineProEnabled = useCineProStore.getState().isEnabled;
-        const initialSources = evt.sourceIds.reduce<Record<string, ScrapingSegment>>((acc, id) => {
-          const meta = sourceMetas.find((s) => s.id === id);
-          acc[id] = {
-            name: meta?.name ?? id,
-            id,
-            status: 'waiting',
-            percentage: 0,
-          };
-          return acc;
-        }, {});
-
-        if (isCineProEnabled) {
-          initialSources['cinepro'] = {
-            name: 'CinePro Core (Server)',
-            id: 'cinepro',
-            status: 'waiting',
-            percentage: 0,
-          };
-        }
-
-        setSources(initialSources);
-
-        const initialOrder = [];
-        if (isCineProEnabled) {
-          initialOrder.push({ id: 'cinepro', children: [] });
-        }
-        initialOrder.push(...evt.sourceIds.map((id) => ({ id, children: [] })));
-        setSourceOrder(initialOrder);
+        // Merge with existing state — never overwrite CinePro's already-running/completed status
+        setSources((prev) => {
+          const updated = { ...prev };
+          evt.sourceIds.forEach((id) => {
+            const meta = sourceMetas.find((s) => s.id === id);
+            // Only initialize sources that don't exist yet or are still waiting
+            if (!updated[id]) {
+              updated[id] = {
+                name: meta?.name ?? id,
+                id,
+                status: 'waiting',
+                percentage: 0,
+              };
+            }
+          });
+          return updated;
+        });
+        // Merge source order — preserve existing entries (CinePro), add new ones
+        setSourceOrder((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id));
+          const newEntries = evt.sourceIds
+            .filter((id) => !existingIds.has(id))
+            .map((id) => ({ id, children: [] as string[] }));
+          return [...prev, ...newEntries];
+        });
       },
       start: (id) => {
         setCurrentSource(id);
         setSources((prev) => {
           const updated = { ...prev };
           Object.keys(updated).forEach((key) => {
+            // Never overwrite CinePro's status from P-Stream engine events
+            if (key === 'cinepro') return;
             if (updated[key].status === 'pending') {
               updated[key] = { ...updated[key], status: 'success' };
             }
@@ -269,73 +267,32 @@ export function useScrape(): UseScrapeReturn {
         const isCineProEnabled = useCineProStore.getState().isEnabled;
         const disabledProviderIds = useCineProStore.getState().disabledProviderIds;
 
-        let cineproResult = null;
-        let cachedStreams: CineProCachedStream[] = [];
-
+        // ── Initialize all sources up-front so the UI renders immediately ──
+        const upfrontSources: Record<string, ScrapingSegment> = {};
         if (isCineProEnabled) {
-          setCurrentSource('cinepro');
-          setSources((prev) => {
-            const updated = { ...prev };
-            if (updated['cinepro']) {
-              updated['cinepro'] = {
-                ...updated['cinepro'],
-                status: 'pending',
-                percentage: 10,
-              };
-            }
-            return updated;
-          });
-
-          try {
-            const req = mapScrapeMediaToRequest(media);
-            const serverUrl = useCineProStore.getState().serverUrl;
-            const res = await fetchCineProStreams(req, serverUrl);
-            
-            // Filter out disabled providers
-            const activeSources = res.sources.filter(
-              (src) => !disabledProviderIds.includes(src.provider.id)
-            );
-
-            setSources((prev) => {
-              const updated = { ...prev };
-              if (updated['cinepro']) {
-                updated['cinepro'] = {
-                  ...updated['cinepro'],
-                  status: activeSources.length > 0 ? 'success' : 'notfound',
-                  percentage: 100,
-                };
-              }
-              return updated;
-            });
-
-            cineproResult = mapCineProResultToStreamsWithMeta(activeSources, res.subtitles);
-            
-            if (cineproResult && cineproResult.length > 0) {
-              cachedStreams = cineproResult.map((mapped) => ({
-                sourceId: `cinepro-${mapped.providerId}`,
-                providerName: mapped.providerName,
-                stream: mapped.stream,
-                quality: mapped.quality,
-              }));
-            }
-          } catch (err) {
-            if (import.meta.env.DEV) {
-              console.error('[useScrape] CinePro scraping failed:', err);
-            }
-            setSources((prev) => {
-              const updated = { ...prev };
-              if (updated['cinepro']) {
-                updated['cinepro'] = {
-                  ...updated['cinepro'],
-                  status: 'failure',
-                  percentage: 100,
-                  reason: err instanceof Error ? err.message : 'Failed',
-                };
-              }
-              return updated;
-            });
-          }
+          upfrontSources['cinepro'] = {
+            name: 'CinePro Core (Server)',
+            id: 'cinepro',
+            status: 'waiting',
+            percentage: 0,
+          };
         }
+        allSources.forEach((source) => {
+          upfrontSources[source.id] = {
+            name: source.name ?? source.id,
+            id: source.id,
+            status: 'waiting',
+            percentage: 0,
+          };
+        });
+        setSources(upfrontSources);
+
+        const otherOrder = allSources.map((s) => ({ id: s.id, children: [] as string[] }));
+        setSourceOrder(
+          isCineProEnabled
+            ? [{ id: 'cinepro', children: [] as string[] }, ...otherOrder]
+            : otherOrder
+        );
 
         // Quality weights for sorting
         const qualityWeight: Record<string, number> = {
@@ -347,25 +304,87 @@ export function useScrape(): UseScrapeReturn {
           'unknown': 0,
         };
 
-        const sortedCinePro = [...cachedStreams].sort((a, b) => {
-          const qA = mapQuality(a.quality);
-          const qB = mapQuality(b.quality);
-          return (qualityWeight[qB] ?? 0) - (qualityWeight[qA] ?? 0);
-        });
+        // ── Phase 1: CinePro Server scans FIRST ──
+        let cineproResult: Awaited<ReturnType<typeof mapCineProResultToStreamsWithMeta>> | null = null;
+        let cachedStreams: CineProCachedStream[] = [];
 
-        // 1. If we have CinePro streams, play CinePro first and skip pstream scanning entirely
-        if (sortedCinePro.length > 0) {
-          useCineProStore.getState().setScrapedStreams(cachedStreams);
-          const bestCinePro = sortedCinePro[0];
+        if (isCineProEnabled) {
+          setCurrentSource('cinepro');
+          setSources((prev) => ({
+            ...prev,
+            cinepro: { ...prev['cinepro'], status: 'pending', percentage: 10 },
+          }));
+
+          try {
+            const req = mapScrapeMediaToRequest(media);
+            const serverUrl = useCineProStore.getState().serverUrl;
+            const res = await fetchCineProStreams(req, serverUrl);
+
+            // Filter out disabled providers
+            const activeSources = res.sources.filter(
+              (src) => !disabledProviderIds.includes(src.provider.id)
+            );
+
+            const hasResults = activeSources.length > 0;
+            setSources((prev) => ({
+              ...prev,
+              cinepro: { ...prev['cinepro'], status: hasResults ? 'success' : 'notfound', percentage: 100 },
+            }));
+
+            if (hasResults) {
+              cineproResult = mapCineProResultToStreamsWithMeta(activeSources, res.subtitles);
+              cachedStreams = cineproResult.map((mapped) => ({
+                sourceId: `cinepro-${mapped.providerId}`,
+                providerName: mapped.providerName,
+                stream: mapped.stream,
+                quality: mapped.quality,
+              }));
+            }
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.error('[useScrape] CinePro scraping failed:', err);
+            }
+            setSources((prev) => ({
+              ...prev,
+              cinepro: {
+                ...prev['cinepro'],
+                status: 'failure',
+                percentage: 100,
+                reason: err instanceof Error ? err.message : 'Failed',
+              },
+            }));
+          }
+        }
+
+        // If CinePro succeeded with streams, return immediately (primary provider)
+        if (cachedStreams.length > 0) {
+          const sortedCinePro = [...cachedStreams].sort((a, b) => {
+            const qA = mapQuality(a.quality);
+            const qB = mapQuality(b.quality);
+            return (qualityWeight[qB] ?? 0) - (qualityWeight[qA] ?? 0);
+          });
+
+          // Persist all CinePro streams for source switching
+          useCineProStore.getState().setScrapedStreams(sortedCinePro);
+
+          // Mark remaining providers as skipped (not needed)
+          setSources((prev) => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach((key) => {
+              if (key !== 'cinepro' && updated[key].status === 'waiting') {
+                updated[key] = { ...updated[key], status: 'notfound', reason: 'Skipped (CinePro found sources)' };
+              }
+            });
+            return updated;
+          });
+
           return {
-            sourceId: bestCinePro.sourceId,
-            stream: bestCinePro.stream,
+            sourceId: sortedCinePro[0].sourceId,
+            stream: sortedCinePro[0].stream,
           };
         }
 
-        // 2. Otherwise run P-Stream fallback
-        useCineProStore.getState().clearScrapedStreams();
-
+        // ── Phase 2: Fallback — scan other providers only if CinePro failed ──
         const pstreamResult = await providers.runAll({
           media,
           sourceOrder,
@@ -377,6 +396,9 @@ export function useScrape(): UseScrapeReturn {
           }
           return null;
         });
+
+        // Clear CinePro cache since it had nothing useful
+        useCineProStore.getState().clearScrapedStreams();
 
         if (pstreamResult) {
           return pstreamResult;
