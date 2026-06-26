@@ -1,3 +1,16 @@
+import type Lenis from 'lenis'
+
+/** Reference to the active Lenis instance, set by LenisProvider */
+let lenisInstance: Lenis | null = null
+
+export function setLenisInstance(instance: Lenis | null): void {
+  lenisInstance = instance
+}
+
+export function getLenisInstance(): Lenis | null {
+  return lenisInstance
+}
+
 /**
  * Scrolls an element into view with configurable options
  * @param selector - CSS selector string, Element, or null
@@ -12,22 +25,24 @@ export function scrollToElement(
     inline?: ScrollLogicalPosition;
     offset?: number; // Additional offset in pixels (positive = scroll down more)
     delay?: number; // Delay in milliseconds before scrolling (useful when element needs to render)
+    immediate?: boolean;
   },
 ): void {
+  if (selector === null) {
+    return;
+  }
+
   const {
     behavior = "smooth",
     block = "start",
     inline = "nearest",
     offset = 0,
     delay = 0,
+    immediate = false,
   } = options || {};
 
-  const scroll = (): void => {
+  const executeScroll = (): void => {
     let element: Element | null = null;
-
-    if (selector === null) {
-      return;
-    }
 
     if (typeof selector === "string") {
       element = document.querySelector(selector);
@@ -39,9 +54,19 @@ export function scrollToElement(
       return;
     }
 
+    // Prefer Lenis if available
+    if (lenisInstance) {
+      lenisInstance.scrollTo(element as HTMLElement, {
+        offset,
+        immediate,
+        duration: immediate ? 0 : 1.2,
+      });
+      return;
+    }
+
     if (offset === 0) {
       // Use native scrollIntoView when no offset is needed
-      element.scrollIntoView({ behavior, block, inline });
+      element.scrollIntoView({ behavior: immediate ? 'auto' : behavior, block, inline });
       return;
     }
 
@@ -52,18 +77,16 @@ export function scrollToElement(
 
     window.scrollTo({
       top: offsetPosition,
-      behavior,
+      behavior: immediate ? 'auto' : behavior,
     });
   };
 
   if (delay > 0) {
-    setTimeout(() => {
-      scroll();
-    }, delay);
+    setTimeout(executeScroll, delay);
     return;
   }
 
-  scroll();
+  executeScroll();
 }
 
 /**
@@ -80,6 +103,7 @@ export function scrollToHash(
     inline?: ScrollLogicalPosition;
     offset?: number;
     delay?: number;
+    immediate?: boolean;
   },
 ): void {
   const normalizedHash = hash.startsWith("#") ? hash : `#${hash}`;

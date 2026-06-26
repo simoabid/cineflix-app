@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { X, User, Star, ExternalLink, Film, Download, Calendar } from 'lucide-react';
 import { CastMember, PersonDetails, PersonMovieCredits } from '../../types';
 import { getImageUrl, getPosterUrl } from '../../services/tmdb';
+import { useLenisToggle } from '../../hooks/useLenisToggle';
 
 interface CastMemberModalProps {
   readonly open: boolean;
@@ -37,15 +38,8 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Lock body scroll while modal is open
-  useEffect(() => {
-    if (!open) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [open]);
+  // Lock body scroll with Lenis while modal is open
+  useLenisToggle(open);
 
   const handleMovieClick = (movieId: number) => {
     onClose();

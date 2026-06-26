@@ -75,7 +75,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
         (anchorRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
         (imdbContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
       }}
-      className={`relative flex-shrink-0 browse-card ${widthClass} ${className}`}
+      className={`relative flex-shrink-0 browse-card gpu-accelerate will-change-[transform,opacity] ${widthClass} ${className}`}
       onPointerEnter={shouldShowHover ? onPointerEnter : undefined}
       onPointerLeave={shouldShowHover ? onPointerLeave : undefined}
       onFocus={shouldShowHover ? onFocus : undefined}

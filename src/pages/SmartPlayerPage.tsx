@@ -22,6 +22,7 @@ import { setCachedMetadata } from '@/backend/helpers/providerApi';
 import { getProviders } from '@/backend/providers/providers';
 import { useSmartPlayer } from '@/hooks/useSmartPlayer';
 import { useCineProStore } from '@/stores/cinepro';
+import { useLenisDisable } from '@/hooks/useLenisDisable';
 
 type NativePlayerPhase = 'idle' | 'scraping' | 'playing' | 'error' | 'notfound' | 'classic';
 
@@ -106,6 +107,8 @@ function buildScrapeMedia(
  * On close it calls navigate(-1) to return to wherever the user came from.
  */
 export const SmartPlayerPage: React.FC<SmartPlayerPageProps> = ({ type }) => {
+  useLenisDisable();
+
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();

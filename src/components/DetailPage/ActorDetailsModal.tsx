@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, ExternalLink, Globe, MapPin, Calendar, Award } from 'lucide-react';
 import { PersonDetails } from '../../types';
 import { getImageUrl } from '../../services/tmdb';
+import { useLenisToggle } from '../../hooks/useLenisToggle';
 
 interface ActorDetailsModalProps {
   readonly open: boolean;
@@ -19,12 +20,8 @@ const ActorDetailsModal: React.FC<ActorDetailsModalProps> = ({
   personDetails,
   onClose,
 }) => {
-  useEffect(() => {
-    if (!open) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = original; };
-  }, [open]);
+  // Lock body scroll with Lenis while modal is open
+  useLenisToggle(open);
 
   return (
     <AnimatePresence>

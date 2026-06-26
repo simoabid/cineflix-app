@@ -20,6 +20,7 @@ import { Content, Genre } from '../types';
 import { searchContent, getMovieGenres, getTVGenres, getPosterUrl } from '../services/tmdb';
 import { useMyList } from '../hooks/useMyList';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLenisToggle } from '../hooks/useLenisToggle';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -45,6 +46,9 @@ interface SearchResult extends Content {
 }
 
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
+  // Disable background scrolling when modal is open
+  useLenisToggle(isOpen);
+
   // Hooks
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();

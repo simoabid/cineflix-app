@@ -28,6 +28,7 @@ import StreamSources from '../components/WatchPage/StreamSources';
 import SeasonsEpisodesSection from '../components/WatchPage/SeasonsEpisodesSection';
 import LoadingScreen from '../components/feedback/LoadingScreen';
 import ErrorState from '../components/feedback/ErrorState';
+import { useLenisDisable } from '../hooks/useLenisDisable';
 
 
 
@@ -36,6 +37,8 @@ interface WatchPageProps {
 }
 
 const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
+  useLenisDisable();
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

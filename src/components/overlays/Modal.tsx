@@ -8,6 +8,7 @@ import { OverlayPortal } from "@/components/overlays/OverlayDisplay";
 import { Flare } from "@/components/utils/Flare";
 import { Heading2 } from "@/components/utils/Text";
 import { useOverlayStack } from "@/stores/interface/overlayStack";
+import { useLenisToggle } from "@/hooks/useLenisToggle";
 
 export function useModal(id: string) {
   const { showModal, hideModal, isModalVisible } = useOverlayStack();
@@ -45,6 +46,8 @@ export function Modal(props: { id: string; children?: ReactNode }) {
   const modalIndex = modalStack.indexOf(props.id);
   const zIndex = modalIndex >= 0 ? 1000 + modalIndex : 999;
 
+  useLenisToggle(modal.isShown);
+
   return (
     <OverlayPortal
       darken
@@ -70,6 +73,8 @@ export function FancyModal(props: {
   oneTime?: boolean;
 }) {
   const modal = useModal(props.id);
+
+  useLenisToggle(modal.isShown);
 
   useEffect(() => {
     if (props.oneTime) {

@@ -21,6 +21,7 @@ import { setCachedMetadata } from '@/backend/helpers/providerApi';
 import { getProviders } from '@/backend/providers/providers';
 import { useSmartPlayer } from '@/hooks/useSmartPlayer';
 import { useCineProStore } from '@/stores/cinepro';
+import { useLenisToggle } from '@/hooks/useLenisToggle';
 
 type NativePlayerPhase = 'idle' | 'scraping' | 'playing' | 'error' | 'notfound' | 'classic';
 
@@ -115,6 +116,8 @@ export function SmartPlayerModal(): React.ReactElement | null {
     setSelectedSource,
     closePlayer,
   } = useSmartPlayer();
+
+  useLenisToggle(isOpen);
 
   const {
     startScraping,

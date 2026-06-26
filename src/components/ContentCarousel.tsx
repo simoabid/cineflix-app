@@ -144,8 +144,8 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
         });
       },
       {
-        threshold: 0.1,
-        rootMargin: '50px 0px -50px 0px'
+        threshold: 0.01,
+        rootMargin: '250px 0px 100px 0px'
       }
     );
 
@@ -215,7 +215,7 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative px-4 md:px-8 py-0 transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      className={`relative px-4 md:px-8 py-0 content-lazy-contain transition-all duration-500 ease-out will-change-[transform,opacity] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
         }`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 transition-all duration-700 delay-100">
@@ -259,6 +259,18 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="w-32 sm:w-36 md:w-40 lg:w-48 flex-shrink-0">
                 <div className="aspect-[2/3] bg-gray-800/85 rounded-xl ring-1 ring-white/10" />
+                <div className="mt-2 space-y-2">
+                  <div className="h-4 bg-gray-800/85 rounded w-3/4" />
+                  <div className="h-3 bg-gray-800/85 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : !isVisible ? (
+          <div className="flex overflow-x-auto gap-2.5 scrollbar-hide pb-1 opacity-0">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="w-32 sm:w-36 md:w-40 lg:w-48 flex-shrink-0">
+                <div className="aspect-[2/3] bg-gray-800/85 rounded-xl border border-white/5" />
                 <div className="mt-2 space-y-2">
                   <div className="h-4 bg-gray-800/85 rounded w-3/4" />
                   <div className="h-3 bg-gray-800/85 rounded w-1/2" />

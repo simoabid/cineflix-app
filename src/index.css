@@ -11,8 +11,25 @@
    PERFORMANCE & SMOOTH SCROLLING
    ============================================ */
 
-html {
-  scroll-behavior: smooth;
+/* Lenis smooth scroll optimizations */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 /* Enable GPU acceleration for smoother animations */
@@ -20,6 +37,12 @@ html {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+}
+
+/* Optimization: Skip rendering of off-screen carousel content */
+.content-lazy-contain {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px; /* Estimate height of a carousel to prevent scrollbar jumps */
 }
 
 /* Optimize card rendering */
