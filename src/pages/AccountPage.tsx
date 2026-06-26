@@ -45,6 +45,7 @@ import { useAccountSettings, SaveStatus } from '../hooks/useAccountSettings';
 import { AVATARS, renderAvatarById } from '../constants/avatars';
 import DynamicBackground from '../components/DynamicBackground';
 import { CineProSettingsView } from '../components/CineProSettingsView';
+import { SEOHead } from '../components/layout/SEOHead';
 
 // Settings tabs
 type SettingsTab = 'profile' | 'playback' | 'notifications' | 'privacy' | 'devices' | 'subscription' | 'accessibility' | 'language' | 'cinepro';
@@ -1009,6 +1010,10 @@ const AccountPage: React.FC = () => {
 
     return (
         <DynamicBackground className="pt-20 pb-12">
+            <SEOHead
+                title="Account"
+                description="Manage your CINEFLIX profile, playback settings, notification preferences, and subscription details."
+            />
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">

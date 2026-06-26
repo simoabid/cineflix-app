@@ -10,6 +10,7 @@ import EmptyState from '../components/MyList/EmptyState';
 import BulkActions from '../components/MyList/BulkActions';
 import StatsModal from '../components/MyList/StatsModal';
 import ExportModal from '../components/MyList/ExportModal';
+import { SEOHead } from '../components/layout/SEOHead';
 
 const MyListPage: React.FC = () => {
   // State management
@@ -217,6 +218,10 @@ const MyListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A1F] text-white pt-20">
+      <SEOHead
+        title="My List"
+        description="Your personal CINEFLIX watchlist. Track and manage the movies and TV shows you want to watch."
+      />
       <div className="container mx-auto px-4 py-8">
         {/* Header - now containing search */}
         <MyListHeader

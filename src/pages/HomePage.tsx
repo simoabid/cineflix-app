@@ -35,6 +35,7 @@ import { Movie, TVShow, MovieCredits } from '../types';
 import AddToListButton from '../components/AddToListButton';
 import LikeButton from '../components/LikeButton';
 import ContentCarousel from '../components/ContentCarousel';
+import { SEOHead } from '../components/layout/SEOHead';
 
 import ContinueWatching from '../components/Home/ContinueWatching';
 import BrowseByGenre from '../components/Home/BrowseByGenre';
@@ -298,6 +299,10 @@ const HomePage = (): JSX.Element => {
 
   return (
     <div className="min-h-screen bg-[#020205] bg-gradient-to-b from-black/80 via-[#050510] to-[#0A0A1F]" style={{ overflowX: 'clip' }}>
+      <SEOHead
+        title="Home"
+        description="Discover and stream movies and TV shows with a premium cinema experience on CINEFLIX."
+      />
       {/* Enhanced Hero Section */}
       {heroMovie && (
         <div

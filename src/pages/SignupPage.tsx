@@ -9,6 +9,7 @@ import {
     validateName
 } from '../utils/validation';
 import { AUTH_STRINGS } from '../utils/strings';
+import { SEOHead } from '../components/layout/SEOHead';
 import { AVATARS } from '../constants/avatars';
 
 interface FormErrors {
@@ -119,10 +120,15 @@ const SignupPage: React.FC = () => {
     }
 
     return (
-        <AuthCard
-            title={AUTH_STRINGS.signup.title}
-            subtitle={AUTH_STRINGS.signup.subtitle}
-        >
+        <>
+            <SEOHead
+                title="Sign Up"
+                description="Sign up for a CINEFLIX account to create your personal watchlist, rate titles, and more."
+            />
+            <AuthCard
+                title={AUTH_STRINGS.signup.title}
+                subtitle={AUTH_STRINGS.signup.subtitle}
+            >
             <form onSubmit={handleSubmit} noValidate className="space-y-3 sm:space-y-4">
                 {/* Server Error */}
                 {errors.server && (
@@ -273,7 +279,8 @@ const SignupPage: React.FC = () => {
                     </Link>
                 </p>
             </form>
-        </AuthCard>
+            </AuthCard>
+        </>
     );
 };
 

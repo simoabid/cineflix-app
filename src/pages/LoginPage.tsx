@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { AuthCard, FormInput, PasswordInput, SocialAuthButtons } from '../components/auth';
 import { validateEmail } from '../utils/validation';
 import { AUTH_STRINGS } from '../utils/strings';
+import { SEOHead } from '../components/layout/SEOHead';
 
 interface FormErrors {
     email?: string;
@@ -100,10 +101,15 @@ const LoginPage: React.FC = () => {
     }
 
     return (
-        <AuthCard
-            title={AUTH_STRINGS.login.title}
-            subtitle={AUTH_STRINGS.login.subtitle}
-        >
+        <>
+            <SEOHead
+                title="Sign In"
+                description="Sign in to your CINEFLIX account to manage your list, watch trailers, and customize your experience."
+            />
+            <AuthCard
+                title={AUTH_STRINGS.login.title}
+                subtitle={AUTH_STRINGS.login.subtitle}
+            >
             <form onSubmit={handleSubmit} noValidate className="space-y-4 sm:space-y-5">
                 {/* Server Error */}
                 {errors.server && (
@@ -193,7 +199,8 @@ const LoginPage: React.FC = () => {
                     </Link>
                 </p>
             </form>
-        </AuthCard>
+            </AuthCard>
+        </>
     );
 };
 

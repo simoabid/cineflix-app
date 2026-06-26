@@ -37,6 +37,7 @@ import ActiveFilters from '../components/browse/ActiveFilters';
 import FilterPresets from '../components/browse/FilterPresets';
 import NoResults from '../components/browse/NoResults';
 import GenreCollections from '../components/GenreCollections';
+import { SEOHead } from '../components/layout/SEOHead';
 
 const BrowsePage = (): JSX.Element => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -267,6 +268,10 @@ const BrowsePage = (): JSX.Element => {
 
     return (
         <div className="min-h-screen bg-[#0A0A1F]">
+            <SEOHead
+                title="Browse"
+                description="Browse trending and popular movies and TV shows on CINEFLIX."
+            />
             {/* Page Header with inline Filter Bar */}
             <div className="pt-24 pb-6 px-4 md:px-6 lg:px-12">
                 {/* Title + Filters on same line */}

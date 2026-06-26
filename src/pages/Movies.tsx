@@ -13,6 +13,7 @@ import {
 import HeroCarousel from '../components/HeroCarousel';
 import ContentCarousel from '../components/ContentCarousel';
 import FilterBar from '../components/FilterBar';
+import { SEOHead } from '../components/layout/SEOHead';
 
 interface MoviesProps { }
 
@@ -387,6 +388,10 @@ const Movies: React.FC<MoviesProps> = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A1F] text-white">
+      <SEOHead
+        title="Movies"
+        description="Browse trending, popular, top-rated, now-playing, and upcoming movies on CINEFLIX."
+      />
       {/* Hero Carousel */}
       {heroMovies.length > 0 && (
         <HeroCarousel

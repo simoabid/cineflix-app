@@ -4,6 +4,7 @@ import { Play, Clock, Tv, Film, ArrowLeft, X } from 'lucide-react';
 import { myListApi } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { getPosterUrl } from '../services/tmdb';
+import { SEOHead } from '../components/layout/SEOHead';
 
 interface ContinueWatchingItem {
     id: string;
@@ -224,6 +225,10 @@ const ContinueWatchingPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#020205] bg-gradient-to-b from-black/85 via-[#050510] to-[#0A0A1F] text-white pt-24 pb-16">
+            <SEOHead
+                title="Continue Watching"
+                description="Resume streaming your recently watched movies and TV shows on CINEFLIX."
+            />
             <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
                 
                 {/* Back Button and Page Header */}

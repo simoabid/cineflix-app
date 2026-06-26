@@ -25,6 +25,7 @@ import SectionHeader from '../components/DetailPage/SectionHeader';
 import SimilarContent from '../components/WatchPage/SimilarContent';
 import LoadingScreen from '../components/feedback/LoadingScreen';
 import ErrorState from '../components/feedback/ErrorState';
+import { SEOHead } from '../components/layout/SEOHead';
 
 interface DetailPageProps {
   type: 'movie' | 'tv';
@@ -244,6 +245,18 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
   return (
     <main className="min-h-screen bg-[#0A0A1F] text-white">
+      <SEOHead
+        title={'title' in content ? content.title : content.name}
+        description={content.overview || 'Watch on CINEFLIX'}
+        image={content.backdrop_path
+          ? `https://image.tmdb.org/t/p/w1280${content.backdrop_path}`
+          : undefined}
+        type={type === 'movie' ? 'video.movie' : 'video.tv_show'}
+        publishedTime={
+          'release_date' in content ? content.release_date : content.first_air_date
+        }
+        section={type === 'movie' ? 'Movies' : 'TV Shows'}
+      />
       {/* ═══════════════════════════════════════════════
           HERO
           ═══════════════════════════════════════════════ */}

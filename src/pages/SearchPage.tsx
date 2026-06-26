@@ -8,6 +8,7 @@ import { Container } from '../components/layout';
 import LoadingScreen from '../components/feedback/LoadingScreen';
 import EmptyState from '../components/feedback/EmptyState';
 import ErrorState from '../components/feedback/ErrorState';
+import { SEOHead } from '../components/layout/SEOHead';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -62,6 +63,10 @@ const SearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-netflix-black pt-24">
+      <SEOHead
+        title="Search"
+        description="Search for movies, TV shows, and cast members on CINEFLIX."
+      />
       <Container>
         {/* Search Header */}
         <div className="mb-8">

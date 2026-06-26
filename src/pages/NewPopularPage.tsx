@@ -27,6 +27,7 @@ import {
 import LogoImage from '../components/LogoImage';
 import { Movie, TVShow } from '../types';
 import { handleImageError } from '../utils/imageLoader';
+import { SEOHead } from '../components/layout/SEOHead';
 
 // Genre mapping for display
 const GENRES = {
@@ -300,6 +301,10 @@ const NewPopularPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A1F] text-white">
+      <SEOHead
+        title="New & Popular"
+        description="Discover the latest releases, trending now, and coming soon movies and TV shows on CINEFLIX."
+      />
       {/* Hero Section */}
       {heroContent.length > 0 && (
         <div

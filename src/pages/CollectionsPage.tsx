@@ -15,6 +15,7 @@ import FranchiseCard from '../components/FranchiseCard';
 import CollectionsHero from '../components/CollectionsHero';
 import CollectionsFilter from '../components/CollectionsFilter';
 import CollectionsLoading from '../components/CollectionsLoading';
+import { SEOHead } from '../components/layout/SEOHead';
 import { Search, Grid, List, Zap, Crown, Clock, Star, Gamepad2, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const CollectionsPage: React.FC = () => {
@@ -608,6 +609,10 @@ const CollectionsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A1F] text-white">
+      <SEOHead
+        title="Collections"
+        description="Discover custom collections and film franchises on CINEFLIX."
+      />
       {/* Hero Section */}
       {featuredCollection && (
         <div className="relative">

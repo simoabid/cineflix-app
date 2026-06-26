@@ -28,6 +28,7 @@ import AddToListButton from '../components/AddToListButton';
 import LikeButton from '../components/LikeButton';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import TimelineView from '../components/TimelineView';
+import { SEOHead } from '../components/layout/SEOHead';
 
 export type TabType = 'overview' | 'movies' | 'timeline' | 'cast' | 'trivia' | 'related';
 export type ViewMode = 'grid' | 'list' | 'timeline';
@@ -354,6 +355,11 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
 
   return (
     <div className="min-h-screen bg-[#0A0A1F]">
+      <SEOHead
+        title={collection.name}
+        description={collection.overview || `Discover the film franchise collection of ${collection.name} on CINEFLIX.`}
+        image={collection.backdrop_path ? safeBackdrop : undefined}
+      />
       {/* Hero Section */}
       <div className="relative h-screen overflow-hidden">
         {/* Background Image */}
