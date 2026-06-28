@@ -9,6 +9,7 @@ import HoverPreviewCard from './HoverPreviewCard';
 import { useScreenSize } from '../hooks/useScreenSize';
 import { useHoverIntent } from '../hooks/useHoverIntent';
 import { useImdbRating } from '../hooks/useImdbRating';
+import { analytics } from '../services/analytics';
 
 type MinimalContent = Partial<Movie & TVShow> & {
   id?: number;
@@ -29,6 +30,7 @@ interface ContentCardProps {
   size?: 'sm' | 'md';
   showTitleBelow?: boolean;
   className?: string;
+  section?: string;
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({
@@ -36,7 +38,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
   mediaType,
   size = 'md',
   showTitleBelow = true,
-  className = ''
+  className = '',
+  section
 }) => {
   // No direct navigate on card overlay; handled in preview
   const [isPreviewHovering, setIsPreviewHovering] = useState(false);
@@ -69,6 +72,17 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
   const widthClass = size === 'sm' ? 'w-32 sm:w-36 md:w-40 lg:w-48' : 'w-36 sm:w-40 md:w-48 lg:w-64';
 
+  const handleClick = () => {
+    if (item.id) {
+      analytics.trackContentClick({
+        contentId: item.id,
+        contentTitle: title,
+        contentType: derivedType,
+        section: section || 'general'
+      });
+    }
+  };
+
   return (
     <div
       ref={(node) => {
@@ -85,6 +99,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
       <Link
         to={`/${derivedType}/${item.id}`}
         className="block outline-none focus-visible:ring-2 focus-visible:ring-netflix-red rounded-xl"
+        onClick={handleClick}
       >
         <div
           className="relative aspect-[2/3] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gray-800 transition-opacity duration-300"

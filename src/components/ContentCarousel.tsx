@@ -15,6 +15,7 @@ interface ContentCarouselItemsProps {
   items: (Movie | TVShow)[];
   type: 'movie' | 'tv';
   cardsLoaded: boolean;
+  section?: string;
 }
 
 interface ScrollDotsProps {
@@ -23,7 +24,7 @@ interface ScrollDotsProps {
   onDotClick: (dotProgress: number) => void;
 }
 
-const ContentCarouselItems = React.memo<ContentCarouselItemsProps>(({ items, type, cardsLoaded }) => (
+const ContentCarouselItems = React.memo<ContentCarouselItemsProps>(({ items, type, cardsLoaded, section }) => (
   <>
     {items.map((item) => (
       <div
@@ -37,6 +38,7 @@ const ContentCarouselItems = React.memo<ContentCarouselItemsProps>(({ items, typ
           size="sm"
           showTitleBelow={true}
           className="cursor-pointer"
+          section={section}
         />
       </div>
     ))}
@@ -284,7 +286,7 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
             className="flex overflow-x-auto gap-2.5 scrollbar-hide pb-1"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            <ContentCarouselItems items={items} type={type} cardsLoaded={cardsLoaded} />
+            <ContentCarouselItems items={items} type={type} cardsLoaded={cardsLoaded} section={title} />
           </div>
         )}
 

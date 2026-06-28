@@ -5,6 +5,7 @@ import { Movie, TVShow } from '../../types';
 import { ViewMode } from '../../types/browse';
 import { getPosterUrl } from '../../services/tmdb';
 import AddToListButton from '../AddToListButton';
+import { analytics } from '../../services/analytics';
 
 interface BrowseResultsGridProps {
     results: (Movie | TVShow)[];
@@ -13,6 +14,15 @@ interface BrowseResultsGridProps {
 }
 
 const BrowseResultsGrid: React.FC<BrowseResultsGridProps> = ({ results, loading, viewMode }) => {
+    const handleClick = (item: Movie | TVShow, type: 'movie' | 'tv', title: string) => {
+        analytics.trackContentClick({
+            contentId: item.id,
+            contentTitle: title,
+            contentType: type,
+            section: 'Browse Results Grid'
+        });
+    };
+
     // Loading skeleton
     if (loading) {
         return (
@@ -49,6 +59,7 @@ const BrowseResultsGrid: React.FC<BrowseResultsGridProps> = ({ results, loading,
                     <Link
                         key={`${type}-${item.id}`}
                         to={`/${type}/${item.id}`}
+                        onClick={() => handleClick(item, type, title)}
                         className="browse-card group relative aspect-[2/3] rounded-lg overflow-visible bg-gray-900 animate-fade-in-up transition-all duration-300 ease-out hover:scale-[1.15] hover:z-50 hover:shadow-[0_20px_60px_rgba(229,9,20,0.4)]"
                         style={{ animationDelay: `${Math.min(index * 30, 500)}ms` }}
                     >

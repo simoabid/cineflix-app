@@ -9,6 +9,7 @@ import LoadingScreen from '../components/feedback/LoadingScreen';
 import EmptyState from '../components/feedback/EmptyState';
 import ErrorState from '../components/feedback/ErrorState';
 import { SEOHead } from '../components/layout/SEOHead';
+import { analytics } from '../services/analytics';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -30,14 +31,15 @@ const SearchPage: React.FC = () => {
       setError(null);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
       const response = await searchContent(query);
-      setResults(response.results.filter(item => 
+      const filtered = response.results.filter(item => 
         item.media_type === 'movie' || item.media_type === 'tv'
-      ));
+      );
+      setResults(filtered);
+      analytics.trackSearch(query, filtered.length);
     } catch (err) {
       console.error('Search error:', err);
       setError('An error occurred while searching. Please try again.');
@@ -59,6 +61,15 @@ const SearchPage: React.FC = () => {
   const getReleaseYear = (item: Content) => {
     const date = item.release_date || item.first_air_date;
     return date ? new Date(date).getFullYear() : '';
+  };
+
+  const handleClick = (item: Content) => {
+    analytics.trackContentClick({
+      contentId: item.id,
+      contentTitle: getTitle(item),
+      contentType: item.media_type as 'movie' | 'tv',
+      section: 'Search Results'
+    });
   };
 
   return (
@@ -118,6 +129,7 @@ const SearchPage: React.FC = () => {
                   key={item.id}
                   to={`/${item.media_type}/${item.id}`}
                   className="group relative"
+                  onClick={() => handleClick(item)}
                 >
                   <div className="aspect-video bg-gray-800 rounded overflow-hidden">
                     <img

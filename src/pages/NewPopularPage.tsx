@@ -28,6 +28,7 @@ import LogoImage from '../components/LogoImage';
 import { Movie, TVShow } from '../types';
 import { handleImageError } from '../utils/imageLoader';
 import { SEOHead } from '../components/layout/SEOHead';
+import { analytics } from '../services/analytics';
 
 // Genre mapping for display
 const GENRES = {
@@ -623,6 +624,7 @@ const ContentSection: React.FC<ContentSectionProps> = ({ id, title, items, type 
             type={type}
             onHover={() => { }}
             isHovered={false}
+            section={title}
           />
         ))}
       </div>
@@ -638,6 +640,7 @@ interface ContentCardPropsInline {
   type: 'movie' | 'tv' | 'mixed';
   onHover?: (index: number | null) => void;
   isHovered?: boolean;
+  section?: string;
 }
 
 const ContentCard: React.FC<ContentCardPropsInline> = ({
@@ -645,7 +648,8 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
   index,
   type,
   onHover,
-  isHovered
+  isHovered,
+  section
 }) => {
   const [localIsHovered, setLocalIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -678,6 +682,15 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
 
   const actualHovered = shouldShowHover && (isHovered !== undefined ? isHovered : localIsHovered);
 
+  const handleClick = () => {
+    analytics.trackContentClick({
+      contentId: item.id,
+      contentTitle: item.title || item.name || '',
+      contentType: item.media_type || (type === 'mixed' ? 'movie' : type) as 'movie' | 'tv',
+      section: section || 'New & Popular'
+    });
+  };
+
   return (
     <div
       className={`relative flex-shrink-0 w-36 sm:w-40 md:w-48 lg:w-64 group cursor-pointer transition-all duration-300 ${actualHovered ? 'scale-105 z-10' : 'scale-100'
@@ -685,7 +698,7 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <Link to={`/${item.media_type === 'movie' ? 'movie' : 'tv'}/${item.id}`}>
+      <Link to={`/${item.media_type === 'movie' ? 'movie' : 'tv'}/${item.id}`} onClick={handleClick}>
         <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-lg">
           {/* Skeleton loader */}
           {!imageLoaded && (

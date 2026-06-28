@@ -17,6 +17,7 @@ import { getPosterUrl } from '../../services/tmdb';
 import AddToListButton from '../AddToListButton';
 import LikeButton from '../LikeButton';
 import { useSmartPlayer } from '../../hooks/useSmartPlayer';
+import { analytics } from '../../services/analytics';
 
 interface SimilarContentProps {
   similar: (Movie | TVShow)[];
@@ -77,6 +78,13 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
   const handleWatchContent = (item: Movie | TVShow) => {
     if (isDragging) return;
     const contentType = 'title' in item ? 'movie' : 'tv';
+    const itemTitle = 'title' in item ? item.title : item.name;
+    analytics.trackContentClick({
+      contentId: item.id,
+      contentTitle: itemTitle,
+      contentType: contentType,
+      section: activeTab === 'similar' ? 'More Like This' : 'Recommended for You'
+    });
     openPlayer({ tmdbId: item.id, type: contentType });
   };
 

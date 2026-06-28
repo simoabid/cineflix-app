@@ -6,6 +6,7 @@ import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
 import AddToListButton from '../AddToListButton';
 import LikeButton from '../LikeButton';
+import { analytics } from '../../services/analytics';
 
 interface BrowseResultsListProps {
     results: (Movie | TVShow)[];
@@ -14,6 +15,15 @@ interface BrowseResultsListProps {
 const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
     const isMovie = (item: Movie | TVShow): item is Movie => 'title' in item;
     const { openPlayer } = useSmartPlayer();
+
+    const handleClick = (item: Movie | TVShow, type: 'movie' | 'tv', title: string) => {
+        analytics.trackContentClick({
+            contentId: item.id,
+            contentTitle: title,
+            contentType: type,
+            section: 'Browse Results List'
+        });
+    };
 
     return (
         <div className="space-y-4">
@@ -32,7 +42,7 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
                         style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
                     >
                         {/* Poster */}
-                        <Link to={`/${type}/${item.id}`} className="flex-shrink-0">
+                        <Link to={`/${type}/${item.id}`} className="flex-shrink-0" onClick={() => handleClick(item, type, title)}>
                             <img
                                 src={getPosterUrl(item.poster_path, 'w185')}
                                 alt={title}
@@ -44,7 +54,7 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
                         {/* Content */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                             <div>
-                                <Link to={`/${type}/${item.id}`}>
+                                <Link to={`/${type}/${item.id}`} onClick={() => handleClick(item, type, title)}>
                                     <h3 className="text-lg md:text-xl font-semibold text-white hover:text-netflix-red transition-colors line-clamp-1">
                                         {title}
                                     </h3>
@@ -93,6 +103,7 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
                                 />
                                 <Link
                                     to={`/${type}/${item.id}`}
+                                    onClick={() => handleClick(item, type, title)}
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors duration-150"
                                 >
                                     <Info className="w-4 h-4" />
