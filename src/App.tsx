@@ -26,6 +26,12 @@ import { SmartPlayerPage } from './pages/SmartPlayerPage';
 import { CineProHealthService } from './services/cinepro-adapter';
 import { LenisProvider } from './components/layout/LenisProvider';
 import { ScrollToTop } from './components/layout/ScrollToTop';
+import { usePageTracking } from './hooks/usePageTracking';
+
+function AnalyticsTracker(): null {
+  usePageTracking();
+  return null;
+}
 
 function App() {
   useEffect(() => {
@@ -43,6 +49,7 @@ function App() {
             <Router>
               <LenisProvider>
                 <ScrollToTop />
+                <AnalyticsTracker />
                 <SmartPlayerProvider>
                   <div className="min-h-screen bg-netflix-black">
                     <Navbar />
