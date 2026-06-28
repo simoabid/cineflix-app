@@ -5,6 +5,7 @@ import { Movie, TVShow } from '../types';
 import { useMyList } from '../hooks/useMyList';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { analytics } from '../services/analytics';
 
 interface AddToListButtonProps {
   content: Movie | TVShow;
@@ -37,15 +38,17 @@ const AddToListButton: React.FC<AddToListButtonProps> = ({
   const handleToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (!isAuthenticated) {
       showToast('Please sign in to add items to your list', 'warning');
       return;
     }
-
     setIsLoading(true);
     try {
+      const wasInList = inList;
       await toggleInList(content, contentType);
+      if (!wasInList) {
+        analytics.trackAddToList(content.id, contentType);
+      }
       setAnimationKey(prev => prev + 1);
     } catch (error) {
       console.error('Error toggling list item:', error);

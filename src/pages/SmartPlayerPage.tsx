@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RotateCcw, ArrowRight } from 'lucide-react';
+import { analytics } from '@/services/analytics';
 
 import { PStreamPlayer } from '@/components/player/PStreamPlayer';
 import { ScrapingOverlay } from '@/components/player/overlays/ScrapingOverlay';
@@ -232,6 +233,13 @@ export const SmartPlayerPage: React.FC<SmartPlayerPageProps> = ({ type }) => {
         isCinePro ? 'cinepro' : 'pstream',
         cineproProviderName,
       );
+      const mediaTitle = 'title' in content ? content.title : content.name;
+      analytics.trackWatchStart({
+        contentId: content.id,
+        contentTitle: mediaTitle,
+        contentType: type,
+        source: result.sourceId || 'unknown'
+      });
       setPhase('playing');
     } catch (err) {
       console.error('Scraping failed:', err);
@@ -243,14 +251,21 @@ export const SmartPlayerPage: React.FC<SmartPlayerPageProps> = ({ type }) => {
     content, currentRequest, selectedSeason, selectedEpisode,
     startScraping, playMedia, setMeta, setScrapeStatus,
     setScrapeNotFound, setPlaybackError, reset,
-    clearFailedSources, clearFailedEmbeds,
+    clearFailedSources, clearFailedEmbeds, type,
   ]);
 
   const handleClassicFallback = useCallback(() => {
+    const mediaTitle = content ? ('title' in content ? content.title : content.name) : 'unknown';
     if (streamSources.length > 0 && selectedSource) {
       setSelectedSource(selectedSource);
       switchToClassic(selectedSource);
       setPhase('classic');
+      analytics.trackWatchStart({
+        contentId: content?.id || 0,
+        contentTitle: mediaTitle,
+        contentType: type,
+        source: selectedSource.id || 'classic'
+      });
     } else {
       const defaultFallback: StreamSource = {
         id: 'vidjoy_player',
@@ -265,8 +280,14 @@ export const SmartPlayerPage: React.FC<SmartPlayerPageProps> = ({ type }) => {
       setSelectedSource(defaultFallback);
       switchToClassic(defaultFallback);
       setPhase('classic');
+      analytics.trackWatchStart({
+        contentId: content?.id || 0,
+        contentTitle: mediaTitle,
+        contentType: type,
+        source: defaultFallback.id
+      });
     }
-  }, [streamSources, selectedSource, currentRequest, content, selectedSeason, selectedEpisode, setSelectedSource, switchToClassic]);
+  }, [streamSources, selectedSource, currentRequest, content, selectedSeason, selectedEpisode, setSelectedSource, switchToClassic, type]);
 
   // Sync player mode phase with the store displayMode
   useEffect(() => {

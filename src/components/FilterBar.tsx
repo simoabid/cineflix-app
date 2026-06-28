@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { Genre } from '../types';
 import { Container } from './layout';
+import { analytics } from '../services/analytics';
 
 interface FilterBarProps {
   genres: Genre[];
@@ -214,6 +215,21 @@ const FilterBar: React.FC<FilterBarProps> = ({
     selectedRating,
   });
 
+  const handleGenreSelect = useCallback((genre: string) => {
+    analytics.trackFilter('genre', genre || 'all');
+    onGenreChange(genre);
+  }, [onGenreChange]);
+
+  const handleYearSelect = useCallback((year: string) => {
+    analytics.trackFilter('year', year || 'all');
+    onYearChange(year);
+  }, [onYearChange]);
+
+  const handleRatingSelect = useCallback((rating: number) => {
+    analytics.trackFilter('rating', String(rating));
+    onRatingChange(rating);
+  }, [onRatingChange]);
+
   useEffect(() => {
     // Keep local debounce state in sync when parent updates searchQuery
     setDebouncedSearch(searchQuery || '');
@@ -305,7 +321,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <div className="hidden md:flex items-center gap-4">
           <select
             value={safeSelectedGenre}
-            onChange={(e) => onGenreChange(e.target.value)}
+            onChange={(e) => handleGenreSelect(e.target.value)}
             className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-600 transition-colors"
             aria-label="Filter by genre"
           >
@@ -319,7 +335,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
           <select
             value={safeSelectedYear}
-            onChange={(e) => onYearChange(e.target.value)}
+            onChange={(e) => handleYearSelect(e.target.value)}
             className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-600 transition-colors"
             aria-label="Filter by year"
           >
@@ -342,7 +358,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               max="10"
               step="0.5"
               value={safeSelectedRating}
-              onChange={(e) => onRatingChange(validateRating(parseFloat(e.target.value)))}
+              onChange={(e) => handleRatingSelect(validateRating(parseFloat(e.target.value)))}
               className="w-32 accent-red-600"
               aria-label="Filter by minimum rating"
             />
@@ -363,7 +379,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <div className="md:hidden space-y-4 mt-4 p-4 bg-gray-800 rounded-lg">
             <select
               value={safeSelectedGenre}
-              onChange={(e) => onGenreChange(e.target.value)}
+              onChange={(e) => handleGenreSelect(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-red-600 transition-colors"
               aria-label="Filter by genre"
             >
@@ -377,7 +393,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
             <select
               value={safeSelectedYear}
-              onChange={(e) => onYearChange(e.target.value)}
+              onChange={(e) => handleYearSelect(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-red-600 transition-colors"
               aria-label="Filter by year"
             >
@@ -400,7 +416,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 max="10"
                 step="0.5"
                 value={safeSelectedRating}
-                onChange={(e) => onRatingChange(validateRating(parseFloat(e.target.value)))}
+                onChange={(e) => handleRatingSelect(validateRating(parseFloat(e.target.value)))}
                 className="w-full accent-red-600"
                 aria-label="Filter by minimum rating"
               />

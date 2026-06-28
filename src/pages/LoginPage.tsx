@@ -5,6 +5,7 @@ import { AuthCard, FormInput, PasswordInput, SocialAuthButtons } from '../compon
 import { validateEmail } from '../utils/validation';
 import { AUTH_STRINGS } from '../utils/strings';
 import { SEOHead } from '../components/layout/SEOHead';
+import { analytics } from '../services/analytics';
 
 interface FormErrors {
     email?: string;
@@ -59,21 +60,15 @@ const LoginPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setHasSubmitted(true);
-
-        // Clear server error
         setErrors(prev => ({ ...prev, server: undefined }));
-
         if (!validateForm()) {
             return;
         }
-
         setIsSubmitting(true);
-
         try {
             const result = await login(email, password);
-
             if (result.success) {
-                // Navigate to intended destination
+                analytics.trackAuth('login');
                 navigate(from, { replace: true });
             } else {
                 setErrors(prev => ({

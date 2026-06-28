@@ -11,6 +11,7 @@ import {
 import { AUTH_STRINGS } from '../utils/strings';
 import { SEOHead } from '../components/layout/SEOHead';
 import { AVATARS } from '../constants/avatars';
+import { analytics } from '../services/analytics';
 
 interface FormErrors {
     name?: string;
@@ -79,20 +80,15 @@ const SignupPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setHasSubmitted(true);
-
-        // Clear server error
         setErrors(prev => ({ ...prev, server: undefined }));
-
         if (!validateForm()) {
             return;
         }
-
         setIsSubmitting(true);
-
         try {
             const result = await register(email, password, name, selectedAvatar);
-
             if (result.success) {
+                analytics.trackAuth('signup');
                 navigate('/', { replace: true });
             } else {
                 setErrors(prev => ({

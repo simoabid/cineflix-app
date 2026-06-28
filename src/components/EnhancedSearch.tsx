@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Filter, Clock, Star, TrendingUp, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { analytics } from '../services/analytics';
 
 export interface SearchSuggestion {
   id: string;
@@ -318,19 +319,14 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({ onClose, isExpanded = f
    */
   const handleSearch = (searchQuery: string) => {
     if (!isValidQuery(searchQuery)) {
-      // Defensive: ignore invalid submissions.
       return;
     }
-
     const normalized = searchQuery.trim();
-
     setRecentSearches((prev) => updateRecentSearches(prev, normalized, 5));
-
+    analytics.trackSearch(normalized, suggestions.length);
     try {
       navigate(`/search?q=${encodeURIComponent(normalized)}&filter=${selectedFilter}`);
     } catch (err) {
-      // If navigation fails, still clear UI state to avoid leaving inconsistent UI.
-      // In real app, we might surface an error toast; keep silent here for parity.
     } finally {
       setQuery('');
       setSuggestions([]);
