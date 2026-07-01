@@ -28,19 +28,21 @@ import { LenisProvider } from './components/layout/LenisProvider';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { usePageTracking } from './hooks/usePageTracking';
 
+import { useServiceWorker } from './hooks/useServiceWorker';
+
 function AnalyticsTracker(): null {
   usePageTracking();
   return null;
 }
 
 function App() {
+  useServiceWorker();
   useEffect(() => {
     CineProHealthService.start();
     return () => {
       CineProHealthService.stop();
     };
   }, []);
-
   return (
     <ErrorBoundary>
       <HelmetProvider>
