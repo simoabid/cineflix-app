@@ -4,16 +4,13 @@ import { useSmartPlayer } from '../hooks/useSmartPlayer';
 import {
   Play,
   Info,
-  Volume2,
-  VolumeX,
   Star,
   Calendar,
   Clock,
   Users,
   ChevronLeft,
   ChevronRight,
-  Share2,
-  Film
+  Share2
 } from 'lucide-react';
 import {
   getTrendingMovies,
@@ -84,7 +81,6 @@ const HomePage = (): JSX.Element => {
   const [topRatedMovies, setTopRatedMovies] = useState<Movie[]>([]);
   const [nowPlayingMovies, setNowPlayingMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const [isHeroAutoPlaying, setIsHeroAutoPlaying] = useState(true);
 
   // Content Types
@@ -306,7 +302,7 @@ const HomePage = (): JSX.Element => {
       {/* Enhanced Hero Section */}
       {heroMovie && (
         <div
-          className="relative min-h-screen lg:h-screen overflow-hidden"
+          className="relative min-h-screen md:h-screen overflow-hidden"
           onMouseEnter={() => setIsHeroAutoPlaying(false)}
           onMouseLeave={() => setIsHeroAutoPlaying(true)}
         >
@@ -317,7 +313,7 @@ const HomePage = (): JSX.Element => {
               src={getPosterUrl(heroMovie.poster_path, 'w342')}
               alt=""
               aria-hidden="true"
-              className="lg:hidden w-full h-full object-cover scale-110 transition-all duration-1000"
+              className="md:hidden w-full h-full object-cover scale-110 transition-all duration-1000"
               style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
@@ -327,17 +323,17 @@ const HomePage = (): JSX.Element => {
             <img
               src={getBackdropUrl(heroMovie.backdrop_path, 'original')}
               alt={heroMovie.title}
-              className="hidden lg:block w-full h-full object-cover transition-all duration-1000"
+              className="hidden md:block w-full h-full object-cover transition-all duration-1000"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = getImageUrl(heroMovie.poster_path, 'original');
               }}
             />
 
             {/* Mobile/Tablet: Dark overlay to keep ambient subtle */}
-            <div className="lg:hidden absolute inset-0 bg-black/40"></div>
+            <div className="md:hidden absolute inset-0 bg-black/40"></div>
 
             {/* Desktop: Original gradient overlays */}
-            <div className="hidden lg:block">
+            <div className="hidden md:block">
               <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
             </div>
@@ -349,14 +345,14 @@ const HomePage = (): JSX.Element => {
               {/* Desktop arrows */}
               <button
                 onClick={prevHero}
-                className="hidden lg:flex absolute left-8 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 backdrop-blur-sm p-3 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 shadow-xl hover:scale-110"
+                className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 backdrop-blur-sm p-3 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 shadow-xl hover:scale-110"
                 aria-label="Previous featured movie"
               >
                 <ChevronLeft className="w-6 h-6 text-white" />
               </button>
               <button
                 onClick={nextHero}
-                className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 backdrop-blur-sm p-3 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 shadow-xl hover:scale-110"
+                className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 backdrop-blur-sm p-3 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 shadow-xl hover:scale-110"
                 aria-label="Next featured movie"
               >
                 <ChevronRight className="w-6 h-6 text-white" />
@@ -365,9 +361,9 @@ const HomePage = (): JSX.Element => {
           )}
 
           {/* ============================================
-              MOBILE / TABLET HERO CONTENT (< lg) — Floating Card
+              MOBILE / TABLET HERO CONTENT (< md) — Floating Card
               ============================================ */}
-          <div className="lg:hidden relative z-10 h-full flex flex-col items-center pt-24 sm:pt-28 px-5 pb-6 no-scrollbar">
+          <div className="md:hidden relative z-10 h-full flex flex-col items-center pt-24 sm:pt-28 px-5 pb-6 no-scrollbar">
             {/* Floating Poster Card */}
             <div className="w-[58%] max-w-[220px] sm:max-w-[240px] flex-shrink-0 mb-4 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
               <img
@@ -466,12 +462,27 @@ const HomePage = (): JSX.Element => {
                 <span>Share</span>
               </button>
             </div>
+
+            {/* Mobile/Tablet dots - pill indicator style */}
+            {heroMovies.length > 1 && (
+              <div className="mt-5 flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur-sm px-3 py-2 flex-shrink-0 animate-fade-in-up" style={{ animationDelay: '0.55s', animationFillMode: 'both' }}>
+                {heroMovies.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToHero(index)}
+                    aria-label={`Go to featured movie ${index + 1}`}
+                    aria-current={index === currentHeroIndex}
+                    className={`hero-carousel-dot ${index === currentHeroIndex ? 'active' : ''}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ============================================
-              DESKTOP HERO CONTENT (lg+)
+              DESKTOP HERO CONTENT (md+)
               ============================================ */}
-          <div className="hidden lg:flex relative z-10 h-full items-center justify-start">
+          <div className="hidden md:flex relative z-10 h-full items-center justify-start">
             <div className="max-w-6xl ml-16 px-8 grid grid-cols-4 gap-12 items-center">
               {/* Movie Poster */}
               <div className="col-span-1 flex justify-start">
@@ -591,64 +602,29 @@ const HomePage = (): JSX.Element => {
                     </button>
                   </div>
                 </div>
-
-                {/* Additional Quick Actions */}
-                <div className="flex items-center justify-start space-x-4 pt-2">
-                  <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="w-10 h-10 bg-gray-700/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-gray-600/50 transition-all duration-300 group border border-white/20 hover:border-white/40"
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-4 h-4 text-white" />
-                    ) : (
-                      <Volume2 className="w-4 h-4 text-white" />
-                    )}
-                  </button>
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <Film className="w-3 h-3" />
-                    <span>Featured Movie</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
           {/* Hero Navigation Dots */}
           {heroMovies.length > 1 && (
-            <>
-              {/* Mobile dots - pill indicator style */}
-              <div className="lg:hidden absolute bottom-2 md:bottom-36 left-1/2 -translate-x-1/2 z-20">
-                <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur-sm px-3 py-2">
-                  {heroMovies.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => goToHero(index)}
-                      aria-label={`Go to featured movie ${index + 1}`}
-                      aria-current={index === currentHeroIndex}
-                      className={`hero-carousel-dot ${index === currentHeroIndex ? 'active' : ''}`}
-                    />
-                  ))}
-                </div>
+            /* Desktop dots */
+            <div className="hidden md:block absolute bottom-36 xl:bottom-40 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+              <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-sm px-3 py-2 border border-white/10 shadow-lg">
+                {heroMovies.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToHero(index)}
+                    aria-label={`Go to featured movie ${index + 1}`}
+                    aria-current={index === currentHeroIndex}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 ${index === currentHeroIndex
+                      ? 'bg-netflix-red scale-110 ring-2 ring-netflix-red/40'
+                      : 'bg-white/50 hover:bg-white/70'
+                      }`}
+                  />
+                ))}
               </div>
-
-              {/* Desktop dots */}
-              <div className="hidden lg:block absolute bottom-28 xl:bottom-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-sm px-3 py-2 border border-white/10">
-                  {heroMovies.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => goToHero(index)}
-                      aria-label={`Go to featured movie ${index + 1}`}
-                      aria-current={index === currentHeroIndex}
-                      className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 ${index === currentHeroIndex
-                        ? 'bg-netflix-red scale-110 ring-2 ring-netflix-red/40'
-                        : 'bg-white/50 hover:bg-white/70'
-                        }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
+            </div>
           )}
         </div>
       )}

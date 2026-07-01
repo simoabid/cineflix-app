@@ -8,7 +8,7 @@ export function useIsMobile(horizontal?: boolean) {
     function onResize() {
       const value = horizontal
         ? window.innerHeight < 600
-        : window.innerWidth < 1024;
+        : window.innerWidth < 768;
       const isChanged = isMobileCurrent.current !== value;
       if (!isChanged) return;
 

@@ -17,9 +17,9 @@ export const useScreenSize = (): ScreenSize => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
       setScreenSize({
-        isMobile: width < 768, // < md breakpoint
-        isTablet: width >= 768 && width < 1024, // md to lg breakpoint
-        isDesktop: width >= 1024, // >= lg breakpoint
+        isMobile: width < 640, // < sm breakpoint
+        isTablet: width >= 640 && width < 768, // sm to md breakpoint
+        isDesktop: width >= 768, // >= md breakpoint
       });
     };
 
