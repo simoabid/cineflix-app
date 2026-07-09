@@ -205,104 +205,64 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
                 const isHovered = hoveredItem === index;
 
                 return (
-                  <div
+                  <motion.button
                     key={`${activeTab}-${item.id}`}
-                    className="flex-shrink-0 w-[140px] sm:w-[180px] md:w-[220px] lg:w-[260px] xl:w-[280px] relative group perspective-1000"
-                    onMouseEnter={() => !isDragging && setHoveredItem(index)}
-                    onMouseLeave={() => setHoveredItem(null)}
+                    onClick={() => handleWatchContent(item)}
+                    whileHover={{ y: -6, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     style={{ scrollSnapAlign: 'start' }}
+                    className="flex-shrink-0 w-[140px] sm:w-[180px] md:w-[220px] lg:w-[240px] relative group flex flex-col border border-white/10 bg-white/[0.02] rounded-2xl overflow-hidden hover:border-[#ff0000]/40 hover:bg-white/[0.05] hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)] transition-all duration-300 text-left outline-none select-none"
                   >
-                    <motion.div
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      animate={{
-                        y: isHovered ? -12 : 0,
-                        scale: isHovered ? 1.02 : 1
-                      }}
-                      className="relative cursor-pointer"
-                    >
-                      {/* Premium Card Shadow */}
-                      <div className={`absolute inset-0 bg-[#ff0000]/20 blur-2xl rounded-2xl transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+                    {/* Poster Container */}
+                    <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-900 rounded-t-2xl">
+                      <img
+                        src={getPosterUrl(item.poster_path, 'w500')}
+                        alt={itemTitle}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108 pointer-events-none"
+                        loading="lazy"
+                      />
 
-                      <div
-                        onClick={() => handleWatchContent(item)}
-                        className="relative overflow-hidden rounded-2xl bg-gray-900 border border-white/5 aspect-[2/3] group-hover:border-[#ff0000]/50 transition-all duration-500"
-                      >
-                        <img
-                          src={getPosterUrl(item.poster_path, 'w500')}
-                          alt={itemTitle}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none"
-                          loading="lazy"
-                        />
+                      {/* Glassy reflection overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-                        {/* Dynamic Overlays */}
-                        <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
-
-                        <div className={`absolute inset-0 flex flex-col justify-end p-5 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-                          <div className="space-y-3">
-                            <div className="flex gap-2">
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={(e) => { e.stopPropagation(); handleWatchContent(item); }}
-                                className="w-10 h-10 flex items-center justify-center bg-[#ff0000] text-white rounded-xl shadow-lg shadow-red-600/40"
-                              >
-                                <Play className="h-5 w-5 fill-current" />
-                              </motion.button>
-                              <AddToListButton
-                                content={item}
-                                contentType={contentType}
-                                variant="icon"
-                                showText={false}
-                                className="!w-10 !h-10 !p-0 bg-white/10 backdrop-blur-md text-white border border-white/10 rounded-xl hover:bg-white/20"
-                              />
-                              <LikeButton
-                                content={item}
-                                contentType={contentType}
-                                variant="icon"
-                                showText={false}
-                                className="!w-10 !h-10 !p-0 bg-white/10 backdrop-blur-md text-white border border-white/10 rounded-xl hover:bg-white/20"
-                              />
-                            </div>
-                            <button className="flex items-center gap-2 text-xs font-semibold text-white/90 hover:text-white transition-colors duration-200">
-                              <Info className="w-4 h-4" />
-                              View Details
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Top Badges */}
-                        <div className="absolute top-4 left-4 flex flex-col gap-2">
-                          <div className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 shadow-xl">
-                            <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                            <span className="text-[11px] font-bold text-white">{(item.vote_average || 0).toFixed(1)}</span>
-                          </div>
-                        </div>
-
-                        <div className="absolute top-4 right-4">
-                          <div className="px-2 py-1 rounded-lg bg-[#ff0000] text-white text-[10px] font-black tracking-tighter shadow-lg shadow-red-600/30">
-                            {contentType === 'movie' ? 'MOVIE' : 'TV SHOW'}
-                          </div>
+                      {/* Top Badges */}
+                      <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
+                        <div className="px-2 py-0.5 rounded bg-black/75 backdrop-blur-sm border border-white/10 flex items-center gap-1 shadow-md">
+                          <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                          <span className="text-[10px] font-bold text-white">{(item.vote_average || 0).toFixed(1)}</span>
                         </div>
                       </div>
 
-                      {/* Footer Info */}
-                      <div className="mt-3.5 sm:mt-5 space-y-1 sm:space-y-1.5">
-                        <h3 className="text-white font-bold text-xs sm:text-sm md:text-base leading-tight line-clamp-1 group-hover:text-[#ff0000] transition-colors duration-300">
-                          {itemTitle}
-                        </h3>
-                        <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[11px] font-medium text-gray-500">
-                          <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 uppercase">
-                            {itemDate ? new Date(itemDate).getFullYear() : 'N/A'}
-                          </span>
-                          <span>•</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-600" />
-                            <span>{item.vote_count.toLocaleString()} votes</span>
-                          </div>
+                      <div className="absolute top-2.5 right-2.5 z-10">
+                        <div className="px-2 py-0.5 rounded bg-[#ff0000] text-white text-[9px] font-black tracking-wider shadow-md">
+                          {contentType === 'movie' ? 'MOVIE' : 'SERIES'}
                         </div>
                       </div>
-                    </motion.div>
-                  </div>
+
+                      {/* Hover play icon indicator */}
+                      <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-12 h-12 bg-[#ff0000] rounded-full flex items-center justify-center shadow-lg shadow-[#ff0000]/40 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                          <Play className="w-5 h-5 text-white fill-current ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Bottom Info Footer */}
+                    <div className="p-3 sm:p-4 bg-gradient-to-b from-white/[0.02] to-black/40 border-t border-white/5 w-full flex-1 flex flex-col justify-between min-h-[5.5rem]">
+                      <h3 className="text-white font-bold text-xs sm:text-sm md:text-base leading-snug line-clamp-2 group-hover:text-[#ff0000] transition-colors duration-300">
+                        {itemTitle}
+                      </h3>
+                      <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-semibold text-gray-400 mt-2 flex-wrap gap-1.5">
+                        <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 uppercase">
+                          {itemDate ? new Date(itemDate).getFullYear() : 'N/A'}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-600" />
+                          <span>{item.vote_count.toLocaleString()} votes</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.button>
                 );
               })}
             </motion.div>

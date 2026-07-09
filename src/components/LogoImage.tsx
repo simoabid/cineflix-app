@@ -67,6 +67,15 @@ const LogoImage: React.FC<LogoImageProps> = ({
 
   const config = sizeConfig[size];
 
+  // Reset state when contentId, contentType, or logoPath changes to avoid showing stale logo data
+  useEffect(() => {
+    setLogoLoaded(false);
+    setLogoError(false);
+    setShowLogo(false);
+    setFetchedLogoPath(null);
+    setIsFetching(false);
+  }, [contentId, contentType, logoPath]);
+
   // On-demand logo fetching
   useEffect(() => {
     const fetchLogo = async () => {
@@ -137,11 +146,11 @@ const LogoImage: React.FC<LogoImageProps> = ({
   if (!currentLogoPath || logoError || !showLogo) {
     return (
       <div 
-        className={`flex items-center justify-center ${config.minHeight} ${className}`}
+        className={`flex items-center ${className.includes('justify-') ? '' : 'justify-center'} ${config.minHeight} ${className}`}
       >
         <h1 
           className={`
-            font-bold text-white leading-tight text-center
+            font-bold text-white leading-tight ${textClassName.includes('text-') ? '' : 'text-center'}
             ${config.textSize}
             ${textClassName}
             drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]

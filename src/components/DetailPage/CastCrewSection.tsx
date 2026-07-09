@@ -166,7 +166,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                             onMouseLeave={handleMouseUp}
                             onMouseUp={handleMouseUp}
                             onMouseMove={handleMouseMove}
-                            className={`flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto scrollbar-hide pb-6 sm:pb-8 pt-2 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
+                            className={`flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto scrollbar-hide pb-6 sm:pb-8 pt-3 px-6 sm:px-8 lg:px-12 cursor-grab active:cursor-grabbing select-none ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
                         >
                             {data.map((member, index) => {
                                 const isCast = 'character' in member;
@@ -181,8 +181,11 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                                         onMouseLeave={() => setHoveredId(null)}
                                     >
                                         <motion.div
-                                            animate={{ y: isHovered ? -8 : 0 }}
-                                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                            animate={{
+                                                y: isHovered ? -6 : 0,
+                                                scale: isHovered ? 1.02 : 1
+                                            }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                             onClick={() => !isDragging && isCast && onActorClick(member as CastMember)}
                                             className="relative rounded-2xl overflow-hidden bg-gray-900 aspect-[3/4.5] border border-white/5 cursor-pointer group-hover:border-red-500/50 transition-colors shadow-xl"
                                         >

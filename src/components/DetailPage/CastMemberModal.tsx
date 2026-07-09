@@ -67,7 +67,8 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: 'spring', stiffness: 280, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-6xl bg-gradient-to-b from-[#13132B] to-[#0A0A1F] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-h-[92vh] overflow-y-auto scrollbar-thin"
+            data-lenis-prevent
+            className="relative w-full max-w-6xl bg-gradient-to-b from-[#13132B] to-[#0A0A1F] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-h-[92vh] overflow-y-auto scrollbar-hide"
           >
             {/* Close button */}
             <button

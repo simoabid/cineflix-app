@@ -968,3 +968,103 @@ export const safeApiCall = async <T>(apiCall: () => Promise<T>): Promise<T | nul
     return null;
   }
 };
+
+export interface AdvancedFilterOptions {
+  query?: string;
+  genreId?: number | null;
+  year?: string;
+  minRating?: number;
+  page?: number;
+}
+
+export const discoverMoviesAdvanced = async (options: AdvancedFilterOptions): Promise<ApiResponse<Movie>> => {
+  const { query, genreId, year, minRating, page = 1 } = options;
+
+  if (query && query.trim()) {
+    const params: any = {
+      query: query.trim(),
+      page,
+    };
+    if (year) {
+      params.primary_release_year = year;
+    }
+    const response = await tmdbApi.get('/search/movie', { params });
+    let results = response.data.results || [];
+
+    if (genreId) {
+      results = results.filter((m: any) => m.genre_ids?.includes(genreId));
+    }
+    if (minRating && minRating > 0) {
+      results = results.filter((m: any) => m.vote_average >= minRating);
+    }
+
+    return {
+      ...response.data,
+      results,
+    };
+  }
+
+  const params: any = {
+    page,
+    sort_by: 'popularity.desc',
+  };
+  if (genreId) {
+    params.with_genres = genreId;
+  }
+  if (year) {
+    params.primary_release_year = year;
+  }
+  if (minRating && minRating > 0) {
+    params['vote_average.gte'] = minRating;
+    params['vote_count.gte'] = 50;
+  }
+
+  const response = await tmdbApi.get('/discover/movie', { params });
+  return response.data;
+};
+
+export const discoverTVShowsAdvanced = async (options: AdvancedFilterOptions): Promise<ApiResponse<TVShow>> => {
+  const { query, genreId, year, minRating, page = 1 } = options;
+
+  if (query && query.trim()) {
+    const params: any = {
+      query: query.trim(),
+      page,
+    };
+    if (year) {
+      params.first_air_date_year = year;
+    }
+    const response = await tmdbApi.get('/search/tv', { params });
+    let results = response.data.results || [];
+
+    if (genreId) {
+      results = results.filter((s: any) => s.genre_ids?.includes(genreId));
+    }
+    if (minRating && minRating > 0) {
+      results = results.filter((s: any) => s.vote_average >= minRating);
+    }
+
+    return {
+      ...response.data,
+      results,
+    };
+  }
+
+  const params: any = {
+    page,
+    sort_by: 'popularity.desc',
+  };
+  if (genreId) {
+    params.with_genres = genreId;
+  }
+  if (year) {
+    params.first_air_date_year = year;
+  }
+  if (minRating && minRating > 0) {
+    params['vote_average.gte'] = minRating;
+    params['vote_count.gte'] = 50;
+  }
+
+  const response = await tmdbApi.get('/discover/tv', { params });
+  return response.data;
+};

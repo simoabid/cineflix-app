@@ -65,5 +65,7 @@ mobile/*
 
 # Other
 cineflix-extension/
-core/CINEFLIX-Page/
+cineflix-core/
+CINEFLIX-Page/
 .windsurf/
+cineflix-core-main/

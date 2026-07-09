@@ -49,7 +49,7 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
 
         {/* Horizontal Scrolling Video Grid */}
         <div className="relative -mx-4 sm:-mx-6 lg:-mx-8">
-          <div className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 px-4 sm:px-6 lg:px-8 scrollbar-hide snap-x snap-mandatory">
+          <div className="flex gap-4 sm:gap-5 overflow-x-auto pt-3 pb-5 px-4 sm:px-6 lg:px-8 scrollbar-hide snap-x snap-mandatory">
             {safeVideos.slice(0, 8).map((video, index) => (
               <motion.button
                 key={video.id}
@@ -58,36 +58,39 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.25) }}
                 onClick={() => setSelectedVideo(video)}
-                whileHover={{ y: -4 }}
-                className="flex-shrink-0 w-72 sm:w-80 md:w-[22rem] group cursor-pointer text-left snap-start"
+                whileHover={{ y: -6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-shrink-0 w-72 sm:w-80 md:w-[22rem] group cursor-pointer text-left snap-start flex flex-col border border-white/10 bg-white/[0.02] rounded-2xl overflow-hidden hover:border-netflix-red/40 hover:bg-white/[0.05] hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)] transition-all duration-300"
                 aria-label={`Play ${video.name}`}
               >
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-3 ring-1 ring-white/10 shadow-lg shadow-black/50 group-hover:ring-netflix-red/50 transition-all duration-300">
+                <div className="relative aspect-video w-full overflow-hidden bg-black rounded-t-2xl">
                   <img
                     src={`https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`}
                     alt={video.name}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.key}/mqdefault.jpg`;
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/10 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-netflix-red rounded-full flex items-center justify-center shadow-2xl shadow-netflix-red/40 transition-transform duration-300 group-hover:scale-110">
-                      <Play className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current ml-0.5" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-netflix-red rounded-full flex items-center justify-center shadow-2xl shadow-netflix-red/40 transition-transform duration-300 group-hover:scale-110">
+                      <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current ml-0.5" />
                     </div>
                   </div>
                   <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-sm border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md">
                     {video.type}
                   </div>
                 </div>
-                <div className="space-y-1 px-1">
-                  <h3 className="font-semibold text-white text-sm sm:text-base group-hover:text-netflix-red transition-colors line-clamp-2 leading-tight">
+                {/* Bottom Info Footer */}
+                <div className="p-4 bg-gradient-to-b from-white/[0.02] to-black/40 border-t border-white/5 w-full flex-1 flex flex-col justify-between min-h-[5.5rem]">
+                  <h3 className="font-semibold text-white text-sm sm:text-base group-hover:text-netflix-red transition-colors duration-300 line-clamp-2 leading-tight">
                     {video.name}
                   </h3>
-                  <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                    <Calendar className="w-3 h-3" />
+                  <p className="text-xs text-gray-400 flex items-center gap-1.5 mt-2">
+                    <Calendar className="w-3.5 h-3.5 text-gray-500" />
                     {new Date(video.published_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
@@ -135,10 +138,9 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
                 <iframe
                   src={`https://www.youtube.com/embed/${selectedVideo.key}?autoplay=1&rel=0`}
                   title={selectedVideo.name}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
-                  sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
-                  referrerPolicy="no-referrer"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   loading="lazy"
                   className="w-full h-full"
                 />

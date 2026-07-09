@@ -83,6 +83,37 @@ const HomePage = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [isHeroAutoPlaying, setIsHeroAutoPlaying] = useState(true);
 
+  // States for cinema crossfade transitions
+  const [activeBackdrop, setActiveBackdrop] = useState<string | null>(null);
+  const [prevBackdrop, setPrevBackdrop] = useState<string | null>(null);
+  const [activePoster, setActivePoster] = useState<string | null>(null);
+  const [prevPoster, setPrevPoster] = useState<string | null>(null);
+  const [isCrossFading, setIsCrossFading] = useState(false);
+
+  const currentBackdrop = heroMovie?.backdrop_path || heroMovie?.poster_path;
+  const currentPoster = heroMovie?.poster_path;
+
+  useEffect(() => {
+    if (currentBackdrop) {
+      if (activeBackdrop && currentBackdrop !== activeBackdrop) {
+        setPrevBackdrop(activeBackdrop);
+        setIsCrossFading(true);
+        const timer = setTimeout(() => setIsCrossFading(false), 1000);
+        setActiveBackdrop(currentBackdrop);
+        if (currentPoster) {
+          setPrevPoster(activePoster);
+          setActivePoster(currentPoster);
+        }
+        return () => clearTimeout(timer);
+      } else if (!activeBackdrop) {
+        setActiveBackdrop(currentBackdrop);
+        if (currentPoster) {
+          setActivePoster(currentPoster);
+        }
+      }
+    }
+  }, [currentBackdrop, activeBackdrop, currentPoster, activePoster]);
+
   // Content Types
   const [trendingType, setTrendingType] = useState<'movie' | 'tv'>('movie');
   const [popularType, setPopularType] = useState<'movie' | 'tv'>('movie');
@@ -307,35 +338,105 @@ const HomePage = (): JSX.Element => {
           onMouseLeave={() => setIsHeroAutoPlaying(true)}
         >
           {/* Background Image - Responsive: Ambient glow for mobile, horizontal backdrop for desktop */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 select-none pointer-events-none">
+            <style>{`
+              @keyframes bgCrossFade {
+                from {
+                  opacity: 0;
+                  transform: scale(1.04);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1.01);
+                }
+              }
+              .animate-bg-fade {
+                animation: bgCrossFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+              }
+              @keyframes heroFadeInUp {
+                from {
+                  opacity: 0;
+                  transform: translateY(20px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+              .animate-hero-fade {
+                animation: heroFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                opacity: 0;
+              }
+              .delay-100 { animation-delay: 100ms; }
+              .delay-200 { animation-delay: 200ms; }
+              .delay-300 { animation-delay: 300ms; }
+              .delay-350 { animation-delay: 350ms; }
+              .delay-400 { animation-delay: 400ms; }
+              .delay-500 { animation-delay: 500ms; }
+              @keyframes activeDotFill {
+                from { width: 0%; }
+                to { width: 100%; }
+              }
+              .animate-dot-fill {
+                animation: activeDotFill 8s linear forwards;
+              }
+            `}</style>
+
             {/* Mobile/Tablet: Blurred poster for ambient color background */}
-            <img
-              src={getPosterUrl(heroMovie.poster_path, 'w342')}
-              alt=""
-              aria-hidden="true"
-              className="md:hidden w-full h-full object-cover scale-110 transition-all duration-1000"
-              style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
-              }}
-            />
+            {prevPoster && (
+              <img
+                src={getPosterUrl(prevPoster, 'w342')}
+                alt=""
+                aria-hidden="true"
+                className="md:hidden absolute inset-0 w-full h-full object-cover scale-110"
+                style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
+              />
+            )}
+            {activePoster && (
+              <img
+                key={`mobile-${activePoster}`}
+                src={getPosterUrl(activePoster, 'w342')}
+                alt=""
+                aria-hidden="true"
+                className={`md:hidden absolute inset-0 w-full h-full object-cover scale-110 transition-opacity duration-1000 ${
+                  isCrossFading ? 'opacity-0' : 'opacity-100'
+                }`}
+                style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
+                }}
+              />
+            )}
+
             {/* Desktop: Horizontal Backdrop */}
-            <img
-              src={getBackdropUrl(heroMovie.backdrop_path, 'original')}
-              alt={heroMovie.title}
-              className="hidden md:block w-full h-full object-cover transition-all duration-1000"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = getImageUrl(heroMovie.poster_path, 'original');
-              }}
-            />
+            {prevBackdrop && (
+              <img
+                src={getBackdropUrl(prevBackdrop, 'original')}
+                alt=""
+                className="hidden md:block absolute inset-0 w-full h-full object-cover brightness-[0.95] md:brightness-100 scale-102"
+              />
+            )}
+            {activeBackdrop && (
+              <img
+                key={`desktop-${activeBackdrop}`}
+                src={getBackdropUrl(activeBackdrop, 'original')}
+                alt={heroMovie.title}
+                className={`hidden md:block absolute inset-0 w-full h-full object-cover brightness-[0.95] md:brightness-100 ${
+                  isCrossFading ? 'opacity-0 animate-bg-fade' : 'scale-102 opacity-100'
+                }`}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = getImageUrl(heroMovie.poster_path, 'original');
+                }}
+              />
+            )}
 
             {/* Mobile/Tablet: Dark overlay to keep ambient subtle */}
             <div className="md:hidden absolute inset-0 bg-black/40"></div>
 
             {/* Desktop: Original gradient overlays */}
             <div className="hidden md:block">
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-[2]"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-[2]"></div>
             </div>
           </div>
 
@@ -363,7 +464,7 @@ const HomePage = (): JSX.Element => {
           {/* ============================================
               MOBILE / TABLET HERO CONTENT (< md) — Floating Card
               ============================================ */}
-          <div className="md:hidden relative z-10 h-full flex flex-col items-center pt-24 sm:pt-28 px-5 pb-6 no-scrollbar">
+          <div key={`mobile-content-${currentHeroIndex}`} className="md:hidden relative z-10 h-full flex flex-col items-center pt-24 sm:pt-28 px-5 pb-6 no-scrollbar">
             {/* Floating Poster Card */}
             <div className="w-[58%] max-w-[220px] sm:max-w-[240px] flex-shrink-0 mb-4 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
               <img
@@ -462,18 +563,30 @@ const HomePage = (): JSX.Element => {
                 <span>Share</span>
               </button>
             </div>
-
-            {/* Mobile/Tablet dots - pill indicator style */}
             {heroMovies.length > 1 && (
-              <div className="mt-5 flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur-sm px-3 py-2 flex-shrink-0 animate-fade-in-up" style={{ animationDelay: '0.55s', animationFillMode: 'both' }}>
+              <div className="mt-5 flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-sm px-3 py-2 flex-shrink-0 animate-fade-in-up border border-white/10 shadow-lg" style={{ animationDelay: '0.55s', animationFillMode: 'both' }}>
                 {heroMovies.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToHero(index)}
                     aria-label={`Go to featured movie ${index + 1}`}
                     aria-current={index === currentHeroIndex}
-                    className={`hero-carousel-dot ${index === currentHeroIndex ? 'active' : ''}`}
-                  />
+                    className={`relative h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                      index === currentHeroIndex 
+                        ? 'w-10 bg-white/20 overflow-hidden' 
+                        : 'w-2 bg-white/40 hover:bg-white/80'
+                    }`}
+                  >
+                    {index === currentHeroIndex && (
+                      <div 
+                        key={currentHeroIndex}
+                        className="absolute top-0 left-0 h-full bg-[#E50914] rounded-full animate-dot-fill"
+                        style={{
+                          animationPlayState: isHeroAutoPlaying ? 'running' : 'paused'
+                        }}
+                      />
+                    )}
+                  </button>
                 ))}
               </div>
             )}
@@ -483,9 +596,9 @@ const HomePage = (): JSX.Element => {
               DESKTOP HERO CONTENT (md+)
               ============================================ */}
           <div className="hidden md:flex relative z-10 h-full items-center justify-start">
-            <div className="max-w-6xl ml-16 px-8 grid grid-cols-4 gap-12 items-center">
+            <div key={`desktop-content-${currentHeroIndex}`} className="max-w-6xl ml-16 px-8 grid grid-cols-4 gap-12 items-center">
               {/* Movie Poster */}
-              <div className="col-span-1 flex justify-start">
+              <div className="col-span-1 flex justify-start animate-hero-fade delay-100">
                 <div>
                   <img
                     src={getPosterUrl(heroMovie.poster_path, 'w500')}
@@ -501,7 +614,7 @@ const HomePage = (): JSX.Element => {
               {/* Movie Info */}
               <div className="col-span-3 space-y-5 pl-8 text-left">
                 {/* Title with Logo */}
-                <div>
+                <div className="animate-hero-fade delay-200">
                   <div className="mb-4">
                     <LogoImage
                       logoPath={heroMovie.logo_path}
@@ -523,7 +636,7 @@ const HomePage = (): JSX.Element => {
                 </div>
 
                 {/* Enhanced Metadata */}
-                <div className="flex flex-wrap items-center justify-start gap-6 text-base">
+                <div className="flex flex-wrap items-center justify-start gap-6 text-base animate-hero-fade delay-300">
                   <div className="flex items-center gap-2">
                     <Star className="w-5 h-5 text-yellow-400 fill-current" />
                     <span className="font-semibold">{formatRating(heroMovie.vote_average)}</span>
@@ -546,7 +659,7 @@ const HomePage = (): JSX.Element => {
                 </div>
 
                 {/* Enhanced Genres */}
-                <div className="flex flex-wrap justify-start gap-3">
+                <div className="flex flex-wrap justify-start gap-3 animate-hero-fade delay-350">
                   {heroMovie.genres?.slice(0, 4).map((genre) => (
                     <span
                       key={genre.id}
@@ -558,7 +671,7 @@ const HomePage = (): JSX.Element => {
                 </div>
 
                 {/* Enhanced Action Buttons */}
-                <div className="space-y-4">
+                <div className="space-y-4 animate-hero-fade delay-400">
                   {/* Primary Actions */}
                   <div className="flex flex-row justify-start gap-4">
                     <button
@@ -617,11 +730,22 @@ const HomePage = (): JSX.Element => {
                     onClick={() => goToHero(index)}
                     aria-label={`Go to featured movie ${index + 1}`}
                     aria-current={index === currentHeroIndex}
-                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 ${index === currentHeroIndex
-                      ? 'bg-netflix-red scale-110 ring-2 ring-netflix-red/40'
-                      : 'bg-white/50 hover:bg-white/70'
-                      }`}
-                  />
+                    className={`relative h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                      index === currentHeroIndex 
+                        ? 'w-10 bg-white/20 overflow-hidden' 
+                        : 'w-2 bg-white/40 hover:bg-white/80'
+                    }`}
+                  >
+                    {index === currentHeroIndex && (
+                      <div 
+                        key={currentHeroIndex}
+                        className="absolute top-0 left-0 h-full bg-[#E50914] rounded-full animate-dot-fill"
+                        style={{
+                          animationPlayState: isHeroAutoPlaying ? 'running' : 'paused'
+                        }}
+                      />
+                    )}
+                  </button>
                 ))}
               </div>
             </div>

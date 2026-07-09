@@ -7,7 +7,8 @@ import {
   getAiringTodayTVShows,
   getTVGenres,
   discoverTVShowsByGenre,
-  getTVShowVideos
+  getTVShowVideos,
+  discoverTVShowsAdvanced
 } from '../services/tmdb';
 import HeroCarousel from '../components/HeroCarousel';
 import ContentCarousel from '../components/ContentCarousel';
@@ -36,6 +37,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
   const [genreRows, setGenreRows] = useState<{ [key: string]: TVShow[] }>({});
   const [genres, setGenres] = useState<Genre[]>([]);
   const [filteredShows, setFilteredShows] = useState<TVShow[]>([]);
+  const [isFilteringLoading, setIsFilteringLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
@@ -142,47 +144,50 @@ const TVShows: React.FC<TVShowsProps> = () => {
     fetchHeroShows();
   }, [fetchAllData, fetchHeroShows]);
 
-  // Filter logic
+  // Fetch advanced search/filter results from TMDB API dynamically
   useEffect(() => {
-    let filtered = [...trendingShows, ...popularShows, ...topRatedShows, ...onAirShows];
-
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(show =>
-        show.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        show.overview.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    const isFilteringActive = Boolean(searchQuery) || Boolean(selectedGenre) || Boolean(selectedYear) || selectedRating > 0;
+    
+    if (!isFilteringActive) {
+      setFilteredShows([]);
+      setIsFilteringLoading(false);
+      return;
     }
 
-    // Apply genre filter
-    if (selectedGenre) {
-      const genreId = genres.find(g => g.name === selectedGenre)?.id;
-      if (genreId) {
-        const genreShows = genreRows[selectedGenre] || [];
-        filtered = [...filtered, ...genreShows];
-        filtered = filtered.filter(show => show.genre_ids.includes(genreId));
+    const genreId = genres.find(g => g.name === selectedGenre)?.id ?? null;
+    let active = true;
+
+    const fetchFilteredResults = async () => {
+      setIsFilteringLoading(true);
+      try {
+        const response = await discoverTVShowsAdvanced({
+          query: searchQuery,
+          genreId,
+          year: selectedYear,
+          minRating: selectedRating,
+          page: 1
+        });
+        
+        if (active) {
+          setFilteredShows(response.results || []);
+        }
+      } catch (err) {
+        console.error('Error fetching advanced filtered TV shows:', err);
+        if (active) {
+          setFilteredShows([]);
+        }
+      } finally {
+        if (active) {
+          setIsFilteringLoading(false);
+        }
       }
-    }
+    };
 
-    // Apply year filter
-    if (selectedYear) {
-      filtered = filtered.filter(show =>
-        show.first_air_date?.startsWith(selectedYear)
-      );
-    }
-
-    // Apply rating filter
-    if (selectedRating > 0) {
-      filtered = filtered.filter(show => show.vote_average >= selectedRating);
-    }
-
-    // Remove duplicates
-    const uniqueShows = filtered.filter((show, index, self) =>
-      index === self.findIndex(s => s.id === show.id)
-    );
-
-    setFilteredShows(uniqueShows);
-  }, [searchQuery, selectedGenre, selectedYear, selectedRating, trendingShows, popularShows, topRatedShows, onAirShows, genres, genreRows]);
+    fetchFilteredResults();
+    return () => {
+      active = false;
+    };
+  }, [searchQuery, selectedGenre, selectedYear, selectedRating, genres]);
 
   const handleWatchTrailer = (trailerKey?: string) => {
     if (trailerKey) {
@@ -239,21 +244,32 @@ const TVShows: React.FC<TVShowsProps> = () => {
         onYearChange={setSelectedYear}
         onRatingChange={setSelectedRating}
         onToggleFilters={() => setShowFilters(!showFilters)}
+        type="tv"
       />
 
       {/* Content Rows */}
       <div className="px-4 sm:px-8 py-8 space-y-12">
         {searchQuery || selectedGenre || selectedYear || selectedRating > 0 ? (
           // Filtered results
-          filteredShows.length > 0 ? (
+          isFilteringLoading ? (
+            <div className="flex flex-col gap-4 py-8">
+              <h2 className="text-2xl font-bold tracking-tight text-white/90 px-4">Searching catalog...</h2>
+              <div className="flex gap-4 overflow-x-hidden px-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="w-[180px] sm:w-[240px] h-[270px] sm:h-[360px] bg-white/5 animate-pulse rounded-2xl border border-white/5 flex-shrink-0" />
+                ))}
+              </div>
+            </div>
+          ) : filteredShows.length > 0 ? (
             <ContentCarousel
               title="Search Results"
               items={filteredShows}
               type="tv"
             />
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">No shows found matching your criteria</p>
+            <div className="text-center py-16">
+              <p className="text-gray-400 text-lg mb-2">No shows found matching your criteria</p>
+              <p className="text-gray-500 text-sm">Try adjusting your filters or search keywords</p>
             </div>
           )
         ) : (

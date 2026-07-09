@@ -329,6 +329,24 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
     fetchContent();
   }, [id, type]);
 
+  // Keep state in sync with URL search parameters
+  useEffect(() => {
+    const s = searchParams.get('season');
+    const e = searchParams.get('episode');
+    if (s) {
+      const parsedSeason = parseInt(s);
+      if (!isNaN(parsedSeason)) {
+        setSelectedSeason(parsedSeason);
+      }
+    }
+    if (e) {
+      const parsedEpisode = parseInt(e);
+      if (!isNaN(parsedEpisode)) {
+        setSelectedEpisode(parsedEpisode);
+      }
+    }
+  }, [searchParams]);
+
   // Separate useEffect for fetching streaming sources
   useEffect(() => {
     if (content) {

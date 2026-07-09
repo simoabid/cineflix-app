@@ -8,7 +8,8 @@ import {
   getUpcomingMovies,
   getMovieGenres,
   discoverMoviesByGenre,
-  getMovieVideos
+  getMovieVideos,
+  discoverMoviesAdvanced
 } from '../services/tmdb';
 import HeroCarousel from '../components/HeroCarousel';
 import ContentCarousel from '../components/ContentCarousel';
@@ -258,6 +259,8 @@ const Movies: React.FC<MoviesProps> = () => {
   const [selectedGenre, setSelectedGenre] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [isFilteringLoading, setIsFilteringLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -312,31 +315,50 @@ const Movies: React.FC<MoviesProps> = () => {
     return combineMovieLists([trendingMovies, popularMovies, topRatedMovies, nowPlayingMovies, upcomingMovies]);
   }, [trendingMovies, popularMovies, topRatedMovies, nowPlayingMovies, upcomingMovies]);
 
-  // Compute filtered movies based on criteria and memoize result
-  const filteredMovies = useMemo(() => {
-    // If no filtering criteria are active, return an empty array to indicate default rows should be shown
+  // Fetch advanced search/filter results from TMDB API dynamically
+  useEffect(() => {
     const isFilteringActive = Boolean(searchQuery) || Boolean(selectedGenre) || Boolean(selectedYear) || selectedRating > 0;
-    if (!isFilteringActive) return [];
-
-    let baseMovies = combinedMovies;
-
-    // If a genre is selected, include genreRows for that genre so discover results are considered
-    if (selectedGenre) {
-      const genreMovies = genreRows[selectedGenre] || [];
-      if (genreMovies.length > 0) {
-        baseMovies = combineMovieLists([baseMovies, genreMovies]);
-      }
+    
+    if (!isFilteringActive) {
+      setFilteredMovies([]);
+      setIsFilteringLoading(false);
+      return;
     }
 
     const genreId = genres.find(g => g.name === selectedGenre)?.id ?? null;
+    let active = true;
 
-    return filterMoviesByCriteria(baseMovies, {
-      searchQuery,
-      genreId,
-      year: selectedYear,
-      minRating: selectedRating
-    });
-  }, [combinedMovies, searchQuery, selectedGenre, selectedYear, selectedRating, genres, genreRows]);
+    const fetchFilteredResults = async () => {
+      setIsFilteringLoading(true);
+      try {
+        const response = await discoverMoviesAdvanced({
+          query: searchQuery,
+          genreId,
+          year: selectedYear,
+          minRating: selectedRating,
+          page: 1
+        });
+        
+        if (active) {
+          setFilteredMovies(response.results || []);
+        }
+      } catch (err) {
+        console.error('Error fetching advanced filtered movies:', err);
+        if (active) {
+          setFilteredMovies([]);
+        }
+      } finally {
+        if (active) {
+          setIsFilteringLoading(false);
+        }
+      }
+    };
+
+    fetchFilteredResults();
+    return () => {
+      active = false;
+    };
+  }, [searchQuery, selectedGenre, selectedYear, selectedRating, genres]);
 
   const handleWatchTrailer = (trailerKey?: string) => {
     if (trailerKey) {
@@ -415,21 +437,32 @@ const Movies: React.FC<MoviesProps> = () => {
         onYearChange={setSelectedYear}
         onRatingChange={setSelectedRating}
         onToggleFilters={() => setShowFilters(!showFilters)}
+        type="movie"
       />
 
       {/* Content Rows */}
       <div className="px-4 sm:px-8 py-8 space-y-12">
         {searchQuery || selectedGenre || selectedYear || selectedRating > 0 ? (
           // Filtered results
-          filteredMovies.length > 0 ? (
+          isFilteringLoading ? (
+            <div className="flex flex-col gap-4 py-8">
+              <h2 className="text-2xl font-bold tracking-tight text-white/90 px-4">Searching catalog...</h2>
+              <div className="flex gap-4 overflow-x-hidden px-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="w-[180px] sm:w-[240px] h-[270px] sm:h-[360px] bg-white/5 animate-pulse rounded-2xl border border-white/5 flex-shrink-0" />
+                ))}
+              </div>
+            </div>
+          ) : filteredMovies.length > 0 ? (
             <ContentCarousel
               title="Search Results"
               items={filteredMovies}
               type="movie"
             />
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">No movies found matching your criteria</p>
+            <div className="text-center py-16">
+              <p className="text-gray-400 text-lg mb-2">No movies found matching your criteria</p>
+              <p className="text-gray-500 text-sm">Try adjusting your filters or search keywords</p>
             </div>
           )
         ) : (

@@ -7,6 +7,8 @@ import EpisodesList from './EpisodesList';
 import SectionHeader from './SectionHeader';
 import LoadingScreen from '../feedback/LoadingScreen';
 import { logger } from '../../utils/logger';
+import { useAuth } from '../../contexts/AuthContext';
+import { myListApi } from '../../services/api';
 
 interface SeasonsEpisodesSectionProps {
   readonly seasons: Season[];
@@ -70,6 +72,54 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
   const storageKey = `cineflix_watched_${seriesId || 'default'}`;
   const [watchedEpisodes, setWatchedEpisodes] = usePersistedSet(storageKey);
   const [expandedEpisode, setExpandedEpisode] = useState<number | null>(null);
+  const { isAuthenticated } = useAuth();
+  const [episodeProgress, setEpisodeProgress] = useState<{ season: number; episode: number; progress: number } | null>(null);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      // 1. Try to load from localStorage first (immediate)
+      try {
+        const stored = localStorage.getItem('cineflix_watch_progress');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const key = `tv_${seriesId}`;
+          if (parsed[key]) {
+            const item = parsed[key];
+            setEpisodeProgress({
+              season: item.seasonNumber || 0,
+              episode: item.episodeNumber || 0,
+              progress: item.progress || 0,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Error reading local watch progress:', err);
+      }
+
+      // 2. If authenticated, fetch from backend to merge/override
+      if (isAuthenticated && seriesId) {
+        try {
+          const response = await myListApi.getContinueWatching();
+          if (response.success && response.data) {
+            const showItem = response.data.find(
+              (item: any) => item.contentType === 'tv' && String(item.contentId) === String(seriesId)
+            );
+            if (showItem && showItem.lastEpisode) {
+              setEpisodeProgress({
+                season: showItem.lastEpisode.seasonNumber,
+                episode: showItem.lastEpisode.episodeNumber,
+                progress: showItem.progress,
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching progress from API:', err);
+        }
+      }
+    };
+
+    fetchProgress();
+  }, [seriesId, isAuthenticated]);
 
   const toggleEpisodeWatched = (episodeId: string) => {
     setWatchedEpisodes(prev => {
@@ -110,30 +160,30 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
         {/* Season Posters Carousel */}
         {visibleSeasons.length > 0 && (
           <div className="mb-7">
-            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 scrollbar-hide">
+            <div className="flex gap-3 sm:gap-4 overflow-x-auto pt-2.5 pb-4 px-1.5 -mx-1.5 scrollbar-hide">
               {visibleSeasons.map((season) => {
                 const isSelected = selectedSeason?.id === season.id;
                 return (
                   <motion.button
                     key={season.id}
                     onClick={() => onSeasonChange(season)}
-                    whileHover={{ y: -4 }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className={`flex-shrink-0 group relative overflow-hidden rounded-xl transition-all duration-300 ${
+                    whileHover={{ y: -6, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    className={`flex-shrink-0 group relative overflow-hidden rounded-2xl transition-all duration-300 flex flex-col ${
                       isSelected
-                        ? 'ring-2 ring-netflix-red shadow-[0_8px_24px_rgba(229,9,20,0.35)]'
-                        : 'ring-1 ring-white/10 hover:ring-white/30'
+                        ? 'border border-netflix-red/60 bg-netflix-red/[0.04] shadow-[0_12px_30px_rgba(229,9,20,0.4)] ring-2 ring-netflix-red/35'
+                        : 'border border-white/10 bg-white/[0.02] hover:border-netflix-red/40 hover:bg-white/[0.05] hover:shadow-[0_10px_25px_rgba(0,0,0,0.5)]'
                     }`}
                     aria-label={`Select Season ${season.season_number}`}
                     aria-pressed={isSelected}
                   >
-                    <div className="w-28 h-44 sm:w-32 sm:h-48 relative">
+                    <div className="w-28 h-40 sm:w-32 sm:h-44 relative overflow-hidden rounded-t-2xl">
                       {season.poster_path ? (
                         <img
                           src={getPosterUrl(season.poster_path, 'w300')}
                           alt={season.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                           loading="lazy"
                         />
                       ) : (
@@ -141,20 +191,26 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                           <Film className="w-8 h-8 text-gray-600" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2.5 text-center">
-                        <p className="text-white font-bold text-xs sm:text-sm leading-tight">
-                          {season.season_number === 0 ? 'Specials' : `Season ${season.season_number}`}
-                        </p>
-                        <p className="text-gray-300 text-[10px] sm:text-xs mt-0.5">
-                          {season.episode_count} episodes
-                        </p>
-                      </div>
+                      {/* Glassy reflection overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                      
+                      {/* Selection checkmark badge */}
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-netflix-red rounded-full flex items-center justify-center shadow-lg shadow-netflix-red/50">
+                        <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-netflix-red rounded-full flex items-center justify-center shadow-lg shadow-netflix-red/50 z-10">
                           <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                         </div>
                       )}
+                    </div>
+                    {/* Bottom Info Bar */}
+                    <div className="p-3 bg-gradient-to-b from-white/[0.02] to-black/40 border-t border-white/5 w-full text-center">
+                      <p className={`font-bold text-xs sm:text-sm tracking-wide transition-colors duration-300 ${
+                        isSelected ? 'text-netflix-red' : 'text-white group-hover:text-netflix-red'
+                      }`}>
+                        {season.season_number === 0 ? 'Specials' : `Season ${season.season_number}`}
+                      </p>
+                      <p className="text-gray-400 text-[10px] sm:text-xs mt-0.5 font-medium">
+                        {season.episode_count} Episodes
+                      </p>
                     </div>
                   </motion.button>
                 );
@@ -174,6 +230,8 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
             expandedEpisode={expandedEpisode}
             onToggleWatched={toggleEpisodeWatched}
             onToggleExpanded={setExpandedEpisode}
+            seriesId={seriesId}
+            episodeProgress={episodeProgress}
           />
         ) : (
           <div className="text-center py-14 px-4 bg-white/[0.02] border border-white/5 rounded-2xl">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlayCircle, Play, Calendar, Star, Clock, Check, ChevronDown } from 'lucide-react';
 import { getImageUrl } from '../../services/tmdb';
@@ -11,6 +12,8 @@ interface EpisodesListProps {
   readonly expandedEpisode: number | null;
   readonly onToggleWatched: (episodeId: string) => void;
   readonly onToggleExpanded: (episodeNumber: number | null) => void;
+  readonly seriesId?: string;
+  readonly episodeProgress?: { season: number; episode: number; progress: number } | null;
 }
 
 const formatRuntime = (runtime?: number): string => {
@@ -40,14 +43,25 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
   expandedEpisode,
   onToggleWatched,
   onToggleExpanded,
+  seriesId,
+  episodeProgress,
 }) => {
+  const navigate = useNavigate();
+
   if (!selectedSeason) return null;
 
   return (
-    <div className="max-h-[640px] overflow-y-auto pr-2 space-y-3 scrollbar-thin">
+    <div
+      data-lenis-prevent
+      className="max-h-[640px] overflow-y-auto pr-2 space-y-3 scrollbar-hide"
+    >
       {episodes.map((episode, index) => {
         const episodeId = `${selectedSeason.season_number}-${episode.episode_number}`;
-        const isWatched = watchedEpisodes.has(episodeId);
+        const hasProgress = !!(episodeProgress &&
+          episodeProgress.season === selectedSeason.season_number &&
+          episodeProgress.episode === episode.episode_number);
+        const progressPercent = hasProgress ? episodeProgress.progress : 0;
+        const isWatched = watchedEpisodes.has(episodeId) || (hasProgress && progressPercent >= 90);
         const isExpanded = expandedEpisode === episode.episode_number;
 
         return (
@@ -65,7 +79,14 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
             <div className="p-4 sm:p-5">
               <div className="flex items-start gap-3 sm:gap-4">
                 {/* Thumbnail */}
-                <div className="flex-shrink-0 relative group/thumb cursor-pointer">
+                <div
+                  className="flex-shrink-0 relative group/thumb cursor-pointer"
+                  onClick={() => {
+                    if (seriesId) {
+                      navigate(`/watch/tv/${seriesId}?season=${selectedSeason.season_number}&episode=${episode.episode_number}`);
+                    }
+                  }}
+                >
                   <div className="w-28 sm:w-36 aspect-video rounded-lg overflow-hidden bg-gray-900 ring-1 ring-white/10 relative">
                     {episode.still_path ? (
                       <img
@@ -92,6 +113,14 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                         {formatRuntime(episode.runtime)}
                       </div>
                     )}
+                    {hasProgress && progressPercent > 0 && progressPercent < 90 && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-10">
+                        <div
+                          className="h-full bg-netflix-red"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -101,8 +130,21 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1.5">
                         <span className="bg-netflix-red/20 text-netflix-red border border-netflix-red/30 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
-                          Ep {episode.episode_number}
+                          EP {episode.episode_number}
                         </span>
+                        <button
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            if (seriesId) {
+                              navigate(`/watch/tv/${seriesId}?season=${selectedSeason.season_number}&episode=${episode.episode_number}`);
+                            }
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-netflix-red hover:bg-red-700 text-white font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-md shadow-netflix-red/20 hover:scale-105 active:scale-95 whitespace-nowrap"
+                          title={`Watch Episode ${episode.episode_number}`}
+                        >
+                          <Play className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
+                          <span>Watch EP {episode.episode_number}</span>
+                        </button>
                         {isWatched && (
                           <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1">
                             <Check className="w-3 h-3" strokeWidth={3} />
