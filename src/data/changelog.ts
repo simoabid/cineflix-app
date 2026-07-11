@@ -16,7 +16,7 @@ export interface ChangelogItem {
 export const changelogData: ChangelogItem[] = [
   {
     id: 'v1.0.0',
-    title: 'Initial Official Release',
+    title: 'CINEFLIX Initial Release v1.0.0 🎉',
     date: 'July 11, 2026',
     version: 'v1.0.0',
     isLatest: true,
