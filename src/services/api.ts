@@ -1,29 +1,5 @@
 const API_BASE_URL: string = import.meta.env?.VITE_API_URL || '/api';
 
-// Token management — kept for backward compatibility during cookie migration
-let authToken: string | null = null;
-
-try {
-    authToken = localStorage.getItem('auth_token');
-} catch {
-    // localStorage may be unavailable in some contexts
-}
-
-export const setAuthToken = (token: string | null): void => {
-    authToken = token;
-    try {
-        if (token) {
-            localStorage.setItem('auth_token', token);
-        } else {
-            localStorage.removeItem('auth_token');
-        }
-    } catch {
-        // localStorage may be unavailable
-    }
-};
-
-export const getAuthToken = (): string | null => authToken;
-
 interface ApiResponse<T> { success: boolean; data?: T; error?: string; message?: string; }
 
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
@@ -32,11 +8,6 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
             'Content-Type': 'application/json',
             ...(options.headers as Record<string, string>)
         };
-
-        // Add auth token as Bearer header (backward compatibility fallback)
-        if (authToken) {
-            headers['Authorization'] = `Bearer ${authToken}`;
-        }
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
@@ -62,7 +33,6 @@ export interface User {
 
 export interface AuthResponse {
     user: User;
-    token: string;
 }
 
 // Auth API

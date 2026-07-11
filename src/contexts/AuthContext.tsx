@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { authApi, User, setAuthToken } from '../services/api';
+import { authApi, User } from '../services/api';
 
 
 interface AuthContextType {
@@ -39,13 +39,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 const response = await authApi.getMe();
                 if (response.success && response.data) {
                     setUser(response.data.user);
-                } else {
-                    // Session expired or invalid — clear any stale localStorage token
-                    setAuthToken(null);
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
-                setAuthToken(null);
             } finally {
                 setIsLoading(false);
             }
@@ -58,12 +54,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             const response = await authApi.login(email, password);
             if (response.success && response.data) {
-                setAuthToken(response.data.token);
                 setUser(response.data.user);
                 return { success: true };
             }
             return { success: false, error: response.error || 'Login failed' };
-        } catch (error) {
+        } catch {
             return { success: false, error: 'An unexpected error occurred' };
         }
     }, []);
@@ -72,12 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             const response = await authApi.register(email, password, name, avatar);
             if (response.success && response.data) {
-                setAuthToken(response.data.token);
                 setUser(response.data.user);
                 return { success: true };
             }
             return { success: false, error: response.error || 'Registration failed' };
-        } catch (error) {
+        } catch {
             return { success: false, error: 'An unexpected error occurred' };
         }
     }, []);
@@ -86,12 +80,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             const response = await authApi.googleLogin(token, type);
             if (response.success && response.data) {
-                setAuthToken(response.data.token);
                 setUser(response.data.user);
                 return { success: true };
             }
             return { success: false, error: response.error || 'Google login failed' };
-        } catch (error) {
+        } catch {
             return { success: false, error: 'An unexpected error occurred' };
         }
     }, []);
@@ -100,7 +93,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             await authApi.logout();
         } finally {
-            setAuthToken(null);
             setUser(null);
         }
     }, []);
@@ -113,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 return { success: true };
             }
             return { success: false, error: response.error || 'Update failed' };
-        } catch (error) {
+        } catch {
             return { success: false, error: 'An unexpected error occurred' };
         }
     }, []);
@@ -125,7 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 return { success: true };
             }
             return { success: false, error: response.error || 'Password change failed' };
-        } catch (error) {
+        } catch {
             return { success: false, error: 'An unexpected error occurred' };
         }
     }, []);

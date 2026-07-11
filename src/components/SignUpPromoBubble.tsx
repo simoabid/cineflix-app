@@ -6,16 +6,16 @@ const SignUpPromoBubble: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Check if user has already dismissed the promo or signed up
+        // Check if user has already dismissed the promo
         const hasSeenPromo = localStorage.getItem('hasSeenSignUpPromo');
-        const authToken = localStorage.getItem('auth_token');
 
-        if (!hasSeenPromo && !authToken) {
+        if (!hasSeenPromo) {
             // Show after a short delay for better effect
             const timer = setTimeout(() => setIsVisible(true), 2000);
             return () => clearTimeout(timer);
         }
     }, []);
+
 
     const handleDismiss = () => {
         setIsVisible(false);

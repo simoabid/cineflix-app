@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 
-const BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY as string;
+// Route through server-side TMDB proxy — no client-exposed API key
+const API_BASE_URL: string = import.meta.env?.VITE_API_URL || '/api';
+const TMDB_PROXY_URL = `${API_BASE_URL}/tmdb`;
 
 /** Module-level session cache: key = `{type}-{id}`, value = certification string */
 const certificationCache = new Map<string, string>();
@@ -26,8 +27,8 @@ async function fetchCertification(
 
   const endpoint =
     mediaType === 'movie'
-      ? `${BASE_URL}/movie/${id}/release_dates?api_key=${API_KEY}`
-      : `${BASE_URL}/tv/${id}/content_ratings?api_key=${API_KEY}`;
+      ? `${TMDB_PROXY_URL}/movie/${id}/release_dates`
+      : `${TMDB_PROXY_URL}/tv/${id}/content_ratings`;
 
   const res = await fetch(endpoint, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw new Error(`TMDB ${res.status}`);

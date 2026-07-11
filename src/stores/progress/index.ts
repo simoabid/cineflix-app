@@ -259,10 +259,10 @@ export const useProgressStore = create(
             episodeNumber: meta.episode?.number
           };
 
-          let isAuth = false;
-          if (typeof window !== "undefined") {
-            isAuth = !!localStorage.getItem("auth_token");
-          }
+          // With httpOnly cookies, we can't directly check auth state from JS.
+          // Always attempt API sync — the server will ignore unauthenticated requests gracefully.
+          const isAuth = true;
+
 
           progressService.saveProgress(progressData, isAuth);
         } catch (err) {

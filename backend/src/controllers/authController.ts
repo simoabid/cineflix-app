@@ -53,7 +53,8 @@ const buildCookieOptions = (): {
 
 /**
  * Send token response with httpOnly cookie and user data.
- * Token is also returned in the body for backward compatibility during migration.
+ * The token is set exclusively as an httpOnly cookie — never returned in the body.
+ * This prevents XSS-based token theft via localStorage.
  */
 const sendTokenResponse = (user: IUser, statusCode: number, res: Response): void => {
     const token = generateToken(user._id.toString());
@@ -69,7 +70,6 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response): void
                     avatar: user.avatar,
                     createdAt: user.createdAt,
                 },
-                token,
             },
         });
 };
