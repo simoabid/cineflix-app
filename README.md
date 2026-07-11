@@ -7,31 +7,35 @@
 <br/>
 <img src="public/cineflix-logo.png" alt="CINEFLIX" width="380" />
 <br/>
-<sub><strong>Full-Stack MERN Streaming Platform</strong></sub>
+<sub><strong>Full-Stack MERN Streaming & Discovery Platform</strong></sub>
 <br/><br/>
 
 <!-- Dynamic Typing SVG -->
 <a href="#">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=E50914&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=80&lines=Browse+%E2%80%A2+Stream+%E2%80%A2+Collect+%E2%80%A2+Track;Built+with+React+%2B+Vite+%2B+Express+%2B+MongoDB" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=E50914&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=80&lines=Browse+%E2%80%A2+Stream+%E2%80%A2+Collect+%E2%80%A2+Track+%E2%80%A2+Watch+Together;Built+with+React+%2B+Vite+%2B+Express+%2B+MongoDB+%2B+Socket.io" alt="Typing SVG" />
 </a>
 
 <br/>
 
 <!-- Badges Row 1 -->
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
 <!-- Badges Row 2 -->
 [![Express](https://img.shields.io/badge/Express-4.18-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.8-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
 [![TMDB API](https://img.shields.io/badge/TMDB_API-Powered-01D277?style=for-the-badge&logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 
 <!-- Badges Row 3 -->
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-E50914?style=for-the-badge)](CONTRIBUTING.md)
+
+<br/>
+
+[**🌐 cineflix.dev**](https://cineflix.dev)
 
 <br/>
 
@@ -66,9 +70,9 @@
 
 ## <img src="https://media.giphy.com/media/iY8CRBdQXODJSCERIr/giphy.gif" width="30"> &nbsp;About The Project
 
-**CINEFLIX** is a full-stack streaming platform built from the ground up with the **MERN stack** (MongoDB, Express, React, Node.js). It delivers a premium Netflix-inspired experience — from cinematic hero carousels and hover preview cards to a complete authentication system and movie collection tracking.
+**CINEFLIX** is a production-grade streaming and discovery platform built from the ground up with the **MERN stack** (MongoDB, Express, React, Node.js) and an end-to-end **TypeScript** codebase. It delivers a premium, Netflix-inspired experience — from cinematic hero carousels and hover preview cards to a full authentication system, real-time watch parties, and a **50+ provider streaming engine** with native HLS playback.
 
-> 🎯 **More than a clone** — CINEFLIX features smart collection discovery with 6,400+ TMDB collections, marathon tracking, franchise timelines, and a deeply customized UI with glassmorphism design, Framer Motion animations, and dynamic backgrounds.
+> 🎯 **Well beyond a clone** — CINEFLIX has grown into a mature platform featuring smart collection discovery with 6,400+ TMDB franchises, a dual-mode streaming player (classic iframe + native HLS via CinePro), real-time watch parties over Socket.io, Google OAuth, httpOnly cookie sessions, server-side API proxying, structured logging, PWA installability, internationalization, and a security-hardened backend with SSRF protection, rate limiting, and CSP headers.
 
 <details>
 <summary><strong>🤔 Why CINEFLIX?</strong></summary>
@@ -77,12 +81,15 @@
 
 | Problem | CINEFLIX Solution |
 |---------|------------------|
-| 🎭 Generic streaming UIs | Premium dark theme with glassmorphism, gradients & micro-animations |
-| 📚 No collection browsing | Infinite scroll discovery of **6,400+** TMDB franchises |
-| 🔐 No user accounts | Full JWT auth with signup, login & profile management |
-| 📋 Can't save favorites | My List with watchlist & favorites, persisted to MongoDB |
-| 🎬 Can't watch content | Integrated streaming with RiveStream & SmashyStream |
-| 📊 No progress tracking | Marathon tracking, watched episodes, completion stats |
+| 🎭 Generic streaming UIs | Premium dark theme with glassmorphism, gradients & Framer Motion micro-interactions |
+| 📚 No collection browsing | Infinite scroll discovery of **6,400+** TMDB franchises with timelines |
+| 🔐 Weak/insecure auth | JWT over httpOnly cookies + Google OAuth, bcrypt (cost 12), rate limiting |
+| 👥 Watching alone | **Watch Parties** — synced playback + live chat over WebSockets |
+| ▶️ Single fragile source | **50+ streaming providers** with automatic fallback + native HLS player |
+| 🔑 Exposed API keys | Server-side TMDB/OMDb proxy with caching — keys never reach the browser |
+| 📋 Can't track anything | My List, favorites, continue-watching, per-episode progress, stats |
+| 🌍 English only | i18n support via `i18next` / `react-i18next` |
+| 📶 Needs a browser tab | **PWA** — installable with `vite-plugin-pwa` + Workbox service worker |
 
 </details>
 
@@ -97,29 +104,37 @@
 │                        🎬 CINEFLIX WEB                          │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  🏠 HOME               │  📚 COLLECTIONS      │  🔍 SEARCH    │
-│  ├─ Hero Carousel       │  ├─ Infinite Scroll  │  ├─ Enhanced  │
+│  🏠 DISCOVER            │  📚 COLLECTIONS      │  🔍 SEARCH    │
+│  ├─ Hero Carousel       │  ├─ Infinite Scroll  │  ├─ Fuzzy     │
 │  ├─ Hover Preview Cards │  ├─ Genre Filters    │  ├─ Multi-type│
-│  ├─ Category Rows       │  ├─ Franchise Detail │  └─ Modal     │
-│  ├─ Dynamic Backgrounds │  └─ Timeline View    │               │
+│  ├─ Category Rows       │  ├─ Franchise Detail │  └─ Keyboard  │
+│  ├─ Dynamic Backgrounds │  └─ Timeline View    │     Shortcuts │
 │  └─ Content Carousels   │                      │               │
 │                         │                      │               │
-│  📋 MY LIST   │  🎥 DETAIL PAGE   │  ▶️ WATCH   │  👤 AUTH     │
-│  ├─ Watchlist  │  ├─ Hero Backdrop │  ├─ Stream  │  ├─ Sign Up  │
-│  ├─ Favorites  │  ├─ Cast & Crew   │  ├─ Multi   │  ├─ Login    │
-│  ├─ Filtering  │  ├─ Trailers      │  │  Source   │  ├─ JWT     │
-│  └─ Persistent │  ├─ Similar       │  └─ Player  │  └─ Profile  │
-│                │  └─ Episodes      │             │              │
+│  ▶️ SMART PLAYER │  👥 WATCH PARTIES │  📋 MY LIST  │  👤 AUTH   │
+│  ├─ Native HLS   │  ├─ Create/Join   │  ├─ Watchlist│  ├─ Email │
+│  ├─ 50+ Providers│  ├─ Synced Play   │  ├─ Favorites│  ├─ Google│
+│  ├─ Subtitle     │  ├─ Live Chat     │  ├─ Continue │  ├─ Cookie│
+│  ├─ Quality Pick │  └─ Host Control  │  ├─ Stats    │  │  Only  │
+│  └─ Iframe       │                   │  └─ Episodes │  └─ Secure│
+│     Fallback     │                   │              │           │
+│                                                                 │
+│  🔒 SECURITY      │  🌍 PLATFORM       │  📊 TRACKING          │
+│  ├─ SSRF Guard     │  ├─ PWA Install    │  ├─ Marathon Progress │
+│  ├─ Helmet CSP     │  ├─ i18n Ready     │  ├─ Episode Watched  │
+│  ├─ Rate Limiting  │  ├─ SEO Meta Tags  │  ├─ Completion Stats │
+│  └─ API Key Proxy  │  └─ Docker Ready   │  └─ Continue Watch   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 </div>
 
-### 🏠 Home Page
+### 🏠 Discovery & Browse
 - **Cinematic hero carousel** with auto-rotation, backdrop images, and logo overlays
 - **Hover preview cards** with intent detection, trailers, and quick actions
 - **Category carousels** — Trending, Popular, Top Rated, Now Playing, Upcoming
+- **Dedicated pages** — Movies, TV Shows, New & Popular, Browse
 - **Dynamic backgrounds** with animated gradient effects
 - **Sign-up promo bubble** for unauthenticated users
 - **Responsive design** — Desktop, tablet, and mobile layouts
@@ -132,35 +147,51 @@
 - **Progress tracking** across film franchises
 
 ### 🔍 Search
-- **Enhanced search** — Movies, TV Shows, and People in one query
-- **Search modal** with keyboard shortcuts
-- **Genre collection browsing** with curated grids
-- **Real-time results** with intelligent ranking
+- **Multi-type search** — Movies, TV Shows, and People in one query
+- **Fuzzy ranking** with Fuse.js for intelligent matching
+- **Command-style search modal** with keyboard shortcuts
+- **Real-time, debounced results** with intelligent ranking
 
-### 🎥 Detail Pages
-- **Full-screen hero** with backdrop, logos, and gradient overlays
-- **Cast & Crew** sections with filmography links
-- **Video trailers** with inline playback
-- **Episode lists** for TV shows with season selection
-- **Similar & Recommended** content carousels
-- **Add to List** and **Like** buttons with animated feedback
+### ▶️ Watch Experience — *Dual Player Modes*
+- **Smart / Native Player** — In-app **HLS playback** via `hls.js` with the CinePro/P-Stream adapter, quality selection, subtitle support (`subsrt-ts`, `wyzie-lib`), and automatic iframe fallback
+- **Classic Player** — Sandboxed iframe embeds for legacy providers
+- **50+ streaming providers** built into a modular provider engine with automatic fallback — including RiveStream, SmashyStream, 111movies, Vidjoy, VidSrc, VidRock, CatFlix, ZoeChip, Nunflix, and many more
+- **Provider engine** with scraper architecture, captioning, quality normalization, and proxy support
+- **OMDb ratings** integration (server-side proxied) for IMDb scores alongside TMDB data
+- **Heuristic watch-progress tracking** persisted to MongoDB + localStorage
 
-### ▶️ Watch Page
-- **Integrated streaming** via RiveStream and SmashyStream providers
-- **Multi-source player** with fallback support
-- **Episode tracking** for TV series watch progress
+### 👥 Watch Parties — *Real-Time*
+- **Create or join** a party by ID; the creator becomes **host**
+- **Synced playback** (play/pause/seek) broadcast to all members over Socket.io
+- **Live party chat** with message sanitization
+- **Automatic host migration** when the host leaves; room auto-teardown when empty
+- **WebSocket authentication** — party events require a valid JWT cookie
 
-### 📋 My List
-- **Watchlist management** — Add/remove movies and TV shows
-- **Filtering** — All, Movies, TV Shows
-- **Persistent storage** with MongoDB backend
+### 📋 My List & Tracking
+- **Watchlist + favorites**, persisted to MongoDB and user-scoped
+- **Continue Watching** with heuristic resume points
+- **Per-episode watched tracking** for TV shows with season progress
+- **Filtering** — All, Movies, TV Shows, by status, recently added
+- **Personal ratings, notes, tags, priority**, and bulk operations
+- **Aggregate stats** — totals, hours watched, completion rate, distributions
 - **Hover preview** with quick actions
 
-### 👤 Authentication
-- **Sign Up** — Email, username, and avatar selection
-- **Login** — JWT-based secure authentication
-- **Account page** — Profile management with preferences
-- **Protected routes** — Content guarded behind auth
+### 👤 Accounts & Auth
+- **Email/password sign up + login** with strong password policy (min 8 characters)
+- **Google OAuth** (ID token & access token flows with audience + `email_verified` verification)
+- **JWT over httpOnly cookies** (30-day expiry) — no localStorage tokens
+- **Account page** — change password, update profile name/avatar, logout
+- **Password-reset flow** — request + reset endpoints (email delivery stubbed)
+- **Protected routes** — Watch, My List, Account, Collections, Preferences require auth
+
+### 🌍 Platform
+- **PWA** — installable with `vite-plugin-pwa` + Workbox service worker caching
+- **i18n** support via `i18next` / `react-i18next` with locale resources
+- **SEO** — dynamic meta tags via `react-helmet-async`
+- **Docker** — multi-stage Dockerfile with production-optimized runtime
+- **Gamepad support** — controller navigation via `useGamepad` hook
+- **Smooth scrolling** via `lenis`, toast notifications, error boundaries
+- **Swagger API docs** at `/api/docs` (development mode only)
 
 ---
 
@@ -190,7 +221,7 @@
 
 <!-- Skill Icons -->
 <a href="https://skillicons.dev">
-  <img src="https://skillicons.dev/icons?i=react,typescript,tailwind,vite,nodejs,express,mongodb&theme=dark" alt="Tech Stack" />
+  <img src="https://skillicons.dev/icons?i=react,typescript,tailwind,vite,nodejs,express,mongodb,docker&theme=dark" alt="Tech Stack" />
 </a>
 
 <br/><br/>
@@ -199,35 +230,103 @@
 
 ### Frontend
 
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| **UI Library** | React | 18.2 | Component-based UI |
-| **Language** | TypeScript | 5.3 | Type safety |
-| **Build Tool** | Vite | 5.x | Fast HMR & bundling |
-| **Styling** | Tailwind CSS | 3.4 | Utility-first CSS |
-| **Animations** | Framer Motion | 12.x | Premium animations |
-| **Routing** | React Router | 6.8 | Client-side routing |
-| **Icons** | Lucide React | 0.263 | Consistent SVG icons |
-| **HTTP** | Axios | 0.21 | API communication |
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **UI / Language** | React 18, TypeScript 5 | Component-based UI with full type safety |
+| **Build Tool** | Vite 8 | Fast HMR & optimized production bundling |
+| **Styling** | Tailwind CSS 3.4, `tailwind-merge`, `clsx` | Utility-first CSS with merge utilities |
+| **Animations** | Framer Motion 12, React Spring | Premium micro-interactions & transitions |
+| **State** | Zustand 5, Immer | Lightweight global state (player, auth, preferences, subtitles, quality, overlays) |
+| **Routing** | React Router 6 | Client-side routing with lazy loading |
+| **Data / HTTP** | Axios, `ofetch` | API communication with interceptors |
+| **Streaming** | `hls.js`, `hls-parser`, `subsrt-ts`, `wyzie-lib` | Native HLS playback, subtitle parsing, caption support |
+| **Realtime** | `socket.io-client` | Watch party sync & live chat |
+| **Search** | Fuse.js | Client-side fuzzy search ranking |
+| **i18n** | i18next, react-i18next | Internationalization framework |
+| **SEO** | react-helmet-async | Dynamic meta tags per page |
+| **PWA** | vite-plugin-pwa, Workbox | Installable app with service worker caching |
+| **Security** | DOMPurify, crypto-js | Input sanitization & client-side crypto |
+| **Icons** | Lucide React, react-icons | Consistent SVG icon sets |
 
 ### Backend
 
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| **Runtime** | Node.js | 18+ | Server environment |
-| **Framework** | Express | 4.18 | REST API server |
-| **Database** | MongoDB (Atlas) | 8.0 | User data & lists |
-| **ODM** | Mongoose | 8.0 | MongoDB modeling |
-| **Auth** | JWT + bcrypt | Latest | Secure authentication |
-| **Hosting** | Vercel | Latest | Serverless deployment |
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Runtime / Framework** | Node.js 18+, Express 4 | REST API server with middleware pipeline |
+| **Database / ODM** | MongoDB (Atlas) 8, Mongoose 8 | User data, lists, preferences, episodes |
+| **Auth** | JWT (`jsonwebtoken`), bcryptjs, cookie-parser | httpOnly cookie sessions, password hashing |
+| **Realtime** | Socket.io 4 | Watch party rooms, playback sync, chat |
+| **Security** | Helmet, express-rate-limit, SSRF guard | CSP, HSTS, rate limiting, private-IP blocking |
+| **Caching** | node-cache | Server-side TMDB/OMDb response caching |
+| **Logging** | Winston + daily-rotate-file | Structured JSON logging with rotation |
+| **API Docs** | swagger-jsdoc + swagger-ui-express | Interactive Swagger UI at `/api/docs` |
+| **API Proxy** | TMDB, OMDb, Vidrock routes | Server-side key injection — keys never reach client |
 
-### External APIs
+### Provider Engine
+
+| Layer | Purpose |
+|-------|---------|
+| **50+ Source Providers** | Modular scraper architecture under `src/lib/providers/engine/` |
+| **CinePro Adapter** | Bridge to CinePro Core for native HLS streams |
+| **Quality Normalization** | Standardizes quality labels across providers |
+| **Caption System** | Cross-provider subtitle extraction and formatting |
+| **Proxy Utilities** | Stream/playlist URL rewriting through backend proxies |
+
+### Testing & Tooling
+
+| Purpose | Technology |
+|---------|-----------|
+| **Unit / Component** | Vitest, Testing Library, jsdom |
+| **Coverage** | `@vitest/coverage-v8` |
+| **Linting** | ESLint, `@typescript-eslint` |
+| **Dev Orchestration** | concurrently (frontend + backend together) |
+
+### External Services
 
 | Service | Purpose |
 |---------|---------|
-| **TMDB API v3** | Movies, TV shows, people, images, search |
-| **RiveStream** | Video streaming source #1 |
-| **SmashyStream** | Video streaming source #2 |
+| **TMDB API v3** | Movies, TV shows, people, images, search (proxied server-side) |
+| **OMDb API** | IMDb ratings and metadata (proxied server-side) |
+| **Google OAuth** | Social sign-in (ID token + access token flows) |
+| **50+ Streaming Providers** | Video sources with automatic fallback |
+| **CinePro Core** | Optional companion service for native HLS streams |
+
+---
+
+## 🏛️ Architecture
+
+<div align="center">
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                          BROWSER (PWA)                           │
+│  React 18 + TS · Zustand · Router · hls.js player · socket.io   │
+└───────────────┬───────────────────────────────────┬──────────────┘
+                │ REST (/api, credentials: cookie)  │ WebSocket
+                ▼                                    ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    EXPRESS API (port 3001)                        │
+│  /api/auth  ── email/pass + Google OAuth · JWT httpOnly cookie   │
+│  /api/my-list · /api/collections · /api/preferences              │
+│  /api/watched-episodes                                           │
+│  /api/tmdb ──────── server-side TMDB proxy (node-cache, 10m TTL) │
+│  /api/omdb ──────── server-side OMDb proxy (7-day cache)         │
+│  /api/vidrock ───── server-side Vidrock encryption                │
+│  /api/proxy · /api/media-proxy ── stream / HLS playlist rewrite  │
+│  /api/docs ──────── Swagger UI (dev only) · /health              │
+│  Middleware: Helmet · CORS · cookie-parser · rate-limit · Winston │
+│  Socket.io: watch-party rooms, playback sync, chat, host migrate │
+└───────────────┬───────────────────────────────────┬──────────────┘
+                │ Mongoose                           │ fetch
+                ▼                                    ▼
+        ┌───────────────┐                   ┌──────────────────┐
+        │  MongoDB Atlas │                   │  TMDB / OMDb /   │
+        │  users, lists, │                   │  Streaming       │
+        │  prefs, watched│                   │  providers       │
+        └───────────────┘                   └──────────────────┘
+```
+
+</div>
 
 ---
 
@@ -235,114 +334,171 @@
 
 ```
 cineflix/
-├── 📱 src/                              # Frontend source
-│   ├── App.tsx                          # Root component + routes
-│   ├── main.tsx                         # Entry point
+├── 📱 src/                                  # Frontend source (React + TypeScript)
+│   ├── App.tsx                             # Root component, routes, providers
+│   ├── main.tsx                            # Entry point
 │   │
-│   ├── 📄 pages/                        # Route pages
-│   │   ├── HomePage.tsx                 # 🏠 Landing + hero carousel
-│   │   ├── BrowsePage.tsx               # 🎭 Browse content
-│   │   ├── Movies.tsx                   # 🎬 Movies category
-│   │   ├── TVShows.tsx                  # 📺 TV Shows category
-│   │   ├── CollectionsPage.tsx          # 📚 Collection discovery
-│   │   ├── CollectionDetailPage.tsx     # 📚 Franchise detail
-│   │   ├── DetailPage.tsx               # 🎥 Movie/TV detail
-│   │   ├── SearchPage.tsx               # 🔍 Search results
-│   │   ├── NewPopularPage.tsx           # 🔥 New & Popular
-│   │   ├── MyListPage.tsx               # 📋 User watchlist
-│   │   ├── WatchPage.tsx                # ▶️ Video player
-│   │   ├── AccountPage.tsx              # 👤 Profile settings
-│   │   ├── LoginPage.tsx                # 🔐 Sign in
-│   │   └── SignupPage.tsx               # 📝 Register
+│   ├── 📄 pages/                           # Route pages (17 pages)
+│   │   ├── HomePage.tsx                    # 🏠 Landing + hero carousel
+│   │   ├── BrowsePage.tsx                  # 🎭 Browse content
+│   │   ├── Movies.tsx                      # 🎬 Movies category
+│   │   ├── TVShows.tsx                     # 📺 TV Shows category
+│   │   ├── NewPopularPage.tsx              # 🔥 New & Popular
+│   │   ├── CollectionsPage.tsx             # 📚 Collection discovery
+│   │   ├── CollectionDetailPage.tsx        # 📚 Franchise detail + timeline
+│   │   ├── DetailPage.tsx                  # 🎥 Movie/TV detail
+│   │   ├── SearchPage.tsx                  # 🔍 Search results
+│   │   ├── WatchPage.tsx                   # ▶️ Classic iframe player
+│   │   ├── SmartPlayerPage.tsx             # ▶️ Native HLS player
+│   │   ├── WatchRedirect.tsx               # ▶️ Player mode router
+│   │   ├── MyListPage.tsx                  # 📋 User watchlist
+│   │   ├── ContinueWatchingPage.tsx        # ⏩ Resume watching
+│   │   ├── AccountPage.tsx                 # 👤 Profile & settings
+│   │   ├── LoginPage.tsx                   # 🔐 Sign in
+│   │   └── SignupPage.tsx                  # 📝 Register
 │   │
-│   ├── 🧩 components/                   # Reusable UI
-│   │   ├── Navbar.tsx                   # Navigation bar
-│   │   ├── Footer.tsx                   # Site footer
-│   │   ├── HeroCarousel.tsx             # Auto-rotating hero
-│   │   ├── ContentCarousel.tsx          # Category row carousel
-│   │   ├── ContentCard.tsx              # Card component
-│   │   ├── MovieCard.tsx                # Movie-specific card
-│   │   ├── HoverPreviewCard.tsx         # Hover intent preview
-│   │   ├── FranchiseCard.tsx            # Collection card
-│   │   ├── CollectionsHero.tsx          # Collections hero section
-│   │   ├── CollectionsFilter.tsx        # Genre filter bar
-│   │   ├── GenreCollections.tsx         # Genre browsing grid
-│   │   ├── TimelineView.tsx             # Franchise timeline
-│   │   ├── EnhancedSearch.tsx           # Search component
-│   │   ├── SearchModal.tsx              # Search overlay
-│   │   ├── FilterBar.tsx                # Content filters
-│   │   ├── AddToListButton.tsx          # List action button
-│   │   ├── LikeButton.tsx               # Like action button
-│   │   ├── EpisodesList.tsx             # TV episode list
-│   │   ├── DynamicBackground.tsx        # Animated backgrounds
-│   │   ├── LogoImage.tsx                # Logo resolver
-│   │   ├── LoadingSkeleton.tsx          # Shimmer skeletons
-│   │   ├── SignUpPromoBubble.tsx         # Auth promo CTA
-│   │   ├── Squares.tsx                  # Decorative grid
-│   │   ├── ProtectedRoute.tsx           # Auth guard
-│   │   └── ErrorBoundary.tsx            # Error handling
+│   ├── 🧩 components/                      # 50+ reusable UI components
+│   │   ├── Navbar.tsx                      # Navigation bar
+│   │   ├── Footer.tsx                      # Site footer
+│   │   ├── HeroCarousel.tsx                # Auto-rotating hero
+│   │   ├── ContentCarousel.tsx             # Category row carousel
+│   │   ├── ContentCard.tsx / MovieCard.tsx  # Content cards
+│   │   ├── HoverPreviewCard.tsx            # Hover intent preview
+│   │   ├── FranchiseCard.tsx               # Collection card
+│   │   ├── CollectionsHero.tsx             # Collections hero section
+│   │   ├── CollectionsFilter.tsx           # Genre filter bar
+│   │   ├── GenreCollections.tsx            # Genre browsing grid
+│   │   ├── TimelineView.tsx                # Franchise timeline
+│   │   ├── EnhancedSearch.tsx              # Search component
+│   │   ├── SearchModal.tsx                 # Search overlay
+│   │   ├── SmartPlayerModal.tsx            # Player mode selector
+│   │   ├── WatchPage/                      # Watch experience components
+│   │   │   ├── NativePlayerSection.tsx     # HLS native player
+│   │   │   ├── StreamSources.tsx           # Provider source list
+│   │   │   ├── SeasonsEpisodesSection.tsx  # TV episode navigation
+│   │   │   ├── UserRating.tsx              # Personal rating widget
+│   │   │   ├── SimilarContent.tsx          # Recommendations
+│   │   │   └── VideoFrame.tsx              # Iframe embed wrapper
+│   │   ├── player/                         # Player controls & overlays
+│   │   ├── overlays/                       # Modal overlays
+│   │   ├── feedback/                       # EmptyState, ErrorState, LoadingScreen
+│   │   ├── auth/                           # Auth-related components
+│   │   ├── ProtectedRoute.tsx              # Auth guard
+│   │   ├── ErrorBoundary.tsx               # Error handling
+│   │   └── ...                             # 20+ more components
 │   │
-│   ├── ⚙️ services/                     # API & business logic
-│   │   ├── tmdb.ts                      # TMDB API client
-│   │   ├── api.ts                       # Backend API client
-│   │   ├── collectionsService.ts        # Collection tracking
-│   │   ├── myListService.ts             # Watchlist management
-│   │   ├── watchService.ts              # Watch history
-│   │   ├── progressService.ts           # Progress tracking
-│   │   ├── logoCache.ts                 # Image cache layer
-│   │   ├── rivestreamService.ts         # RiveStream provider
-│   │   └── smashystream.ts              # SmashyStream provider
+│   ├── 🎮 lib/providers/engine/            # Streaming provider engine
+│   │   ├── index.ts                        # Engine entry point
+│   │   ├── providers/
+│   │   │   ├── all.ts                      # Provider registry
+│   │   │   ├── base.ts                     # Base provider interface
+│   │   │   ├── streams.ts / captions.ts    # Stream & caption types
+│   │   │   └── sources/                    # 50+ provider scrapers
+│   │   │       ├── vidrock.ts / catflix.ts / zoechip.ts / nunflix.ts ...
+│   │   │       ├── ridomovies/ / lookmovie/ / soapertv/ / warezcdn/ ...
+│   │   │       └── ... (35 files + 15 directories)
+│   │   └── utils/                          # Proxy, quality, TMDB, playlist utils
 │   │
-│   ├── 🪝 hooks/                        # Custom React hooks
-│   │   ├── useMyList.ts                 # Watchlist hook
-│   │   ├── useHoverIntent.ts            # Smart hover detection
-│   │   ├── useAccountSettings.ts        # Profile management
-│   │   └── useScreenSize.ts             # Responsive hook
+│   ├── ⚙️ services/                        # API & business logic
+│   │   ├── tmdb.ts                         # TMDB service (via server proxy)
+│   │   ├── omdb.ts                         # OMDb ratings (via server proxy)
+│   │   ├── api.ts                          # Backend API client (cookie auth)
+│   │   ├── collectionsService.ts           # Collection tracking
+│   │   ├── collectionDiscovery.ts          # Collection discovery engine
+│   │   ├── myListService.ts                # Watchlist management
+│   │   ├── watchService.ts                 # Watch history & progress
+│   │   ├── progressService.ts              # Progress tracking
+│   │   ├── rivestreamService.ts            # RiveStream provider
+│   │   ├── smashystream.ts                 # SmashyStream provider
+│   │   ├── 111movies.ts                    # 111movies provider
+│   │   ├── cinepro-adapter/                # CinePro Core bridge
+│   │   ├── logoCache.ts                    # Image cache layer
+│   │   └── analytics.ts                    # Page tracking
 │   │
-│   ├── 🔐 contexts/                     # React context providers
-│   │   ├── AuthContext.tsx              # Authentication state
-│   │   └── ToastContext.tsx             # Notification system
+│   ├── 🏪 stores/                          # Zustand state stores
+│   │   ├── auth/                           # Authentication state
+│   │   ├── player/                         # Player state (slices, utils)
+│   │   ├── progress/                       # Watch progress
+│   │   ├── subtitles/                      # Subtitle preferences
+│   │   ├── quality/                        # Quality selection
+│   │   ├── volume/                         # Volume state
+│   │   ├── preferences/                    # User preferences
+│   │   ├── language/                       # i18n language
+│   │   ├── bookmarks/                      # Bookmarked content
+│   │   ├── banner/                         # Banner state
+│   │   ├── interface/                      # UI state
+│   │   ├── overlay/                        # Overlay state
+│   │   ├── cinepro/                        # CinePro integration state
+│   │   ├── watchParty/                     # Watch party state
+│   │   └── watchHistory.ts                 # Watch history
 │   │
-│   ├── 📐 types/                        # TypeScript definitions
-│   │   ├── index.ts                     # Core types
-│   │   ├── browse.ts                    # Browse types
-│   │   └── myList.ts                    # List types
+│   ├── 🪝 hooks/                           # 24+ custom React hooks
+│   │   ├── useMyList.ts                    # Watchlist hook
+│   │   ├── useHoverIntent.ts               # Smart hover detection
+│   │   ├── useWatchParty.ts                # Watch party management
+│   │   ├── useWatchPartySync.ts            # Playback sync
+│   │   ├── useScrape.ts                    # Provider scraping
+│   │   ├── useSmartPlayer.ts               # Smart player context
+│   │   ├── useImdbRating.ts                # OMDb/IMDb ratings
+│   │   ├── useGamepad.ts                   # Controller/gamepad input
+│   │   ├── useServiceWorker.ts             # PWA service worker
+│   │   ├── usePageTracking.ts              # Analytics tracking
+│   │   ├── useDetailPageData.ts            # Detail page data fetching
+│   │   ├── useCertification.ts             # Content certification
+│   │   ├── usePlayer.ts / useProgressBar.ts# Player controls
+│   │   ├── useAccountSettings.ts           # Profile management
+│   │   ├── useScreenSize.ts / useIsMobile.ts # Responsive hooks
+│   │   └── ...                             # Scroll, lenis, overlay router
 │   │
-│   └── 🔧 utils/                        # Utility functions
-│       ├── imageLoader.ts               # Image optimization
-│       ├── strings.ts                   # String helpers
-│       └── validation.ts               # Form validation
+│   ├── 🔐 contexts/                        # React context providers
+│   │   ├── AuthContext.tsx                  # Authentication (cookie-based)
+│   │   ├── SmartPlayerContext.tsx           # Smart player mode
+│   │   └── ToastContext.tsx                 # Notification system
+│   │
+│   ├── 🌍 setup/                           # App initialization
+│   │   └── i18n.ts                         # i18next configuration
+│   │
+│   ├── 📐 types/                           # TypeScript definitions
+│   └── 🔧 utils/                           # Utility functions
 │
-├── 🖥️ backend/                          # Express API server
-│   └── src/
-│       ├── server.ts                    # Entry point
-│       ├── config/
-│       │   └── database.ts              # MongoDB connection
-│       ├── models/
-│       │   ├── User.ts                  # User schema
-│       │   ├── MyList.ts                # Watchlist schema
-│       │   ├── Collection.ts            # Collection schema
-│       │   ├── Preferences.ts           # User preferences
-│       │   └── WatchedEpisode.ts        # Episode tracking
-│       ├── controllers/
-│       │   ├── authController.ts        # Auth logic
-│       │   ├── myListController.ts      # List CRUD
-│       │   ├── collectionsController.ts # Collection ops
-│       │   ├── preferencesController.ts # Settings ops
-│       │   └── watchedEpisodeController.ts
-│       ├── routes/
-│       │   ├── authRoutes.ts            # /api/auth/*
-│       │   ├── myListRoutes.ts          # /api/mylist/*
-│       │   ├── collectionsRoutes.ts     # /api/collections/*
-│       │   ├── preferencesRoutes.ts     # /api/preferences/*
-│       │   └── watchedEpisodeRoutes.ts  # /api/episodes/*
-│       └── middleware/
-│           └── authMiddleware.ts        # JWT verification
+├── 🖥️ backend/src/                         # Express API server (TypeScript, ESM)
+│   ├── server.ts                           # Bootstrap, CORS, Helmet, routes, Socket.io, Swagger
+│   ├── config/
+│   │   ├── env.ts                          # Validated env (fails fast on missing keys)
+│   │   ├── database.ts                     # MongoDB connection
+│   │   └── swagger.ts                      # API docs configuration
+│   ├── models/
+│   │   ├── User.ts                         # User schema (bcrypt, Google OAuth fields)
+│   │   ├── MyList.ts                       # Watchlist schema (ratings, notes, tags)
+│   │   ├── Collection.ts                   # Collection progress schema
+│   │   ├── Preferences.ts                  # User preferences schema
+│   │   └── WatchedEpisode.ts               # Episode tracking schema
+│   ├── controllers/                        # Business logic for each domain
+│   ├── routes/
+│   │   ├── authRoutes.ts                   # /api/auth/* (email, Google, password reset)
+│   │   ├── myListRoutes.ts                 # /api/my-list/* (CRUD, stats, bulk, search)
+│   │   ├── collectionsRoutes.ts            # /api/collections/* (protected)
+│   │   ├── preferencesRoutes.ts            # /api/preferences/* (protected)
+│   │   ├── watchedEpisodeRoutes.ts         # /api/watched-episodes/*
+│   │   ├── tmdbRoutes.ts                   # /api/tmdb/* (server-side proxy, 10m cache)
+│   │   ├── omdbRoutes.ts                   # /api/omdb (server-side proxy, 7d cache)
+│   │   ├── vidrockRoutes.ts                # /api/vidrock/* (server-side encryption)
+│   │   ├── proxyRoutes.ts                  # /api/proxy (stream proxy with SSRF guard)
+│   │   └── mediaProxyRoutes.ts             # /api/media-proxy (HLS playlist rewriting)
+│   ├── middleware/
+│   │   └── authMiddleware.ts               # JWT verification (protect / optionalAuth)
+│   ├── sockets/
+│   │   └── watchParty.ts                   # Socket.io: rooms, sync, chat, host migration
+│   └── utils/
+│       ├── logger.ts                       # Winston structured logging
+│       └── publicDestination.ts            # SSRF guard (blocks private IPs, CGNAT, NAT64)
 │
-├── 🎨 tailwind.config.js                # Design tokens
-├── ⚡ vite.config.ts                    # Build config
-├── 🚀 vercel.json                       # Deployment config
-└── 📄 index.html                        # HTML entry point
+├── 🐳 Dockerfile                           # Multi-stage production build
+├── 🐳 .dockerignore                        # Excludes .env, node_modules, logs
+├── 🎨 tailwind.config.js                   # Design tokens
+├── ⚡ vite.config.ts                       # Build config (PWA, proxy, aliases)
+├── 🚀 vercel.json                          # Vercel deployment config
+└── 📄 index.html                           # HTML entry point
 ```
 
 ---
@@ -363,8 +519,8 @@ cineflix/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/simoabid/cineflix.git
-cd cineflix
+git clone https://github.com/simoabid/cineflix-app.git
+cd cineflix-app
 
 # 2. Install frontend dependencies
 npm install
@@ -401,17 +557,43 @@ cd backend && npm install && cd ..
 <details>
 <summary><strong>🔐 Step 3: Environment Variables</strong></summary>
 
-**Root `.env`** (frontend):
-```env
-VITE_TMDB_API_KEY=your_tmdb_api_key_here
-```
+> ⚠️ **Important:** API keys (TMDB, OMDb, Vidrock) live **only** in `backend/.env`. They are proxied server-side and never shipped to the client bundle.
 
-**`backend/.env`** (backend):
+**`backend/.env`** (backend — all secrets live here):
 ```env
 PORT=3001
-MONGODB_URI=mongodb+srv://admin:<password>@cluster0.example.mongodb.net/?retryWrites=true&w=majority
-JWT_SECRET=my_super_secure_secret_key_123
+NODE_ENV=development
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.example.mongodb.net/?retryWrites=true&w=majority
+JWT_SECRET=your_long_random_secret
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+
+# API keys — server-side only, never prefix with VITE_
+TMDB_API_KEY=your_tmdb_v3_key
+OMDB_API_KEY=your_omdb_key
+VIDROCK_PASSPHRASE=your_vidrock_passphrase
+
+# Optional — enables Google Sign-In
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+LOG_LEVEL=info
 ```
+
+**Root `.env`** (frontend — minimal, no secrets):
+```env
+# Backend API URL — defaults to /api if unset
+VITE_API_URL=/api
+
+# Optional — Google OAuth client ID (public, safe to expose)
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+
+# Optional — CinePro Core integration
+VITE_CINEPRO_URL=http://localhost:3005
+VITE_CINEPRO_ENABLED=true
+VITE_CINEPRO_TIMEOUT=15000
+```
+
+`backend/src/config/env.ts` **fails fast** at startup if `JWT_SECRET`, `MONGODB_URI`, or `TMDB_API_KEY` are missing.
 
 </details>
 
@@ -422,67 +604,87 @@ JWT_SECRET=my_super_secure_secret_key_123
 npm run dev
 
 # Or start them separately:
-# Terminal 1 — Backend
+# Terminal 1 — Backend (Express + Socket.io on :3001)
 cd backend && npm run dev
 
-# Terminal 2 — Frontend
+# Terminal 2 — Frontend (Vite on :5173)
 npm run dev:frontend
 ```
 
-> 💡 **Frontend:** `http://localhost:3000` &nbsp;|&nbsp; **Backend:** `http://localhost:3001`
+> 💡 **Frontend:** `http://localhost:5173` &nbsp;|&nbsp; **Backend:** `http://localhost:3001` &nbsp;|&nbsp; **API Docs:** `http://localhost:3001/api/docs`
+
+### Testing & Quality
+
+```bash
+npm test              # Vitest run
+npm run test:ui       # Vitest watch UI
+npm run test:coverage # Coverage report
+npm run lint          # ESLint (max-warnings 0)
+```
+
+### Build
+
+```bash
+npm run build         # Builds backend (tsc) then frontend (vite build)
+```
 
 ---
 
-## 📊 API Architecture
+## 📡 API Reference
 
-```mermaid
-graph TB
-    Client[🌐 Browser] -->|React Router| Pages[📄 Pages]
-    Pages -->|Axios| TMDB[🎬 TMDB API]
-    Pages -->|Axios| Backend[🖥️ Express API]
-    Backend -->|Mongoose| DB[(🗄️ MongoDB)]
-    Backend -->|JWT| Auth[🔐 Auth Middleware]
-    Pages -->|Service Layer| Stream[▶️ Streaming APIs]
-    
-    subgraph Frontend
-        Pages
-        Components[🧩 Components]
-        Hooks[🪝 Hooks]
-        Context[🔐 Contexts]
-        Pages --> Components
-        Pages --> Hooks
-        Pages --> Context
-    end
-    
-    subgraph Backend Services
-        Backend
-        Auth
-        DB
-    end
-    
-    style Client fill:#0A0A1F,stroke:#E50914,color:#fff
-    style TMDB fill:#01D277,stroke:#01D277,color:#fff
-    style Backend fill:#1A1A2E,stroke:#E50914,color:#fff
-    style DB fill:#47A248,stroke:#47A248,color:#fff
-    style Stream fill:#646CFF,stroke:#646CFF,color:#fff
-```
+Interactive docs are served at **`/api/docs`** (Swagger UI) with the raw spec at **`/api/docs.json`**. Health check at **`/health`**.
 
-### Backend API Endpoints
+> 📘 Swagger UI is only accessible when `NODE_ENV !== 'production'`.
+
+### Auth — `/api/auth`
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/auth/signup` | ❌ | Register new user |
-| `POST` | `/api/auth/login` | ❌ | Authenticate user |
-| `GET` | `/api/auth/profile` | ✅ | Get user profile |
-| `GET` | `/api/mylist` | ✅ | Get user's watchlist |
-| `POST` | `/api/mylist` | ✅ | Add to watchlist |
-| `DELETE` | `/api/mylist/:id` | ✅ | Remove from watchlist |
-| `GET` | `/api/collections` | ✅ | Get saved collections |
-| `POST` | `/api/collections` | ✅ | Save collection progress |
-| `GET` | `/api/preferences` | ✅ | Get user preferences |
-| `PUT` | `/api/preferences` | ✅ | Update preferences |
-| `GET` | `/api/episodes` | ✅ | Get watched episodes |
-| `POST` | `/api/episodes` | ✅ | Mark episode watched |
+| `POST` | `/register` | ❌ | Register new user (rate-limited) |
+| `POST` | `/login` | ❌ | Login, sets httpOnly cookie (rate-limited) |
+| `POST` | `/logout` | ❌ | Clear auth cookie |
+| `POST` | `/google` | ❌ | Google OAuth (ID or access token) |
+| `POST` | `/github` | ❌ | GitHub OAuth (stub) |
+| `POST` | `/forgot-password` | ❌ | Request password reset (rate-limited) |
+| `POST` | `/reset-password` | ❌ | Reset with token |
+| `GET` | `/me` | ✅ | Get current user |
+| `PUT` | `/profile` | ✅ | Update name/avatar |
+| `PUT` | `/password` | ✅ | Change password |
+
+### My List — `/api/my-list`
+
+`GET /` · `POST /add` · `PUT /:id` · `DELETE /:id` · `POST /progress` · `POST /toggle-like` · `POST /like` · `POST /unlike` · `GET /stats` · `GET /search` · `POST /bulk` · `GET /check/:contentId/:contentType` · `GET /liked` · `GET /continue-watching` · `GET /recent` · `GET /tags` — all **auth-protected & user-scoped**.
+
+### Other Endpoints
+
+| Base | Auth | Description |
+|------|------|-------------|
+| `/api/collections` | ✅ | Saved collection progress (CRUD) |
+| `/api/preferences` | ✅ | User preferences (GET/PUT) |
+| `/api/watched-episodes` | ✅ | Per-episode watch tracking |
+| `/api/tmdb/*` | ❌ | Cached TMDB proxy (10-min TTL, server-side key) |
+| `/api/omdb` | ❌ | Cached OMDb proxy (7-day TTL, server-side key) |
+| `/api/vidrock/encrypt` | ✅ | Vidrock encryption (server-side passphrase) |
+| `/api/proxy` | ✅ | Generic stream proxy with SSRF protection |
+| `/api/media-proxy` | ✅ | HLS/MP4 proxy with playlist URL rewriting |
+| `/health` | ❌ | Health check endpoint |
+
+### WebSocket Events (Socket.io)
+
+| Direction | Event | Description |
+|-----------|-------|-------------|
+| Client → | `create-party` | Create a new watch party (becomes host) |
+| Client → | `join-party` | Join an existing party by ID |
+| Client → | `leave-party` | Leave the current party |
+| Client → | `playback-sync` | Sync play/pause/seek (host only) |
+| Client → | `party-chat` | Send a chat message (sanitized) |
+| ← Server | `party-created` | Party created confirmation |
+| ← Server | `party-joined` | Successfully joined party |
+| ← Server | `member-joined` / `member-left` | Member presence updates |
+| ← Server | `sync-state` | Playback state broadcast |
+| ← Server | `chat-message` | Chat message broadcast |
+| ← Server | `host-changed` | Host migration notification |
+| ← Server | `party-error` | Error notification |
 
 ---
 
@@ -495,10 +697,12 @@ graph TB
 - **Code splitting** — React Router lazy loading per page
 - **Image optimization** — `imageLoader` utility with fallback support
 - **Logo caching** — `logoCache` service prevents redundant TMDB fetches
+- **Server-side caching** — TMDB (10m TTL) and OMDb (7d TTL) responses cached on backend
 - **Debounced search** — Reduces API calls during typing
 - **Hover intent detection** — `useHoverIntent` hook prevents accidental preview triggers
 - **Skeleton loaders** — Perceived performance with shimmer animations
 - **Intersection Observer** — Content loads as it enters viewport
+- **PWA caching** — Workbox strategies for offline-capable static assets
 
 </details>
 
@@ -534,48 +738,71 @@ Built with Framer Motion for premium micro-interactions:
 <summary><strong>🔐 Authentication Flow</strong></summary>
 
 ```
-User Signs Up/Logs In
-        │
-        ▼
-┌─────────────────────┐
-│ POST /api/auth/login │
-│ Email + Password     │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ bcrypt.compare()     │
-│ Verify credentials   │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ jwt.sign()           │
-│ Generate token       │
-│ (24h expiry)         │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ AuthContext stores   │
-│ token + user data    │
-│ in localStorage      │
-└──────────┬──────────┘
-           │
-           ▼
+User Signs Up / Logs In / Google OAuth
+         │
+         ▼
+┌──────────────────────────┐
+│ POST /api/auth/login     │
+│ or POST /api/auth/google │
+│ Email + Password / Token │
+└───────────┬──────────────┘
+            │
+            ▼
+┌──────────────────────────┐
+│ bcrypt.compare() or      │
+│ Google audience verify   │
+└───────────┬──────────────┘
+            │
+            ▼
+┌──────────────────────────┐
+│ jwt.sign()               │
+│ Generate token (30d)     │
+└───────────┬──────────────┘
+            │
+            ▼
+┌──────────────────────────┐
+│ Set httpOnly cookie      │
+│ auth_token (secure, 30d) │
+│ NO localStorage tokens   │
+└───────────┬──────────────┘
+            │
+            ▼
    🔓 Protected routes unlocked
-   My List, Preferences, etc.
+   My List, Collections, Preferences,
+   Watch Parties, Stream Proxy
 ```
 
 </details>
 
 <details>
-<summary><strong>📺 Streaming Integration</strong></summary>
+<summary><strong>▶️ Streaming Architecture</strong></summary>
 
-- **Multi-source approach** — Falls back between RiveStream and SmashyStream
-- **Embedded player** — Iframe-based streaming within the watch page
-- **Episode tracking** — MongoDB persistence for TV show watch progress
-- **Source selection** — Users can switch between available providers
+- **Dual player modes** — Smart Player (native HLS via `hls.js`) and Classic (iframe embeds)
+- **50+ provider engine** — Modular scraper architecture with base provider interface
+- **CinePro adapter** — Bridge to CinePro Core for premium HLS streams
+- **Automatic fallback** — If one provider fails, the engine tries the next
+- **Server-side proxy** — Stream URLs rewritten through `/api/proxy` and `/api/media-proxy` (with SSRF protection)
+- **Quality selection** — Zustand-managed quality preferences persisted
+- **Subtitle support** — Multi-format parsing via `subsrt-ts` and `wyzie-lib`
+- **Episode tracking** — MongoDB persistence for TV show watch progress per-episode
+
+</details>
+
+<details>
+<summary><strong>🔒 Security Hardening</strong></summary>
+
+- **bcrypt** password hashing (cost factor 12); password field excluded from queries by default
+- **JWT over httpOnly + `secure` (prod) + `sameSite` cookies** — no localStorage tokens
+- **Helmet** security headers — CSP, HSTS, X-Frame-Options, X-Content-Type-Options
+- **Allowlist-based CORS** with credentials
+- **Rate limiting** on auth endpoints and global request limiting (200/min)
+- **User-scoped queries** everywhere in My List (no IDOR)
+- **Google OAuth** with audience and `email_verified` verification
+- **Server-side API proxy** — TMDB, OMDb, and Vidrock keys never reach the client bundle
+- **SSRF guard** on outbound proxy destinations (`utils/publicDestination.ts`) — blocks private IPs, CGNAT, NAT64, link-local
+- **DOMPurify** sanitization on watch party chat messages
+- **Cascading deletes** clean up all user-owned data on account removal
+- **Swagger gated** — `/api/docs` only accessible in non-production environments
 
 </details>
 
@@ -592,29 +819,45 @@ User Signs Up/Logs In
 | 5 | **New & Popular** | `/new-popular` | Trending content |
 | 6 | **Collections** | `/collections` | Infinite scroll franchise discovery |
 | 7 | **Collection Detail** | `/collection/:id` | Franchise films & timeline |
-| 8 | **Detail** | `/movie/:id`, `/tv/:id` | Full movie/show details |
-| 9 | **Watch** | `/watch/:type/:id` | Video streaming player |
-| 10 | **Search** | `/search` | Multi-type search |
-| 11 | **My List** | `/my-list` | User watchlist |
-| 12 | **Account** | `/account` | Profile & preferences |
-| 13 | **Login** | `/login` | Authentication |
-| 14 | **Sign Up** | `/signup` | Registration |
+| 8 | **Detail** | `/movie/:id`, `/tv/:id` | Full movie/show details, OMDb ratings |
+| 9 | **Watch (Classic)** | `/watch/:type/:id` | Iframe-based streaming player |
+| 10 | **Watch (Smart)** | `/smart-player/:type/:id` | Native HLS player |
+| 11 | **Search** | `/search` | Multi-type fuzzy search |
+| 12 | **My List** | `/my-list` | User watchlist, favorites, stats |
+| 13 | **Continue Watching** | `/continue-watching` | Resume where you left off |
+| 14 | **Account** | `/account` | Profile, preferences, password |
+| 15 | **Login** | `/login` | Email + Google authentication |
+| 16 | **Sign Up** | `/signup` | Registration with avatar selection |
 
 ---
 
 ## 🚀 Deployment
 
-The project is configured for **Vercel** deployment:
+### Production (AWS EC2 + Nginx)
+
+The project is deployed at **[cineflix.dev](https://cineflix.dev)** on an AWS EC2 instance with:
+- **Nginx** as reverse proxy with Let's Encrypt SSL
+- **PM2** for process management (auto-restart, boot persistence)
+- Subdomains: `cineflix.dev` (frontend), `api.cineflix.dev` (backend), `core.cineflix.dev` (CinePro)
+
+### Docker
 
 ```bash
-# Build for production
-npm run build
+# Build the multi-stage production image
+docker build -t cineflix .
 
-# Preview production build locally
-npm run preview
+# Run with environment variables
+docker run -p 3001:3001 --env-file backend/.env cineflix
 ```
 
-`vercel.json` handles both frontend static files and backend serverless functions.
+### Vercel
+
+The project also supports Vercel deployment via `vercel.json`:
+
+```bash
+npm run build
+npm run preview    # Preview production build locally
+```
 
 ---
 
@@ -626,10 +869,13 @@ npm run preview
 | Issue | Solution |
 |-------|----------|
 | **MongoDB Connection Error** | Check IP whitelist in Atlas → Network Access → `0.0.0.0/0` |
-| **Movies not loading** | Verify `VITE_TMDB_API_KEY` in root `.env` |
+| **Movies not loading** | Verify `TMDB_API_KEY` in `backend/.env` (not frontend!) |
 | **Sign Up/Login fails** | Ensure backend is running on `http://localhost:3001` |
-| **CORS errors** | Backend `cors` middleware should allow `localhost:3000` |
+| **CORS errors** | Check `CORS_ALLOWED_ORIGINS` in `backend/.env` includes your frontend origin |
 | **Build errors** | Run `npm install` in both root and `backend/` directories |
+| **API keys in browser** | Keys must be in `backend/.env` without `VITE_` prefix |
+| **Swagger not loading** | Only available when `NODE_ENV=development` |
+| **Backend crashes on start** | Check `backend/src/config/env.ts` — `JWT_SECRET`, `MONGODB_URI`, and `TMDB_API_KEY` are required |
 
 </details>
 
@@ -653,6 +899,8 @@ git push origin feature/amazing-feature
 # 5. Open a Pull Request
 ```
 
+Please run `npm run lint` and `npm test` before opening a PR.
+
 ### Commit Convention
 
 | Prefix | Usage |
@@ -665,6 +913,7 @@ git push origin feature/amazing-feature
 | `perf:` | Performance |
 | `auth:` | Authentication |
 | `api:` | Backend/API |
+| `security:` | Security hardening |
 
 ---
 
@@ -681,13 +930,16 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 | Resource | Purpose |
 |----------|---------|
 | [TMDB](https://www.themoviedb.org/) | Movie & TV Show database |
+| [OMDb](https://www.omdbapi.com/) | IMDb ratings & metadata |
 | [React](https://react.dev/) | UI framework |
 | [Vite](https://vitejs.dev/) | Build tooling |
 | [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
 | [Framer Motion](https://www.framer.com/motion/) | Premium animations |
+| [Zustand](https://zustand-demo.pmnd.rs/) | Lightweight state management |
+| [Socket.io](https://socket.io/) | Real-time watch parties |
+| [hls.js](https://github.com/video-dev/hls.js/) | Native HLS playback |
 | [MongoDB Atlas](https://www.mongodb.com/) | Cloud database |
 | [Lucide Icons](https://lucide.dev/) | Beautiful icon set |
-| [Vercel](https://vercel.com/) | Deployment platform |
 
 </div>
 
@@ -700,7 +952,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 
 <br/>
 
-**Built with ❤️ using the MERN Stack**
+**Built with ❤️ by [ABID.Dev](https://abid.dev) for movie lovers worldwide 🎥**
 
 <br/>
 
