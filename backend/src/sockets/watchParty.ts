@@ -1,5 +1,8 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HttpServer } from 'http';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
 
 /** Watch party event payloads */
@@ -7,6 +10,10 @@ interface PlaybackSyncPayload {
     partyId: string;
     currentTime: number;
     isPlaying: boolean;
+}
+
+interface CreatePartyPayload {
+    userName: string;
 }
 
 interface JoinPartyPayload {
@@ -28,11 +35,58 @@ interface PartyRoom {
     createdAt: number;
 }
 
+/** Maximum chat message length to prevent abuse */
+const MAX_CHAT_MESSAGE_LENGTH = 500 as const;
+
 const activeParties = new Map<string, PartyRoom>();
+
+/**
+ * Generate a cryptographically random party ID (server-side only).
+ * This prevents clients from choosing/guessing room IDs.
+ */
+function generatePartyId(): string {
+    return crypto.randomBytes(16).toString('hex');
+}
+
+/**
+ * Sanitize a chat message: trim whitespace, enforce length limit, strip control characters.
+ */
+function sanitizeChatMessage(message: string): string {
+    if (typeof message !== 'string') return '';
+    // Strip control characters except newlines, trim, and truncate
+    return message
+        .replace(/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/g, '')
+        .trim()
+        .slice(0, MAX_CHAT_MESSAGE_LENGTH);
+}
+
+/**
+ * Authenticate a Socket.io handshake using the auth cookie JWT.
+ */
+function authenticateSocket(socket: Socket): boolean {
+    try {
+        const cookieHeader = socket.handshake.headers.cookie;
+        if (!cookieHeader) return false;
+        // Parse the auth_token cookie from the cookie header
+        const cookies = cookieHeader.split(';').reduce<Record<string, string>>((acc, cookie) => {
+            const [key, ...vals] = cookie.trim().split('=');
+            if (key) acc[key.trim()] = vals.join('=');
+            return acc;
+        }, {});
+        const token = cookies['auth_token'];
+        if (!token) return false;
+        const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string };
+        (socket as any).userId = decoded.id;
+        return true;
+    } catch {
+        return false;
+    }
+}
 
 /**
  * Initializes the Socket.io server for watch-party synchronization.
  * Handles room management, playback sync, and party chat.
+ * All connections require authentication via the auth cookie.
  */
 export function initializeSocketServer(httpServer: HttpServer, allowedOrigins: string[]): SocketIOServer {
     const io = new SocketIOServer(httpServer, {
@@ -44,14 +98,28 @@ export function initializeSocketServer(httpServer: HttpServer, allowedOrigins: s
         pingTimeout: 20000,
     });
 
+    // Authentication middleware — reject unauthenticated connections
+    io.use((socket, next) => {
+        if (authenticateSocket(socket)) {
+            next();
+        } else {
+            next(new Error('Authentication required'));
+        }
+    });
+
     io.on('connection', (socket: Socket) => {
         logger.info(`🔌 Socket connected: ${socket.id}`);
 
-        /** Create a new watch party — the creator becomes the host */
-        socket.on('create-party', ({ partyId, userName }: JoinPartyPayload) => {
+        /** Create a new watch party — the creator becomes the host. Party ID is server-generated. */
+        socket.on('create-party', ({ userName }: CreatePartyPayload) => {
+            if (!userName || typeof userName !== 'string') {
+                socket.emit('party-error', { error: 'Username is required' });
+                return;
+            }
+            const partyId = generatePartyId();
             const room: PartyRoom = {
                 hostSocketId: socket.id,
-                members: new Map([[socket.id, userName]]),
+                members: new Map([[socket.id, userName.trim().slice(0, 50)]]),
                 createdAt: Date.now(),
             };
             activeParties.set(partyId, room);
@@ -62,32 +130,60 @@ export function initializeSocketServer(httpServer: HttpServer, allowedOrigins: s
 
         /** Join an existing watch party */
         socket.on('join-party', ({ partyId, userName }: JoinPartyPayload) => {
+            if (!partyId || typeof partyId !== 'string' || !userName || typeof userName !== 'string') {
+                socket.emit('party-error', { error: 'Party ID and username are required' });
+                return;
+            }
             const room = activeParties.get(partyId);
             if (!room) {
                 socket.emit('party-error', { error: 'Party not found' });
                 return;
             }
-            room.members.set(socket.id, userName);
+            const sanitizedName = userName.trim().slice(0, 50);
+            room.members.set(socket.id, sanitizedName);
             socket.join(partyId);
-            socket.to(partyId).emit('member-joined', { userName, memberCount: room.members.size });
+            socket.to(partyId).emit('member-joined', { userName: sanitizedName, memberCount: room.members.size });
             socket.emit('party-joined', { partyId, memberCount: room.members.size, isHost: false });
-            logger.info(`👤 ${userName} joined party ${partyId} (${room.members.size} members)`);
+            logger.info(`👤 ${sanitizedName} joined party ${partyId} (${room.members.size} members)`);
         });
 
-        /** Sync playback position — host broadcasts to all party members */
+        /** Sync playback position — host-only: only the party host can broadcast sync state */
         socket.on('playback-sync', ({ partyId, currentTime, isPlaying }: PlaybackSyncPayload) => {
+            if (!partyId || typeof partyId !== 'string') return;
+            const room = activeParties.get(partyId);
+            if (!room) return;
+            // Only the host can sync playback — prevents disruptive sync injection
+            if (room.hostSocketId !== socket.id) {
+                socket.emit('party-error', { error: 'Only the host can sync playback' });
+                return;
+            }
+            if (typeof currentTime !== 'number' || typeof isPlaying !== 'boolean') return;
             socket.to(partyId).emit('sync-state', { currentTime, isPlaying, from: socket.id });
         });
 
-        /** Chat messages within the party */
-        socket.on('party-chat', ({ partyId, userName, message }: ChatMessagePayload) => {
-            const payload: ChatMessagePayload = { partyId, userName, message, timestamp: Date.now() };
+        /** Chat messages within the party — sanitized and length-limited */
+        socket.on('party-chat', ({ partyId, userName }: ChatMessagePayload) => {
+            if (!partyId || typeof partyId !== 'string') return;
+            const room = activeParties.get(partyId);
+            if (!room || !room.members.has(socket.id)) return;
+            // Use the server-known username (not client-supplied) to prevent spoofing
+            const verifiedUserName = room.members.get(socket.id) ?? 'Unknown';
+            const message = sanitizeChatMessage(arguments[0]?.message ?? '');
+            if (!message) return;
+            const payload: ChatMessagePayload = {
+                partyId,
+                userName: verifiedUserName,
+                message,
+                timestamp: Date.now(),
+            };
             io.to(partyId).emit('chat-message', payload);
         });
 
         /** Leave a party */
         socket.on('leave-party', (partyId: string) => {
-            handleLeaveParty(socket, partyId);
+            if (typeof partyId === 'string') {
+                handleLeaveParty(socket, partyId);
+            }
         });
 
         /** Clean up on disconnect */
