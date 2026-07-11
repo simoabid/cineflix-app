@@ -8,6 +8,7 @@ import AddToListButton from './AddToListButton';
 import LikeButton from './LikeButton';
 import { useNavigate } from 'react-router-dom';
 import { useSmartPlayer } from '../hooks/useSmartPlayer';
+import { useCertification } from '../hooks/useCertification';
 
 type MinimalContent = Partial<Movie & TVShow> & {
   id?: number;
@@ -31,8 +32,14 @@ interface HoverPreviewCardProps {
   onMouseLeavePreview: () => void;
 }
 
-const PREVIEW_WIDTH = 400; // slightly smaller (~25rem)
-const PREVIEW_HEIGHT_APPROX = 330; // adjusted for clamping
+const PREVIEW_WIDTH = 400;
+const PREVIEW_HEIGHT_APPROX = 330;
+
+/** Premium cubic-bezier curves for Netflix-style transitions */
+const EASING_ENTER = 'cubic-bezier(0.25, 1, 0.5, 1)';
+const EASING_EXIT  = 'cubic-bezier(0.25, 0, 0.3, 1)';
+const DURATION_ENTER_MS = 330;
+const DURATION_EXIT_MS  = 220;
 
 const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
   item,
@@ -54,7 +61,7 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
     setMounted(true);
   }, []);
 
-  // Smooth show/hide with small delays to feel premium and avoid flicker
+  // Tight show/hide delays tuned to match enter/exit animation durations
   useEffect(() => {
     if (!mounted) return;
     if (visible) {
@@ -62,17 +69,19 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
         window.clearTimeout(hideTimerRef.current);
         hideTimerRef.current = null;
       }
+      // Small settle delay — lets the card render before triggering the scale
       showTimerRef.current = window.setTimeout(() => {
         setAnimVisible(true);
-      }, 500); // slower appear delay for better UX
+      }, 50);
     } else {
       if (showTimerRef.current) {
         window.clearTimeout(showTimerRef.current);
         showTimerRef.current = null;
       }
+      // Exit immediately so it feels highly responsive
       hideTimerRef.current = window.setTimeout(() => {
         setAnimVisible(false);
-      }, 300); // longer linger on exit for calm fade-out
+      }, DURATION_EXIT_MS);
     }
     return () => {
       if (showTimerRef.current) window.clearTimeout(showTimerRef.current);
@@ -80,17 +89,47 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
     };
   }, [visible, mounted]);
 
+  /**
+   * Position the preview so its center aligns with the original card's center.
+   * The preview is wider/taller than the card — by centering on the card's
+   * midpoint the scale animation radiates equally in all directions (center center).
+   */
   const position = useMemo(() => {
     const margin = 12;
-    const centerLeft = anchorRect.left + anchorRect.width / 2 - PREVIEW_WIDTH / 2;
+    // Horizontal: center preview on card's horizontal midpoint
+    const cardCenterX = anchorRect.left + anchorRect.width / 2;
+    const centerLeft = cardCenterX - PREVIEW_WIDTH / 2;
     const clampedLeft = Math.max(margin, Math.min(window.innerWidth - PREVIEW_WIDTH - margin, centerLeft));
 
-    // Prefer to float slightly above the anchor
-    const desiredTop = anchorRect.top - 16;
-    const clampedTop = Math.max(margin, Math.min(window.innerHeight - PREVIEW_HEIGHT_APPROX - margin, desiredTop));
+    // Vertical: center preview on card's vertical midpoint
+    const cardCenterY = anchorRect.top + anchorRect.height / 2;
+    const centerTop = cardCenterY - PREVIEW_HEIGHT_APPROX / 2;
+    const clampedTop = Math.max(margin, Math.min(window.innerHeight - PREVIEW_HEIGHT_APPROX - margin, centerTop));
 
     return { left: clampedLeft, top: clampedTop };
   }, [anchorRect]);
+
+  // Compute scale-origin so animation radiates from card center even when
+  // the preview panel is clamped to avoid viewport edges.
+  // MUST live above the early return to satisfy Rules of Hooks.
+  const transformOriginX = useMemo(() => {
+    const cardCenterX = anchorRect.left + anchorRect.width / 2;
+    const originPct = ((cardCenterX - position.left) / PREVIEW_WIDTH) * 100;
+    return `${Math.round(Math.min(100, Math.max(0, originPct)))}%`;
+  }, [anchorRect, position]);
+
+  const transformOriginY = useMemo(() => {
+    const cardCenterY = anchorRect.top + anchorRect.height / 2;
+    const originPct = ((cardCenterY - position.top) / PREVIEW_HEIGHT_APPROX) * 100;
+    return `${Math.round(Math.min(100, Math.max(0, originPct)))}%`;
+  }, [anchorRect, position]);
+
+  // Lazy-fetch real certification — fires only on hover, cached per session.
+  // MUST be above the early return to satisfy Rules of Hooks.
+  const { certification, isLoading: isCertLoading } = useCertification({
+    id: item.id,
+    mediaType,
+  });
 
   if (!mounted) return null;
 
@@ -100,6 +139,7 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
     return d ? new Date(d).getFullYear() : '';
   })();
   const rating = typeof item.vote_average === 'number' ? item.vote_average : undefined;
+
 
   const handleWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
     if (!rootRef.current) return;
@@ -126,18 +166,42 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
     }
   };
 
+
+
   return createPortal(
-    <div
-      className={`fixed z-[60] pointer-events-auto`}
-      style={{ left: position.left, top: position.top, width: PREVIEW_WIDTH }}
-      onPointerEnter={onMouseEnterPreview}
-      onPointerLeave={onMouseLeavePreview}
-    >
+    <>
+      {/* ── Full-screen dim overlay (lightbox) ── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 59,
+          backgroundColor: 'rgba(0,0,0,0.25)',
+          pointerEvents: 'none',
+          opacity: animVisible ? 1 : 0,
+          transition: animVisible
+            ? `opacity ${DURATION_ENTER_MS}ms ${EASING_ENTER}`
+            : `opacity ${DURATION_EXIT_MS}ms ${EASING_EXIT}`,
+          willChange: 'opacity',
+        }}
+      />
+
+      {/* ── Preview card wrapper ── */}
+      <div
+        className="fixed pointer-events-auto"
+        style={{
+          left: position.left,
+          top: position.top,
+          width: PREVIEW_WIDTH,
+          zIndex: 60,
+        }}
+        onPointerEnter={onMouseEnterPreview}
+        onPointerLeave={onMouseLeavePreview}
+      >
       <div
         ref={rootRef}
-        className={`relative rounded-2xl overflow-hidden ring-1 ring-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl transition-all duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] transform-gpu ${
-          animVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.92] translate-y-6'
-        } cursor-pointer`}
+        className="relative rounded-2xl overflow-hidden ring-1 ring-white/10 bg-gray-900/70 backdrop-blur-xl shadow-2xl cursor-pointer"
         onClick={() => item.id && navigate(`/${mediaType}/${item.id}`)}
         onKeyDown={(e) => {
           if ((e.key === 'Enter' || e.key === ' ') && item.id) {
@@ -149,8 +213,15 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
         tabIndex={0}
         onWheel={handleWheel}
         style={{
-          transformOrigin: `${Math.round(((anchorRect.left + anchorRect.width / 2) - position.left) / PREVIEW_WIDTH * 100)}% top`,
-          willChange: 'transform, opacity'
+          transformOrigin: `${transformOriginX} ${transformOriginY}`,
+          willChange: 'transform, opacity',
+          transform: animVisible
+            ? 'scale(1) translateZ(0)'
+            : 'scale(0.68) translateZ(0)',
+          opacity: animVisible ? 1 : 0,
+          transition: animVisible
+            ? `transform ${DURATION_ENTER_MS}ms ${EASING_ENTER}, opacity ${DURATION_ENTER_MS}ms ${EASING_ENTER}`
+            : `transform ${DURATION_EXIT_MS}ms ${EASING_EXIT}, opacity ${Math.round(DURATION_EXIT_MS * 0.75)}ms ${EASING_EXIT}`,
         }}
       >
         {/* Media banner */}
@@ -188,14 +259,23 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
                   {mediaType === 'movie' ? 'MOVIE' : 'TV'}
                 </span>
               </div>
-              <div className="mt-1 text-xs text-gray-300 flex items-center gap-2">
-                {year && <span>{year}</span>}
-                {typeof rating === 'number' && (
-                  <>
-                    <span>•</span>
-                    <span>{rating.toFixed(1)} ★</span>
-                  </>
+              <div className="mt-1 text-xs flex items-center gap-2 flex-wrap">
+                {/* Green match score derived from vote_average */}
+                {typeof rating === 'number' && rating > 0 && (
+                  <span className="text-green-400 font-bold text-sm">
+                    {Math.round(rating * 10)}% Match
+                  </span>
                 )}
+                {/* HD quality badge */}
+                <span className="border border-white/40 text-white/70 text-[10px] font-semibold px-1 py-0.5 rounded">
+                  HD
+                </span>
+                {/* Content rating badge — real TMDB certification, lazy-fetched */}
+                <span className="border border-white/40 text-white/70 text-[10px] font-semibold px-1 py-0.5 rounded">
+                  {isCertLoading ? '···' : (certification ?? (mediaType === 'tv' ? 'TV-MA' : 'NR'))}
+                </span>
+                {/* Release year */}
+                {year && <span className="text-gray-400">{year}</span>}
               </div>
               <p className="mt-2 text-sm text-gray-300 line-clamp-3">
                 {item.overview}
@@ -232,7 +312,8 @@ const HoverPreviewCard: React.FC<HoverPreviewCardProps> = ({
           </div>
         </div>
       </div>
-    </div>,
+      </div>
+    </>,
     document.body
   );
 };

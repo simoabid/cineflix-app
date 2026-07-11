@@ -51,9 +51,9 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
   // Use hover intent hook for smart hover detection
   const { visible: isHovering, onPointerEnter, onPointerLeave, onFocus, onBlur } = useHoverIntent({
-    hoverDelay: 180,
+    hoverDelay: 450,
     pointerMoveThreshold: 120,
-    wheelThreshold: 250
+    wheelThreshold: 500
   });
   const derivedType: 'movie' | 'tv' = mediaType || (item.media_type === 'tv' ? 'tv' : 'movie');
   const title = item.title || item.name || '';

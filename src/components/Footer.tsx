@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useQueryParam } from '../hooks/useQueryParams';
+import { changelogData } from '../data/changelog';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Facebook,
   Twitter,
   Instagram,
   Globe,
-
-  Users,
 
   HelpCircle,
   MessageCircle,
@@ -23,9 +22,9 @@ import {
   Code,
   Lightbulb,
   Linkedin,
-  Github,
-  MessageSquare
+  Github
 } from 'lucide-react';
+import { FaDiscord, FaReddit } from 'react-icons/fa6';
 
 import { Container } from './layout';
 
@@ -35,6 +34,16 @@ const Footer: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState({ code: 'en', name: 'us English', flag: '🇺🇸' });
+  const [overlay, setOverlay] = useQueryParam('overlay');
+  const [hasUnseenUpdates, setHasUnseenUpdates] = useState(false);
+
+  useEffect(() => {
+    if (changelogData.length > 0) {
+      const latestVersion = changelogData[0].version;
+      const lastSeen = localStorage.getItem('lastSeenUpdate');
+      setHasUnseenUpdates(lastSeen !== latestVersion);
+    }
+  }, [overlay]);
 
   const languages = [
     { code: 'en', name: 'us English', flag: '🇺🇸' },
@@ -104,17 +113,17 @@ const Footer: React.FC = () => {
 
   const supportLinks = [
     { name: 'Help Center', href: '/help', icon: HelpCircle },
-    { name: 'Community Support', href: '/community-help', icon: Users },
+    { name: 'Community Support', href: 'https://discord.gg/67tRp9K6r', icon: FaDiscord },
     { name: 'Feature Requests', href: '/feature-requests', icon: Lightbulb },
-    { name: 'Developer API', href: '/api', icon: Code },
-    { name: 'Contact Us', href: '/contact', icon: MessageCircle },
+    { name: 'Developer API', href: 'https://developer.themoviedb.org', icon: Code },
+    { name: 'Contact Us', href: 'mailto:contact@cineflix.dev', icon: MessageCircle },
   ];
 
   const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: 'https://facebook.com/simoabidx', color: '#1877F2' },
+    { name: 'Reddit', icon: FaReddit, href: 'https://www.reddit.com/r/CINEFLIX_App', color: '#FF4500' },
     { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/SeeMooAbid', color: '#1DA1F2' },
     { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/simoabiid', color: '#E4405F' },
-    { name: 'Discord', icon: MessageSquare, href: 'https://discord.gg/seemoo.a', color: '#5865F2' },
+    { name: 'Discord', icon: FaDiscord, href: 'https://discord.gg/67tRp9K6r', color: '#5865F2' },
     { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/mohamed-amine-abidd', color: '#0A66C2' },
     { name: 'GitHub', icon: Github, href: 'https://github.com/simoabid', color: '#333' },
   ];
@@ -128,8 +137,8 @@ const Footer: React.FC = () => {
     {
       name: 'Notifications',
       icon: Bell,
-      action: () => { },
-      badge: '3'
+      action: () => setOverlay('notifications'),
+      badge: hasUnseenUpdates ? '1' : undefined
     },
     {
       name: 'Profile',
@@ -480,7 +489,7 @@ const Footer: React.FC = () => {
                     whileHover={{ scale: 1.1, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                     className="group p-4 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl transition-all duration-300 flex flex-col items-center gap-2"
-                    style={{ '--social-color': social.color } as any}
+                    style={{ '--social-color': social.color } as React.CSSProperties}
                   >
                     <social.icon className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors duration-300" />
                     <span className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors duration-300">

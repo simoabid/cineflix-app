@@ -329,7 +329,7 @@ export function SourceSelectionView({
       </Menu.BackLink>
 
       {/* Scrollable body — must be exactly the 2nd direct child of CardWithScrollable */}
-      <div className="overflow-y-auto overflow-x-hidden scrollbar-none pb-4">
+      <div className="overflow-y-auto overflow-x-hidden scrollbar-hide pb-4">
         {/* Search/filter input */}
         {(sources.length + (showCinePro ? cineproStreams.length : 0)) > 4 && (
           <div className="px-1 pt-3 pb-1">

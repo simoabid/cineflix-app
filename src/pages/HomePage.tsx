@@ -374,11 +374,12 @@ const HomePage = (): JSX.Element => {
               .delay-400 { animation-delay: 400ms; }
               .delay-500 { animation-delay: 500ms; }
               @keyframes activeDotFill {
-                from { width: 0%; }
-                to { width: 100%; }
+                from { transform: scaleX(0); }
+                to { transform: scaleX(1); }
               }
               .animate-dot-fill {
                 animation: activeDotFill 8s linear forwards;
+                transform-origin: left;
               }
             `}</style>
 
@@ -580,7 +581,7 @@ const HomePage = (): JSX.Element => {
                     {index === currentHeroIndex && (
                       <div 
                         key={currentHeroIndex}
-                        className="absolute top-0 left-0 h-full bg-[#E50914] rounded-full animate-dot-fill"
+                        className="absolute top-0 left-0 h-full w-full bg-[#E50914] rounded-full origin-left animate-dot-fill"
                         style={{
                           animationPlayState: isHeroAutoPlaying ? 'running' : 'paused'
                         }}
@@ -739,7 +740,7 @@ const HomePage = (): JSX.Element => {
                     {index === currentHeroIndex && (
                       <div 
                         key={currentHeroIndex}
-                        className="absolute top-0 left-0 h-full bg-[#E50914] rounded-full animate-dot-fill"
+                        className="absolute top-0 left-0 h-full w-full bg-[#E50914] rounded-full origin-left animate-dot-fill"
                         style={{
                           animationPlayState: isHeroAutoPlaying ? 'running' : 'paused'
                         }}

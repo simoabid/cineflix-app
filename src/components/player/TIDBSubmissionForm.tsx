@@ -234,7 +234,7 @@ export function TIDBSubmissionForm({
                 <IconPatch icon={Icons.X} />
               </button>
             </div>
-            <Flare.Child className="pointer-events-auto relative h-full overflow-y-auto scrollbar-none select-text p-6 pt-20 sm:pt-6">
+            <Flare.Child className="pointer-events-auto relative h-full overflow-y-auto scrollbar-hide select-text p-6 pt-20 sm:pt-6">
               <div className="select-text">
                 <div className="flex items-center gap-2 mb-1">
                   <Icon icon={Icons.CLOCK} className="h-5 w-5 text-white" />

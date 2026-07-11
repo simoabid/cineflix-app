@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { getInteractionState } from '../lib/interactionTracker';
 
 export interface UseHoverIntentOptions {
@@ -11,9 +11,9 @@ export interface UseHoverIntentOptions {
 }
 
 const DEFAULT_OPTIONS: Required<UseHoverIntentOptions> = {
-  hoverDelay: 180,
+  hoverDelay: 450,
   pointerMoveThreshold: 120,
-  wheelThreshold: 250,
+  wheelThreshold: 500,
 };
 
 export function useHoverIntent(options?: UseHoverIntentOptions) {
@@ -83,6 +83,16 @@ export function useHoverIntent(options?: UseHoverIntentOptions) {
   const onBlur = useCallback(() => {
     setVisible(false);
   }, []);
+
+  useEffect(() => {
+    const handleGlobalScroll = () => {
+      cancel();
+    };
+    window.addEventListener('global-scroll', handleGlobalScroll, { passive: true });
+    return () => {
+      window.removeEventListener('global-scroll', handleGlobalScroll);
+    };
+  }, [cancel]);
 
   return {
     visible,

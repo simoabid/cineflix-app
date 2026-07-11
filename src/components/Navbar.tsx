@@ -28,6 +28,9 @@ import { useAuth } from '../contexts/AuthContext';
 import SignUpPromoBubble from './SignUpPromoBubble';
 import { useSmartPlayer } from '../hooks/useSmartPlayer';
 import { renderAvatarById } from '../constants/avatars';
+import { useQueryParam } from '../hooks/useQueryParams';
+import UpdatesModal from './UpdatesModal';
+import { changelogData } from '../data/changelog';
 
 const NAVBAR_TRANSLATIONS = {
   notifications: 'Notifications',
@@ -44,16 +47,16 @@ const NAVBAR_TRANSLATIONS = {
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [overlay, setOverlay] = useQueryParam('overlay');
+  const [hasUnseenUpdates, setHasUnseenUpdates] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const notificationsRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Auth context
@@ -85,9 +88,6 @@ const Navbar: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserMenuOpen(false);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setNotificationsOpen(false);
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false);
@@ -138,11 +138,18 @@ const Navbar: React.FC = () => {
     };
   }, [mobileMenuOpen]);
 
-  const notifications = [
-    { id: 1, title: 'New Marvel movie added', time: '2 min ago', type: 'new' },
-    { id: 2, title: 'Your watchlist updated', time: '1 hour ago', type: 'update' },
-    { id: 3, title: 'New season available', time: '3 hours ago', type: 'new' },
-  ];
+  useEffect(() => {
+    if (changelogData.length > 0) {
+      const latestVersion = changelogData[0].version;
+      if (overlay === 'notifications') {
+        localStorage.setItem('lastSeenUpdate', latestVersion);
+        setHasUnseenUpdates(false);
+      } else {
+        const lastSeen = localStorage.getItem('lastSeenUpdate');
+        setHasUnseenUpdates(lastSeen !== latestVersion);
+      }
+    }
+  }, [overlay]);
 
   const navigationItems = [
     { name: 'Home', path: '/', icon: Home },
@@ -182,20 +189,20 @@ const Navbar: React.FC = () => {
                 />
               </Link>
 
-              {/* Desktop Navigation */}
               <div className="hidden lg:flex items-center space-x-1 laptop:space-x-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center space-x-1 laptop:space-x-2 px-2.5 py-1.5 laptop:px-4 laptop:py-2 rounded-lg text-xs laptop:text-sm font-medium transition-all duration-300 relative group ${location.pathname === item.path
-                        ? 'text-white bg-white/10 backdrop-blur-sm border-b-2 border-brand-red shadow-lg shadow-brand-red/10'
+                      className={`flex items-center space-x-1.5 laptop:space-x-2 px-3.5 py-1.5 laptop:px-4.5 laptop:py-2 rounded-full text-xs laptop:text-sm font-medium transition-all duration-300 relative group ${isActive
+                        ? 'text-black bg-white shadow-md font-semibold'
                         : 'text-gray-300 hover:text-white hover:bg-white/10'
                         }`}
                     >
-                      <Icon className="w-4 h-4 hidden xl:block flex-shrink-0" />
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'block' : 'hidden xl:block'}`} />
                       <span>{item.name}</span>
                     </Link>
                   );
@@ -253,42 +260,21 @@ const Navbar: React.FC = () => {
                 {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
               </button>
 
-              {/* Notifications - Only show when authenticated */}
-              {isAuthenticated && (
-                <div ref={notificationsRef} className="relative">
-                  <button
-                    onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative w-9 h-9 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
-                    aria-label={`Notifications (${notifications.length} unread)`}
-                    aria-expanded={notificationsOpen}
-                  >
-                    <Bell className="w-4 h-4 xs:w-5 h-5" />
-                    <span className="absolute top-0.5 right-0.5 xs:top-1 xs:right-1 w-3.5 h-3.5 xs:w-4 xs:h-4 bg-netflix-red rounded-full flex items-center justify-center" aria-hidden="true">
-                      <span className="text-[8px] xs:text-[10px] text-white font-bold">{notifications.length}</span>
+              {/* Notifications / App Updates Overlay */}
+              <div className="relative">
+                <button
+                  onClick={() => setOverlay('notifications')}
+                  className="relative w-9 h-9 xs:w-10 xs:h-10 sm:w-11 sm:h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                  aria-label="App Updates"
+                >
+                  <Bell className="w-4 h-4 xs:w-5 h-5" />
+                  {hasUnseenUpdates && (
+                    <span className="absolute top-0.5 right-0.5 xs:top-1 xs:right-1 w-3.5 h-3.5 xs:w-4 xs:h-4 bg-netflix-red rounded-full flex items-center justify-center animate-pulse" aria-hidden="true">
+                      <span className="text-[8px] xs:text-[10px] text-white font-bold">1</span>
                     </span>
-                  </button>
-
-                  {notificationsOpen && (
-                    <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-surface-card/95 backdrop-blur-xl rounded-xl shadow-2xl border border-glass-border py-2 z-50">
-                      <div className="px-4 py-3 border-b border-gray-700/50">
-                        <h3 className="text-white font-semibold">{NAVBAR_TRANSLATIONS.notifications}</h3>
-                      </div>
-                      {notifications.map((notification) => (
-                        <div key={notification.id} className="px-4 py-3 hover:bg-gray-700/50 transition-colors">
-                          <div className="flex items-start space-x-3">
-                            <div className={`w-2 h-2 rounded-full mt-2 ${notification.type === 'new' ? 'bg-green-500' : 'bg-blue-500'
-                              }`}></div>
-                            <div className="flex-1">
-                              <p className="text-sm text-white">{notification.title}</p>
-                              <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   )}
-                </div>
-              )}
+                </button>
+              </div>
 
               {/* User Profile / Sign In */}
               {isAuthenticated ? (
@@ -474,6 +460,16 @@ const Navbar: React.FC = () => {
                       </>
                     )}
                   </button>
+                  <button
+                    onClick={() => {
+                      setOverlay('notifications');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-left w-full mb-1"
+                  >
+                    <Bell className="w-5 h-5 text-gray-400" />
+                    <span>What's New</span>
+                  </button>
                   {isAuthenticated ? (
                     <>
                       <Link
@@ -526,6 +522,12 @@ const Navbar: React.FC = () => {
         onClose={() => setIsSearchModalOpen(false)}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+      />
+
+      {/* Updates Modal */}
+      <UpdatesModal
+        isOpen={overlay === 'notifications'}
+        onClose={() => setOverlay(null)}
       />
     </>
   );

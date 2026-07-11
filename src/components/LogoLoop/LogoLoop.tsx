@@ -320,8 +320,8 @@ const LogoLoop = memo<LogoLoopProps>(
             height={item.height}
             alt={item.alt ?? ''}
             title={item.title}
-            loading="lazy"
-            decoding="async"
+            loading="eager"
+            decoding="sync"
             draggable={false}
           />
         );

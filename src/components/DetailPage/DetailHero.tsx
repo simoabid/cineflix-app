@@ -16,6 +16,7 @@ import LikeButton from '../LikeButton';
 import LogoImage from '../LogoImage';
 import { Container } from '../layout';
 import { useSmartPlayer } from '../../hooks/useSmartPlayer';
+import { useCertification } from '../../hooks/useCertification';
 
 interface DetailHeroProps {
   readonly content: Movie | TVShow;
@@ -37,6 +38,17 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
   const navigate = useNavigate();
   const { openPlayer } = useSmartPlayer();
   const id = content.id;
+
+  // Lazy-fetch real TMDB certification, cached per session
+  const { certification, isLoading: isCertLoading } = useCertification({
+    id: content.id,
+    mediaType: type,
+  });
+
+  // Derive match % from vote_average (same formula as hover card)
+  const matchPercent = content.vote_average > 0
+    ? Math.round(content.vote_average * 10)
+    : null;
 
   const getTitle = (): string => {
     return type === 'movie' ? (content as Movie).title : (content as TVShow).name;
@@ -156,7 +168,20 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
 
             {/* Metadata Row */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-white/90">
+              {/* Match % */}
+              {matchPercent !== null && (
+                <span className="text-green-400 font-bold text-sm">{matchPercent}% Match</span>
+              )}
+              {/* HD badge */}
+              <span className="border border-white/40 text-white/70 text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                HD
+              </span>
+              {/* Certification badge */}
+              <span className="border border-white/40 text-white/70 text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                {isCertLoading ? '···' : (certification ?? (type === 'tv' ? 'TV-MA' : 'NR'))}
+              </span>
               {/* TMDB Rating */}
+              <span className="text-white/40">•</span>
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
                 <span className="font-bold">{formatRating(content.vote_average)}</span>
@@ -320,8 +345,22 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
                 </div>
               </div>
 
-              {/* Metadata Row */}
+              {/* Metadata Row — Desktop */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 lg:gap-6 text-xs sm:text-sm md:text-base lg:text-lg">
+                {/* Match % */}
+                {matchPercent !== null && (
+                  <span className="text-green-400 font-bold text-base sm:text-lg lg:text-xl">
+                    {matchPercent}% Match
+                  </span>
+                )}
+                {/* HD badge */}
+                <span className="border border-white/40 text-white/70 text-xs font-semibold px-2 py-0.5 rounded">
+                  HD
+                </span>
+                {/* Certification badge */}
+                <span className="border border-white/40 text-white/70 text-xs font-semibold px-2 py-0.5 rounded">
+                  {isCertLoading ? '···' : (certification ?? (type === 'tv' ? 'TV-MA' : 'NR'))}
+                </span>
                 {/* TMDB Rating block */}
                 <div className="flex items-center gap-1 sm:gap-2">
                   <Star className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-yellow-400 fill-current" />

@@ -18,10 +18,10 @@ interface ContentCarouselItemsProps {
   section?: string;
 }
 
-interface ScrollDotsProps {
-  itemsLength: number;
+interface ScrollSliderProps {
   scrollProgress: number;
-  onDotClick: (dotProgress: number) => void;
+  onChange: (progress: number) => void;
+  visible: boolean;
 }
 
 const ContentCarouselItems = React.memo<ContentCarouselItemsProps>(({ items, type, cardsLoaded, section }) => (
@@ -47,40 +47,46 @@ const ContentCarouselItems = React.memo<ContentCarouselItemsProps>(({ items, typ
 
 ContentCarouselItems.displayName = 'ContentCarouselItems';
 
-const ScrollDots = React.memo<ScrollDotsProps>(({ itemsLength, scrollProgress, onDotClick }) => {
-  if (itemsLength <= 5) {
+const ScrollSlider = React.memo<ScrollSliderProps>(({ scrollProgress, onChange, visible }) => {
+  if (!visible) {
     return null;
   }
 
-  const totalDots = Math.min(Math.ceil(itemsLength / 5), 10);
-
   return (
-    <div className="mt-2 mb-1 flex justify-center gap-2">
-      {Array.from({ length: totalDots }).map((_, index) => {
-        const denominator = Math.max(totalDots - 1, 1);
-        const dotProgress = (index / denominator) * 100;
-        const isActive = scrollProgress >= dotProgress - 10 && scrollProgress <= dotProgress + 10;
-        const isPassed = scrollProgress > dotProgress + 10;
-
-        return (
-          <button
-            key={index}
-            onClick={() => onDotClick(dotProgress)}
-            className={`transition-all duration-300 rounded-full ${isActive
-              ? 'w-10 h-2.5 bg-netflix-red'
-              : isPassed
-                ? 'w-2.5 h-2.5 bg-netflix-red/60'
-                : 'w-2.5 h-2.5 bg-gray-600/40 hover:bg-gray-500/60'
-              }`}
-            aria-label={`Go to section ${index + 1}`}
-          />
-        );
-      })}
+    <div className="mt-4 mb-2 flex justify-center items-center w-full">
+      <div className="w-48 sm:w-64 relative flex items-center group">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="0.1"
+          value={scrollProgress}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer outline-none transition-all duration-300
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:h-2
+            [&::-webkit-slider-thumb]:w-10
+            [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:bg-[#E50914]
+            [&::-webkit-slider-thumb]:transition-all
+            [&::-webkit-slider-thumb]:duration-200
+            [&::-moz-range-thumb]:h-2
+            [&::-moz-range-thumb]:w-10
+            [&::-moz-range-thumb]:rounded-full
+            [&::-moz-range-thumb]:bg-[#E50914]
+            [&::-moz-range-thumb]:border-none
+            [&::-moz-range-thumb]:transition-all
+            [&::-moz-range-thumb]:duration-200
+            hover:[&::-webkit-slider-thumb]:bg-red-500
+            hover:[&::-moz-range-thumb]:bg-red-500"
+          aria-label="Carousel scroll progress"
+        />
+      </div>
     </div>
   );
 });
 
-ScrollDots.displayName = 'ScrollDots';
+ScrollSlider.displayName = 'ScrollSlider';
 
 const ContentCarousel: React.FC<ContentCarouselProps> = ({
   title,
@@ -198,18 +204,16 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
     });
   }, []);
 
-  const handleDotClick = useCallback((dotProgress: number) => {
+  const handleSliderChange = useCallback((progress: number) => {
     const element = scrollRef.current;
     if (!element) return;
 
     const { scrollWidth, clientWidth } = element;
     const maxScroll = scrollWidth - clientWidth;
-    const targetScroll = (dotProgress / 100) * maxScroll;
+    const targetScroll = (progress / 100) * maxScroll;
 
-    element.scrollTo({
-      left: targetScroll,
-      behavior: 'smooth'
-    });
+    element.scrollLeft = targetScroll;
+    setScrollProgress(progress);
   }, []);
 
 
@@ -290,9 +294,13 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
           </div>
         )}
 
-        {/* Scroll Progress Dots */}
+        {/* Scroll Progress Slider */}
         {!loading && (
-          <ScrollDots itemsLength={items.length} scrollProgress={scrollProgress} onDotClick={handleDotClick} />
+          <ScrollSlider
+            scrollProgress={scrollProgress}
+            onChange={handleSliderChange}
+            visible={canScrollLeft || canScrollRight}
+          />
         )}
       </div>
     </div>

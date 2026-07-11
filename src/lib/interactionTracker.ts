@@ -27,6 +27,12 @@ export function initInteractionTracker(): void {
   document.addEventListener('wheel', () => {
     state.lastWheel = Date.now();
   }, { passive: true });
+
+  // Track scroll events globally (includes horizontal carousel scrolls and page scroll)
+  document.addEventListener('scroll', () => {
+    state.lastWheel = Date.now();
+    window.dispatchEvent(new CustomEvent('global-scroll'));
+  }, { passive: true, capture: true });
 }
 
 export function getInteractionState(): InteractionState {

@@ -60,7 +60,7 @@ export const ClassicSourcesView: React.FC<ClassicSourcesViewProps> = ({ id }) =>
             No classic sources found for this content.
           </div>
         ) : (
-          <div className="space-y-1.5 max-h-[350px] overflow-y-auto px-1 pr-2 scrollbar-thin">
+          <div className="space-y-1.5 max-h-[350px] overflow-y-auto px-1 pr-2 scrollbar-hide">
             {streamSources.map((source) => {
               const isSelected = displayMode === "iframe" && activeIframeSource?.id === source.id;
 

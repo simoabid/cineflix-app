@@ -160,11 +160,12 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
           .delay-400 { animation-delay: 400ms; }
           .delay-500 { animation-delay: 500ms; }
           @keyframes activeDotFill {
-            from { width: 0%; }
-            to { width: 100%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
           }
           .animate-dot-fill {
             animation: activeDotFill 8s linear forwards;
+            transform-origin: left;
           }
         `}</style>
 
@@ -347,7 +348,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
               {index === currentIndex && (
                 <div 
                   key={currentIndex}
-                  className="absolute top-0 left-0 h-full bg-[#E50914] rounded-full animate-dot-fill"
+                  className="absolute top-0 left-0 h-full w-full bg-[#E50914] rounded-full origin-left animate-dot-fill"
                   style={{
                     animationPlayState: isAutoPlaying ? 'running' : 'paused'
                   }}

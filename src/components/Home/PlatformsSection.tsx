@@ -40,8 +40,8 @@ const renderPlatformItem = (item: unknown, key: Key): ReactNode => {
       <img
         src={logo.src}
         alt={logo.alt}
-        loading="lazy"
-        decoding="async"
+        loading="eager"
+        decoding="sync"
         draggable={false}
         className="platform-logo-img"
       />

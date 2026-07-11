@@ -10,9 +10,9 @@ type MovieCardProps = {
 
 export default function MovieCard({ title, poster, description, rating, year }: MovieCardProps) {
   const { visible, onPointerEnter, onPointerLeave, onFocus, onBlur } = useHoverIntent({
-    hoverDelay: 180,
+    hoverDelay: 450,
     pointerMoveThreshold: 120,
-    wheelThreshold: 250
+    wheelThreshold: 500
   });
 
   return (
