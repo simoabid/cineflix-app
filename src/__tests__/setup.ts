@@ -26,7 +26,6 @@ Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
 // Mock import.meta.env for tests
 Object.defineProperty(import.meta, 'env', {
   value: {
-    VITE_TMDB_API_KEY: 'test-api-key',
     VITE_API_URL: 'http://localhost:3001/api',
     MODE: 'test',
     DEV: true,

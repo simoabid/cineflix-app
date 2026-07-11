@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { setAuthToken, getAuthToken, authApi, myListApi, checkBackendHealth } from '../api';
+import { authApi, myListApi, checkBackendHealth } from '../api';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -8,34 +8,6 @@ vi.stubGlobal('fetch', mockFetch);
 describe('API Client', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
-    setAuthToken(null);
-  });
-
-  describe('Token management', () => {
-    it('should set and get auth token', () => {
-      expect(getAuthToken()).toBeNull();
-      setAuthToken('test-token-123');
-      expect(getAuthToken()).toBe('test-token-123');
-    });
-
-    it('should persist token to localStorage', () => {
-      setAuthToken('my-token');
-      expect(localStorage.getItem('auth_token')).toBe('my-token');
-    });
-
-    it('should clear token from localStorage when set to null', () => {
-      setAuthToken('my-token');
-      setAuthToken(null);
-      expect(localStorage.getItem('auth_token')).toBeNull();
-    });
-
-    it('should handle localStorage errors gracefully', () => {
-      const original = localStorage.setItem;
-      localStorage.setItem = () => { throw new Error('Storage full'); };
-      expect(() => setAuthToken('token')).not.toThrow();
-      localStorage.setItem = original;
-    });
   });
 
   describe('apiRequest behavior', () => {
@@ -51,7 +23,7 @@ describe('API Client', () => {
       expect(options.headers['Content-Type']).toBe('application/json');
     });
 
-    it('should include credentials: include', async () => {
+    it('should include credentials: include for cookie-based auth', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true, data: {} }),
@@ -63,20 +35,7 @@ describe('API Client', () => {
       expect(options.credentials).toBe('include');
     });
 
-    it('should add Authorization header when token is set', async () => {
-      setAuthToken('my-bearer-token');
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true, data: {} }),
-      });
-
-      await authApi.getMe();
-
-      const [, options] = mockFetch.mock.calls[0];
-      expect(options.headers['Authorization']).toBe('Bearer my-bearer-token');
-    });
-
-    it('should not add Authorization header when no token', async () => {
+    it('should not include Authorization header (cookie-only auth)', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true, data: {} }),
@@ -147,7 +106,7 @@ describe('API Client', () => {
     it('should call POST /auth/register with body', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true, data: { user: { id: '1' }, token: 'abc' } }),
+        json: async () => ({ success: true, data: { user: { id: '1' } } }),
       });
 
       await authApi.register('test@test.com', 'Pass1!', 'Test User');
@@ -163,7 +122,7 @@ describe('API Client', () => {
     it('should call POST /auth/login', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true, data: { user: {}, token: 'tok' } }),
+        json: async () => ({ success: true, data: { user: {} } }),
       });
 
       await authApi.login('test@test.com', 'pass');
