@@ -1,14 +1,27 @@
 import { Router, Request, Response } from 'express';
-import { assertPublicHttpDestination } from '../utils/publicDestination.js';
+import { assertPublicHttpDestination, fetchWithSsrfProtection } from '../utils/publicDestination.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { logger } from '../utils/logger.js';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
+/** Rate limiter for the general proxy — 60 requests per minute per IP */
+const proxyLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many proxy requests, please try again later' },
+});
+
+router.use(proxyLimiter);
+router.use(protect);
+
 const forwardedHeaderMap: Record<string, string> = {
-    'x-cookie': 'cookie',
     'x-referer': 'referer',
     'x-origin': 'origin',
     'x-user-agent': 'user-agent',
-    'x-x-real-ip': 'x-real-ip',
 };
 
 function buildForwardHeaders(req: Request): Record<string, string> {
@@ -28,6 +41,9 @@ function buildForwardHeaders(req: Request): Record<string, string> {
                 'x-forwarded-for',
                 'x-forwarded-host',
                 'x-forwarded-proto',
+                'cookie',
+                'x-cookie',
+                'authorization',
             ].includes(lowerKey)
         ) {
             headers[lowerKey] = value;
@@ -52,21 +68,17 @@ router.all('/', async (req: Request, res: Response): Promise<void> => {
     let destination: URL;
     try {
         destination = await assertPublicHttpDestination(rawDestination);
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Invalid destination',
-        });
+    } catch {
+        res.status(400).json({ success: false, error: 'Invalid or blocked destination' });
         return;
     }
 
     try {
         const method = req.method.toUpperCase();
-        const response = await fetch(destination, {
+        const response = await fetchWithSsrfProtection(destination, {
             method,
             headers: buildForwardHeaders(req),
             body: method === 'GET' || method === 'HEAD' ? undefined : (req.body as Buffer),
-            redirect: 'follow',
         });
 
         response.headers.forEach((value, key) => {
@@ -90,11 +102,9 @@ router.all('/', async (req: Request, res: Response): Promise<void> => {
 
         const buffer = Buffer.from(await response.arrayBuffer());
         res.send(buffer);
-    } catch (error) {
-        res.status(502).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Proxy request failed',
-        });
+    } catch {
+        logger.warn(`Proxy request failed for destination: ${rawDestination}`);
+        res.status(502).json({ success: false, error: 'Proxy request failed' });
     }
 });
 

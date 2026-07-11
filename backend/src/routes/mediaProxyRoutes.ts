@@ -1,8 +1,23 @@
 import { Router, Request, Response } from 'express';
 import { Readable } from 'stream';
-import { assertPublicHttpDestination } from '../utils/publicDestination.js';
+import { assertPublicHttpDestination, fetchWithSsrfProtection } from '../utils/publicDestination.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { logger } from '../utils/logger.js';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
+
+/** Rate limiter for media proxy — 120 requests per minute per IP */
+const mediaProxyLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many media proxy requests, please try again later' },
+});
+
+router.use(mediaProxyLimiter);
+router.use(protect);
 
 type MediaProxyPayload = {
     type: 'hls' | 'mp4';
@@ -21,6 +36,8 @@ const blockedForwardHeaders = new Set([
     'x-forwarded-for',
     'x-forwarded-host',
     'x-forwarded-proto',
+    'cookie',
+    'authorization',
 ]);
 
 function decodePayload(input: string): MediaProxyPayload {
@@ -78,7 +95,8 @@ function copyResponseHeaders(response: globalThis.Response, res: Response): void
         }
         res.setHeader(key, value);
     });
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Restrict CORS to same-origin instead of wildcard
+    // The browser will use the CORS config from the main app
 }
 
 function isProbablyPlaylist(url: string, previousLine: string | null): boolean {
@@ -135,11 +153,10 @@ function rewritePlaylist(playlist: string, baseUrl: URL, payload: MediaProxyPayl
 }
 
 async function proxyHls(payload: MediaProxyPayload, req: Request, res: Response): Promise<void> {
-    const destination = await assertPublicHttpDestination(payload.url);
-    const response = await fetch(destination, {
+    await assertPublicHttpDestination(payload.url);
+    const response = await fetchWithSsrfProtection(payload.url, {
         method: req.method === 'HEAD' ? 'HEAD' : 'GET',
         headers: buildForwardHeaders(payload, req),
-        redirect: 'follow',
     });
 
     copyResponseHeaders(response, res);
@@ -156,11 +173,10 @@ async function proxyHls(payload: MediaProxyPayload, req: Request, res: Response)
 }
 
 async function proxyFile(payload: MediaProxyPayload, req: Request, res: Response): Promise<void> {
-    const destination = await assertPublicHttpDestination(payload.url);
-    const response = await fetch(destination, {
+    await assertPublicHttpDestination(payload.url);
+    const response = await fetchWithSsrfProtection(payload.url, {
         method: req.method === 'HEAD' ? 'HEAD' : 'GET',
         headers: buildForwardHeaders(payload, req),
-        redirect: 'follow',
     });
 
     copyResponseHeaders(response, res);
@@ -184,22 +200,17 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     let payload: MediaProxyPayload;
     try {
         payload = decodePayload(rawPayload);
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Invalid media proxy payload',
-        });
+    } catch {
+        res.status(400).json({ success: false, error: 'Invalid media proxy payload' });
         return;
     }
 
     try {
         if (payload.type === 'hls') await proxyHls(payload, req, res);
         else await proxyFile(payload, req, res);
-    } catch (error) {
-        res.status(502).json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Media proxy request failed',
-        });
+    } catch {
+        logger.warn('Media proxy request failed');
+        res.status(502).json({ success: false, error: 'Media proxy request failed' });
     }
 });
 
