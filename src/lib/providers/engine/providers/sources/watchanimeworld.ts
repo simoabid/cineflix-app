@@ -7,7 +7,9 @@ import { NotFoundError } from '../../utils/errors';
 
 const baseUrl = 'https://watchanimeworld.in';
 const zephyrBaseUrl = 'https://play.zephyrflick.top';
-const tmdbApiKey = '5b9790d9305dca8713b9a0afad42ea8d'; // Same key used in hianime
+// Route through server-side TMDB proxy — never expose API keys in client code
+const API_BASE_URL: string = import.meta.env?.VITE_API_URL || '/api';
+const TMDB_PROXY_URL = `${API_BASE_URL}/tmdb`;
 
 interface TMDBShowResponse {
   name: string;
@@ -27,7 +29,7 @@ interface ZephyrStreamResponse {
 
 async function fetchTMDBData(tmdbId: string | number, mediaType: 'movie' | 'tv'): Promise<string> {
   const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
-  const response = await fetch(`https://api.themoviedb.org/3/${endpoint}/${tmdbId}?api_key=${tmdbApiKey}`);
+  const response = await fetch(`${TMDB_PROXY_URL}/${endpoint}/${tmdbId}`);
 
   if (!response.ok) {
     throw new NotFoundError('Failed to fetch TMDB data');

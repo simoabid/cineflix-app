@@ -2,16 +2,15 @@ import axios from 'axios';
 import { Movie, TVShow, Video, ApiResponse, Content, Genre, ImageConfig, MovieCredits, PersonDetails, PersonMovieCredits, ExternalIds, Season, SeasonDetails, EpisodeDetails, MovieCredit, CrewMember } from '../types';
 import * as collectionDiscovery from './collectionDiscovery';
 
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const BASE_URL = 'https://api.themoviedb.org/3';
+// Route all TMDB requests through the server-side proxy — never expose the API key to the client bundle
+const API_BASE_URL: string = import.meta.env?.VITE_API_URL || '/api';
+const BASE_URL = `${API_BASE_URL}/tmdb`;
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
 const tmdbApi = axios.create({
   baseURL: BASE_URL,
-  params: {
-    api_key: API_KEY,
-  },
 });
+
 
 // Runtime guards and local safe request wrapper to mitigate axios-related risks
 type ApiParams = Record<string, string | number | boolean | string[] | undefined>;
@@ -42,7 +41,9 @@ tmdbApi.defaults.headers.common = {
 const sanitizePath = (path: string): string => {
   if (!path || typeof path !== 'string') return '/';
   try {
-    const url = new URL(path, BASE_URL);
+    // Use a dummy origin since BASE_URL is now a relative proxy path
+    const dummyOrigin = 'http://localhost';
+    const url = new URL(path, dummyOrigin);
     const rawSegments = url.pathname.split('/').filter(Boolean);
     const cleanSegments = rawSegments.filter(seg => seg !== '..');
     const cleanPath = '/' + cleanSegments.join('/');

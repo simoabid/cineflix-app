@@ -83,11 +83,15 @@ async function extractVidhideEmbed(ctx: MovieScrapeContext | ShowScrapeContext, 
   return results;
 }
 
-async function fetchTmdbTitleInSpanish(tmdbId: number, apiKey: string, mediaType: 'movie' | 'show'): Promise<string> {
+// Route through server-side TMDB proxy — never expose API keys in client code
+const API_BASE_URL_PELISPLUS: string = import.meta.env?.VITE_API_URL || '/api';
+const TMDB_PROXY_URL_PELISPLUS = `${API_BASE_URL_PELISPLUS}/tmdb`;
+
+async function fetchTmdbTitleInSpanish(tmdbId: number, mediaType: 'movie' | 'show'): Promise<string> {
   const endpoint =
     mediaType === 'movie'
-      ? `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${apiKey}&language=es-ES`
-      : `https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${apiKey}&language=es-ES`;
+      ? `${TMDB_PROXY_URL_PELISPLUS}/movie/${tmdbId}?language=es-ES`
+      : `${TMDB_PROXY_URL_PELISPLUS}/tv/${tmdbId}?language=es-ES`;
 
   const response = await fetch(endpoint);
   if (!response.ok) {
@@ -135,13 +139,12 @@ async function fallbackSearchByGithub(
 async function comboScraper(ctx: ShowScrapeContext | MovieScrapeContext): Promise<SourcererOutput> {
   const mediaType = ctx.media.type;
   const tmdbId = ctx.media.tmdbId;
-  const apiKey = '7604525319adb2db8e7e841cb98e9217'; // API key for TMDB
 
   if (!tmdbId) throw new NotFoundError('TMDB ID is required to fetch the title in Spanish');
 
   let translatedTitle = '';
   try {
-    translatedTitle = await fetchTmdbTitleInSpanish(Number(tmdbId), apiKey, mediaType);
+    translatedTitle = await fetchTmdbTitleInSpanish(Number(tmdbId), mediaType);
   } catch {
     throw new NotFoundError('Could not get the title from TMDB');
   }

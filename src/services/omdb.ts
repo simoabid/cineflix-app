@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY || '';
-const OMDB_BASE_URL = 'https://www.omdbapi.com';
+// Route OMDb requests through the server-side proxy — never expose the API key to the client bundle
+const API_BASE_URL: string = import.meta.env?.VITE_API_URL || '/api';
+const OMDB_PROXY_URL = `${API_BASE_URL}/omdb`;
 
 /** Response shape from the OMDb API for a single title lookup. */
 interface OmdbResponse {
@@ -173,7 +174,7 @@ const isRateLimitError = (error: unknown, responseData?: OmdbResponse): boolean 
  * @returns The IMDb rating as a string (e.g. "7.6"), or null if unavailable
  */
 export const fetchImdbRating = async (imdbId: string): Promise<string | null> => {
-  if (!OMDB_API_KEY || !imdbId) return null;
+  if (!imdbId) return null;
 
   // Check two-tier cache
   const cached = readCached(imdbId);
@@ -188,8 +189,8 @@ export const fetchImdbRating = async (imdbId: string): Promise<string | null> =>
 
   const requestPromise = (async (): Promise<string | null> => {
     try {
-      const response = await axios.get<OmdbResponse>(OMDB_BASE_URL, {
-        params: { i: imdbId, apikey: OMDB_API_KEY },
+      const response = await axios.get<OmdbResponse>(OMDB_PROXY_URL, {
+        params: { i: imdbId },
         timeout: 5000,
       });
       const data = response.data;
@@ -241,18 +242,18 @@ export const fetchImdbRatingByTmdbId = async (
     return { rating: cached, source: cached ? 'imdb' : 'none' };
   }
 
-  // If no OMDB key or rate-limited, use TMDB fallback immediately
-  if (!OMDB_API_KEY || isRateLimited()) {
+  // If rate-limited, use TMDB fallback immediately
+  if (isRateLimited()) {
     return buildTmdbFallback(tmdbRating);
   }
 
   try {
-    const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+    // Route through server-side TMDB proxy
+    const TMDB_PROXY_URL = `${API_BASE_URL}/tmdb`;
     const endpoint = mediaType === 'tv'
-      ? `https://api.themoviedb.org/3/tv/${tmdbId}/external_ids`
-      : `https://api.themoviedb.org/3/movie/${tmdbId}`;
+      ? `${TMDB_PROXY_URL}/tv/${tmdbId}/external_ids`
+      : `${TMDB_PROXY_URL}/movie/${tmdbId}`;
     const tmdbResponse = await axios.get(endpoint, {
-      params: { api_key: TMDB_API_KEY },
       timeout: 5000,
     });
     const imdbId: string | undefined = tmdbResponse.data.imdb_id;

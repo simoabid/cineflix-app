@@ -30,4 +30,8 @@ export const env = {
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
     // Reserved for future server-side OAuth authorization code exchange flows
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+    // Server-side only API keys — never prefix with VITE_ to keep them out of the client bundle
+    OMDB_API_KEY: process.env.OMDB_API_KEY || '',
+    VIDROCK_PASSPHRASE: process.env.VIDROCK_PASSPHRASE || '',
 } as const;
+

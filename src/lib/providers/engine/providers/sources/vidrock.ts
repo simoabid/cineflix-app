@@ -1,5 +1,3 @@
-import CryptoJS from 'crypto-js';
-
 import { flags } from '../../entrypoint/utils/targets';
 import { SourcererOutput, makeSourcerer } from '../base';
 import { MovieScrapeContext } from '../../utils/context';
@@ -10,44 +8,42 @@ const headers = {
   Referer: 'https://vidrock.net/',
 };
 
-// C-1: Passphrase sourced from environment variable — never hardcoded in source
-const PASSPHRASE = import.meta.env.VITE_VIDROCK_PASSPHRASE as string | undefined;
+// Server-side encryption endpoint — the passphrase never touches the client
+const API_BASE_URL: string = import.meta.env?.VITE_API_URL || '/api';
+const VIDROCK_ENCRYPT_URL = `${API_BASE_URL}/vidrock/encrypt`;
 
 const baseUrl = 'https://vidrock.net/api';
 const userAgent =
   'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36';
 
-function buildCryptoParams(): { key: CryptoJS.lib.WordArray; iv: CryptoJS.lib.WordArray } {
-  if (!PASSPHRASE) {
-    throw new Error(
-      '[Vidrock] VITE_VIDROCK_PASSPHRASE env var is not set. Add it to your .env.local file.',
-    );
+/**
+ * Request the encrypted path from the server (passphrase stays server-side).
+ */
+async function getEncryptedPath(itemId: string, itemType: string): Promise<string> {
+  const response = await fetch(VIDROCK_ENCRYPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ itemId, itemType }),
+  });
+  if (!response.ok) {
+    throw new NotFoundError('Failed to encrypt Vidrock request');
   }
-  return {
-    key: CryptoJS.enc.Utf8.parse(PASSPHRASE),
-    iv: CryptoJS.enc.Utf8.parse(PASSPHRASE.substring(0, 16)),
-  };
+  const data = await response.json();
+  if (!data.success || !data.data?.path) {
+    throw new NotFoundError('Vidrock encryption returned invalid data');
+  }
+  return data.data.path;
 }
 
 
 async function comboScraper(ctx: MovieScrapeContext): Promise<SourcererOutput> {
-  const { key, iv } = buildCryptoParams();
   const itemType = 'movie';
   const itemId = ctx.media.tmdbId;
 
-  const encrypted = CryptoJS.AES.encrypt(itemId, key, {
-    iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  });
-
-  let encryptedBase64 = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
-
-  encryptedBase64 = encryptedBase64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-  const encoded = encodeURIComponent(encryptedBase64);
-
-  const url = `${baseUrl}/${itemType}/${encoded}`;
+  // Get encrypted path from server (passphrase stays server-side)
+  const encryptedPath = await getEncryptedPath(String(itemId), itemType);
+  const url = `${baseUrl}/${encryptedPath}`;
 
   const res = await ctx.proxiedFetcher<any>(url, {
     headers: {
