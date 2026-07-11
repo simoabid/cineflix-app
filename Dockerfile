@@ -49,12 +49,12 @@ RUN mkdir -p /app/backend/logs && chown -R cineflix:cineflix /app
 # Switch to non-root user
 USER cineflix
 
-# Expose port
-EXPOSE 3000
+# Expose port (matches env.ts default PORT=3001)
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
 # Start the server
 ENV NODE_ENV=production

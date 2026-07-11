@@ -8,7 +8,9 @@ backend/dist
 logs
 backend/logs
 .env
+.env.*
 backend/.env
+backend/.env.*
 .gemini
 .agent
 CINEFLIX_ROADMAP
