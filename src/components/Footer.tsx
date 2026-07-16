@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQueryParam } from '../hooks/useQueryParams';
 import { changelogData } from '../data/changelog';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,14 +20,23 @@ import {
   Bell,
 
   Code,
-  Lightbulb,
   Linkedin,
-  Github
+  Github,
+  Heart,
+  Shield,
+  FileText,
 } from 'lucide-react';
-import { FaDiscord, FaReddit } from 'react-icons/fa6';
+import { FaDiscord, FaReddit, FaCoffee } from 'react-icons/fa';
 
 import { Container } from './layout';
 import { BrandLogo } from './BrandLogo';
+import {
+  SUPPORT_URL,
+  SUPPORT_CTA_LABEL,
+  SUPPORT_MESSAGE,
+  DISCORD_LINK,
+  GITHUB_LINK,
+} from '../setup/constants';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -113,20 +122,22 @@ const Footer: React.FC = () => {
   */
 
   const supportLinks = [
-    { name: 'Help Center', href: '/help', icon: HelpCircle },
-    { name: 'Community Support', href: 'https://discord.gg/67tRp9K6r', icon: FaDiscord },
-    { name: 'Feature Requests', href: '/feature-requests', icon: Lightbulb },
-    { name: 'Developer API', href: 'https://developer.themoviedb.org', icon: Code },
-    { name: 'Contact Us', href: 'mailto:contact@cineflix.dev', icon: MessageCircle },
+    { name: SUPPORT_CTA_LABEL, href: SUPPORT_URL, icon: FaCoffee, external: true },
+    { name: 'About & Support', href: '/support', icon: Heart, external: false },
+    { name: 'Community Discord', href: DISCORD_LINK, icon: FaDiscord, external: true },
+    { name: 'Privacy Policy', href: '/privacy', icon: Shield, external: false },
+    { name: 'Terms of Service', href: '/terms', icon: FileText, external: false },
+    { name: 'Contact Us', href: 'mailto:contact@cineflix.dev', icon: MessageCircle, external: true },
+    { name: 'TMDB API', href: 'https://developer.themoviedb.org', icon: Code, external: true },
   ];
 
   const socialLinks = [
     { name: 'Reddit', icon: FaReddit, href: 'https://www.reddit.com/r/CINEFLIX_App', color: '#FF4500' },
     { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/SeeMooAbid', color: '#1DA1F2' },
     { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/simoabiid', color: '#E4405F' },
-    { name: 'Discord', icon: FaDiscord, href: 'https://discord.gg/67tRp9K6r', color: '#5865F2' },
+    { name: 'Discord', icon: FaDiscord, href: DISCORD_LINK, color: '#5865F2' },
     { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/mohamed-amine-abidd', color: '#0A66C2' },
-    { name: 'GitHub', icon: Github, href: 'https://github.com/simoabid', color: '#333' },
+    { name: 'GitHub', icon: Github, href: GITHUB_LINK, color: '#333' },
   ];
 
   const quickActions = [
@@ -363,25 +374,48 @@ const Footer: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="py-12 border-t border-gray-800/50"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Support Links */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-type-logo" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {/* Support Links — compact two-column list so it doesn't tower over sibling columns */}
+            <div className="md:col-span-2 lg:col-span-1">
+              <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-white">
+                <HelpCircle className="h-5 w-5 text-type-logo" />
                 Support & Resources
               </h3>
-              <ul className="space-y-4">
-                {supportLinks.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="group flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300"
-                    >
-                      <link.icon className="w-4 h-4 text-type-logo group-hover:scale-110 transition-transform duration-300" />
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
+              <p className="mb-3 max-w-prose text-sm leading-relaxed text-gray-500">
+                {SUPPORT_MESSAGE}
+              </p>
+              <ul className="grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-2">
+                {supportLinks.map((link) => {
+                  const className =
+                    'group flex min-h-[40px] items-center gap-2.5 rounded-md px-1 py-1.5 text-sm text-gray-400 transition-all duration-300 hover:text-white';
+                  const icon = (
+                    <link.icon className="h-4 w-4 shrink-0 text-type-logo transition-transform duration-300 group-hover:scale-110" />
+                  );
+                  if (!link.external) {
+                    return (
+                      <li key={link.name}>
+                        <Link to={link.href} className={className}>
+                          {icon}
+                          <span className="truncate">{link.name}</span>
+                        </Link>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li key={link.name}>
+                      <a
+                        href={link.href}
+                        className={className}
+                        {...(link.href.startsWith('http')
+                          ? { target: '_blank', rel: 'noopener noreferrer' }
+                          : {})}
+                      >
+                        {icon}
+                        <span className="truncate">{link.name}</span>
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -503,10 +537,18 @@ const Footer: React.FC = () => {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex flex-wrap gap-6 text-sm text-gray-400">
-              <a href="/terms" className="hover:text-white transition-colors duration-300">Terms of Service</a>
-              <a href="/privacy" className="hover:text-white transition-colors duration-300">Privacy Policy</a>
-              <a href="/cookies" className="hover:text-white transition-colors duration-300">Cookie Settings</a>
-              <a href="/legal" className="hover:text-white transition-colors duration-300">Legal Notices</a>
+              <Link to="/terms" className="hover:text-white transition-colors duration-300">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-white transition-colors duration-300">Privacy Policy</Link>
+              <Link to="/cookies" className="hover:text-white transition-colors duration-300">Cookie Policy</Link>
+              <Link to="/support" className="hover:text-white transition-colors duration-300">Support</Link>
+              <a
+                href={SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors duration-300"
+              >
+                {SUPPORT_CTA_LABEL}
+              </a>
             </div>
             <div className="text-sm text-gray-500">
               <p>© {currentYear} CINEFLIX, Inc. All rights reserved.</p>

@@ -535,7 +535,7 @@ cd backend && npm install && cd ..
 <summary><strong>📦 Step 1: MongoDB Atlas Setup</strong></summary>
 
 1. Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) (free)
-2. Create a **New Project** → name it "CineFlix"
+2. Create a **New Project** → name it "CINEFLIX"
 3. Click **Build a Database** → select **M0 Free** tier
 4. Create a **Database User** (save the password!)
 5. Go to **Network Access** → **Add IP Address** → **Allow Access from Anywhere** (`0.0.0.0/0`)

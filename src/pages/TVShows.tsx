@@ -313,7 +313,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
 
             <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Popular TV shows">
               <ContentCarousel
-                title="Popular on CineFlix"
+                title="Popular on CINEFLIX"
                 items={popularShows}
                 type="tv"
               />

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     User,
     Mail,
@@ -15,7 +15,6 @@ import {
     Shield,
     Monitor,
     Globe,
-    CreditCard,
     Volume2,
     Play,
     Download,
@@ -23,9 +22,7 @@ import {
     Clock,
     Tv,
     Crown,
-    Zap,
     Settings,
-    ChevronRight,
     AlertTriangle,
     History,
     HardDrive,
@@ -36,7 +33,10 @@ import {
     Loader2,
     CheckCircle2,
     AlertCircle,
-    Palette
+    Palette,
+    Heart,
+    ExternalLink,
+    Megaphone,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { PasswordInput } from '../components/auth';
@@ -48,9 +48,25 @@ import DynamicBackground from '../components/DynamicBackground';
 import { CineProSettingsView } from '../components/CineProSettingsView';
 import { SEOHead } from '../components/layout/SEOHead';
 import { ThemePicker } from '../components/settings/ThemePicker';
+import {
+    SUPPORT_CTA_LABEL,
+    SUPPORT_MESSAGE,
+    SUPPORT_URL,
+} from '../setup/constants';
+import { useSupportStore } from '../stores/support';
 
 // Settings tabs
-type SettingsTab = 'profile' | 'playback' | 'appearance' | 'notifications' | 'privacy' | 'devices' | 'subscription' | 'accessibility' | 'language' | 'cinepro';
+type SettingsTab =
+    | 'profile'
+    | 'playback'
+    | 'appearance'
+    | 'notifications'
+    | 'privacy'
+    | 'devices'
+    | 'support'
+    | 'accessibility'
+    | 'language'
+    | 'cinepro';
 
 interface TabItem {
     id: SettingsTab;
@@ -65,7 +81,7 @@ const tabs: TabItem[] = [
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'privacy', label: 'Privacy', icon: Shield },
     { id: 'devices', label: 'Devices', icon: Monitor },
-    { id: 'subscription', label: 'Subscription', icon: CreditCard },
+    { id: 'support', label: 'Support', icon: Heart },
     { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'cinepro', label: 'CinePro Core', icon: Settings },
@@ -205,13 +221,49 @@ const AccountPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, logout, updateProfile, changePassword } = useAuth();
     const { settings, isLoading, saveStatus, error, updateSetting } = useAccountSettings();
+    const showSupportAds = useSupportStore((s) => s.showSupportAds);
+    const isSupporter = useSupportStore((s) => s.isSupporter);
+    const setShowSupportAds = useSupportStore((s) => s.setShowSupportAds);
+    const setIsSupporter = useSupportStore((s) => s.setIsSupporter);
+    const hydrateFromServer = useSupportStore((s) => s.hydrateFromServer);
 
-    // Active tab (support #appearance deep-link from Navbar)
-    const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
-        typeof window !== 'undefined' && window.location.hash === '#appearance'
-            ? 'appearance'
-            : 'profile'
-    );
+    // Active tab (support #appearance / #support deep-links)
+    const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
+        if (typeof window === 'undefined') return 'profile';
+        if (window.location.hash === '#appearance') return 'appearance';
+        if (window.location.hash === '#support') return 'support';
+        return 'profile';
+    });
+
+    // Sync server preferences → local support store when account settings load
+    useEffect(() => {
+        if (isLoading) return;
+        hydrateFromServer({
+            showSupportAds: settings.showSupportAds,
+            isSupporter: settings.isSupporter,
+        });
+    }, [
+        isLoading,
+        settings.showSupportAds,
+        settings.isSupporter,
+        hydrateFromServer,
+    ]);
+
+    const toggleShowSupportAds = useCallback(() => {
+        if (isSupporter) return;
+        const next = !showSupportAds;
+        setShowSupportAds(next);
+        updateSetting('showSupportAds', next);
+    }, [isSupporter, showSupportAds, setShowSupportAds, updateSetting]);
+
+    const toggleIsSupporter = useCallback(() => {
+        const next = !isSupporter;
+        setIsSupporter(next);
+        updateSetting('isSupporter', next);
+        if (next) {
+            updateSetting('showSupportAds', false);
+        }
+    }, [isSupporter, setIsSupporter, updateSetting]);
 
     // Profile editing state
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -786,114 +838,91 @@ const AccountPage: React.FC = () => {
                     </div>
                 );
 
-            case 'subscription':
+            case 'support':
                 return (
                     <div className="space-y-6">
-                        <SettingsCard title="Current Plan" icon={Crown}>
-                            <div className="p-6 bg-gradient-to-r from-buttons-purple/20 via-red-600/10 to-transparent rounded-xl border border-buttons-purple/30">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-buttons-purple rounded-xl flex items-center justify-center">
-                                            <Crown className="w-6 h-6 text-white" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-xl font-bold text-white">Premium</h4>
-                                            <p className="text-sm text-gray-400">$19.99/month</p>
-                                        </div>
-                                    </div>
-                                    <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm font-medium rounded-full border border-green-500/30">
-                                        Active
-                                    </span>
+                        <SettingsCard
+                            title="Support CINEFLIX"
+                            description="Help keep this free, open-source project running online"
+                            icon={Heart}
+                        >
+                            <div className="rounded-xl border border-buttons-purple/30 bg-gradient-to-r from-buttons-purple/20 via-red-600/10 to-transparent p-6">
+                                <p className="text-sm leading-relaxed text-gray-300">{SUPPORT_MESSAGE}</p>
+                                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                                    <a
+                                        href={SUPPORT_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-buttons-purple px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-buttons-purpleHover"
+                                    >
+                                        <Heart className="h-4 w-4" />
+                                        {SUPPORT_CTA_LABEL} on Ko-fi
+                                        <ExternalLink className="h-4 w-4 opacity-80" />
+                                    </a>
+                                    <Link
+                                        to="/support"
+                                        className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-gray-600 px-5 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:text-white"
+                                    >
+                                        About support
+                                    </Link>
                                 </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                                    <div className="flex items-center gap-2 text-gray-300">
-                                        <Zap className="w-4 h-4 text-type-logo" />
-                                        <span>4K Ultra HD streaming</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-300">
-                                        <Monitor className="w-4 h-4 text-type-logo" />
-                                        <span>Watch on 4 devices</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-300">
-                                        <Download className="w-4 h-4 text-type-logo" />
-                                        <span>Unlimited downloads</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-300">
-                                        <Volume2 className="w-4 h-4 text-type-logo" />
-                                        <span>Spatial Audio</span>
-                                    </div>
-                                </div>
-
-                                <p className="text-sm text-gray-400">
-                                    Next billing date: <span className="text-white">January 15, 2025</span>
+                                <p className="mt-4 text-xs text-gray-500">
+                                    Opens{' '}
+                                    <span className="text-gray-400">ko-fi.com/abiddev</span>
+                                    . Tips are voluntary and help with hosting and maintenance.
                                 </p>
                             </div>
                         </SettingsCard>
 
-                        <SettingsCard title="Billing Information" description="Manage your payment methods" icon={CreditCard}>
-                            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-400 rounded flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">VISA</span>
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-medium">•••• •••• •••• 4242</p>
-                                        <p className="text-sm text-gray-400">Expires 12/26</p>
-                                    </div>
-                                </div>
-                                <button className="text-type-logo hover:text-red-400 transition-colors">
-                                    <Edit3 className="w-5 h-5" />
-                                </button>
+                        <SettingsCard
+                            title="Support ads"
+                            description="Optional, non-intrusive ads on browse and detail pages — never on the watch player"
+                            icon={Megaphone}
+                        >
+                            <div className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
+                                <strong className="font-semibold text-amber-200">Coming soon.</strong>{' '}
+                                Display ads are not live yet. Your preference is saved and will apply
+                                when respectful ads ship (Phase 2). Watch pages will never show these ads.
                             </div>
 
-                            <div className="flex gap-4 mt-4">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors">
-                                    <CreditCard className="w-4 h-4" />
-                                    Add Payment Method
-                                </button>
-                                <button className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white rounded-lg font-medium transition-colors">
-                                    View Billing History
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </SettingsCard>
+                            <SettingRow
+                                label="Show support ads"
+                                description={
+                                    isSupporter
+                                        ? 'Disabled while you are marked as a supporter (ad-free).'
+                                        : 'When ads go live, help cover costs with light placements outside /watch. You can turn this off anytime.'
+                                }
+                            >
+                                <ToggleSwitch
+                                    enabled={showSupportAds && !isSupporter}
+                                    onChange={toggleShowSupportAds}
+                                    disabled={isSupporter}
+                                />
+                            </SettingRow>
 
-                        <SettingsCard title="Change Plan" description="Upgrade or downgrade your subscription" icon={Zap}>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {[
-                                    { name: 'Basic', price: '$9.99', features: ['HD streaming', '1 device', 'No downloads'] },
-                                    { name: 'Standard', price: '$14.99', features: ['Full HD', '2 devices', '10 downloads'] },
-                                    { name: 'Premium', price: '$19.99', features: ['4K Ultra HD', '4 devices', 'Unlimited'], current: true },
-                                ].map((plan) => (
-                                    <div
-                                        key={plan.name}
-                                        className={`p - 4 rounded - xl border transition - all ${plan.current
-                                            ? 'bg-buttons-purple/10 border-buttons-purple'
-                                            : 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
-                                            } `}
-                                    >
-                                        <h4 className="text-lg font-bold text-white mb-1">{plan.name}</h4>
-                                        <p className="text-2xl font-bold text-type-logo mb-3">{plan.price}<span className="text-sm text-gray-400">/mo</span></p>
-                                        <ul className="space-y-2">
-                                            {plan.features.map((feature, i) => (
-                                                <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                                                    <Check className="w-4 h-4 text-green-400" />
-                                                    {feature}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <button
-                                            disabled={plan.current}
-                                            className={`w - full mt - 4 py - 2 rounded - lg font - medium transition - colors ${plan.current
-                                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                                : 'bg-buttons-purple hover:bg-buttons-purpleHover text-white'
-                                                } `}
-                                        >
-                                            {plan.current ? 'Current Plan' : 'Switch'}
-                                        </button>
-                                    </div>
-                                ))}
+                            <SettingRow
+                                label="I support CINEFLIX"
+                                description="Honor system for now: mark yourself as a supporter to stay ad-free and hide the support banner. Automatic Ko-fi linking comes later."
+                            >
+                                <ToggleSwitch
+                                    enabled={isSupporter}
+                                    onChange={toggleIsSupporter}
+                                />
+                            </SettingRow>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-2">
+                                <span
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                                        isSupporter
+                                            ? 'border-green-500/40 bg-green-500/15 text-green-300'
+                                            : 'border-gray-600 bg-gray-800/80 text-gray-400'
+                                    }`}
+                                >
+                                    {isSupporter ? 'Supporter · ad-free' : 'Free user'}
+                                </span>
+                                <p className="text-xs text-gray-500">
+                                    Preferences sync to your account when signed in, and stay on this device as a backup.
+                                </p>
                             </div>
                         </SettingsCard>
                     </div>
@@ -1032,7 +1061,7 @@ const AccountPage: React.FC = () => {
         <DynamicBackground className="pt-20 pb-12">
             <SEOHead
                 title="Account"
-                description="Manage your CINEFLIX profile, playback settings, notification preferences, and subscription details."
+                description="Manage your CINEFLIX profile, playback settings, preferences, and support options."
             />
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}

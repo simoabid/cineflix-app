@@ -1,4 +1,4 @@
-name: CineFlix CI
+name: CINEFLIX CI
 
 on:
   push:

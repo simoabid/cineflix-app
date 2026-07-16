@@ -527,7 +527,7 @@ const Movies: React.FC<MoviesProps> = () => {
 
             <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Popular movies">
               <ContentCarousel
-                title="Popular on CineFlix"
+                title="Popular on CINEFLIX"
                 items={popularMovies}
                 type="movie"
               />

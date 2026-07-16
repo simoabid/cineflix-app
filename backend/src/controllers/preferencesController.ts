@@ -41,6 +41,9 @@ const defaultPreferences = {
     interfaceLanguage: 'en',
     region: 'us',
     timezone: 'America/New_York',
+    // Support / monetization
+    showSupportAds: true,
+    isSupporter: false,
 } as const;
 
 /** Format preferences for response (exclude internal fields) */
@@ -83,6 +86,9 @@ function formatPreferences(prefs: IPreferences | typeof defaultPreferences) {
         interfaceLanguage: prefs.interfaceLanguage,
         region: prefs.region,
         timezone: prefs.timezone,
+        // Support / monetization
+        showSupportAds: prefs.showSupportAds ?? true,
+        isSupporter: prefs.isSupporter ?? false,
     };
 }
 

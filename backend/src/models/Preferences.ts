@@ -45,6 +45,12 @@ export interface IPreferences extends Document {
     interfaceLanguage: string;
     region: string;
     timezone: string;
+
+    // Support / monetization (Phase 1)
+    /** Prefer optional support ads when inventory exists (default true). */
+    showSupportAds: boolean;
+    /** Honor-system or future webhook: supporter forces ads off. */
+    isSupporter: boolean;
 }
 
 const preferencesSchema = new Schema<IPreferences>(
@@ -93,6 +99,10 @@ const preferencesSchema = new Schema<IPreferences>(
         interfaceLanguage: { type: String, default: 'en' },
         region: { type: String, default: 'us' },
         timezone: { type: String, default: 'America/New_York' },
+
+        // Support / monetization (Phase 1)
+        showSupportAds: { type: Boolean, default: true },
+        isSupporter: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

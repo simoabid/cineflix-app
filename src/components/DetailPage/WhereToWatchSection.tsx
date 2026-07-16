@@ -19,7 +19,7 @@ interface Provider {
 }
 
 /**
- * "Where to Watch" panel highlighting CineFlix as the primary streaming option
+ * "Where to Watch" panel highlighting CINEFLIX as the primary streaming option
  * with a curated list of secondary providers shown for completeness.
  */
 const WhereToWatchSection: React.FC<WhereToWatchSectionProps> = ({ contentId, type }) => {
@@ -27,7 +27,7 @@ const WhereToWatchSection: React.FC<WhereToWatchSectionProps> = ({ contentId, ty
 
   const providers: Provider[] = [
     {
-      name: 'CineFlix',
+      name: 'CINEFLIX',
       logo: <Play className="w-5 h-5 fill-current text-white" />,
       status: 'available',
       badge: 'FREE',

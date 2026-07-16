@@ -45,6 +45,10 @@ export interface AccountSettings {
     interfaceLanguage: string;
     region: string;
     timezone: string;
+
+    // Support / monetization (Phase 1)
+    showSupportAds: boolean;
+    isSupporter: boolean;
 }
 
 // Default settings (matches backend defaults)
@@ -91,6 +95,10 @@ export const defaultSettings: AccountSettings = {
     interfaceLanguage: 'en',
     region: 'us',
     timezone: 'America/New_York',
+
+    // Support / monetization
+    showSupportAds: true,
+    isSupporter: false,
 };
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';

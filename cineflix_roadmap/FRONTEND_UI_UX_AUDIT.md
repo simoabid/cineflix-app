@@ -6,7 +6,7 @@ This document presents a comprehensive, professional-grade visual experience aud
 
 ## 1. Executive Summary: The Visual Identity Clash
 
-A deep architectural review of the Cineflix web frontend reveals a major stylistic and visual identity clash between two contrasting design languages:
+A deep architectural review of the CINEFLIX web frontend reveals a major stylistic and visual identity clash between two contrasting design languages:
 
 1. **Classic Netflix Cinematic Dark Theme**: Grounded in high-contrast solid dark backgrounds (`#141414`), deep gray surface accents, and the aggressive signature dark red primary accents (`#E50914` / `bg-netflix-red`).
 2. **Modern Glassmorphic Space Indigo Theme**: Introduced in search modals, headers, and footer components, utilizing translucent dark blue/purple backdrops (`#13132B` / `bg-black/20 backdrop-blur-xl`), border-white/10 overlays, and subtle glowing filters.

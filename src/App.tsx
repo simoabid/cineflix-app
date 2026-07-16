@@ -5,6 +5,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { SupportBanner } from './components/SupportBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import DetailPage from './pages/DetailPage';
@@ -23,6 +24,9 @@ import ContinueWatchingPage from './pages/ContinueWatchingPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SmartPlayerProvider } from './contexts/SmartPlayerContext';
 import { SmartPlayerPage } from './pages/SmartPlayerPage';
+import PrivacyPage from './pages/legal/PrivacyPage';
+import TermsPage from './pages/legal/TermsPage';
+import SupportPage from './pages/legal/SupportPage';
 import { CineProHealthService } from './services/cinepro-adapter';
 import { LenisProvider } from './components/layout/LenisProvider';
 import { ScrollToTop } from './components/layout/ScrollToTop';
@@ -57,6 +61,7 @@ function App() {
                   <SmartPlayerProvider>
                     <div className="min-h-screen bg-background-main">
                       <Navbar />
+                      <SupportBanner />
                       <main>
                         <Routes>
                           {/* Public Routes */}
@@ -72,6 +77,14 @@ function App() {
                           <Route path="/watch/movie/:id" element={<SmartPlayerPage type="movie" />} />
                           <Route path="/watch/tv/:id" element={<SmartPlayerPage type="tv" />} />
                           <Route path="/search" element={<SearchPage />} />
+
+                          {/* Legal & support (Phase 0 monetization pre-flight) */}
+                          <Route path="/privacy" element={<PrivacyPage />} />
+                          <Route path="/settings/privacy" element={<PrivacyPage />} />
+                          <Route path="/cookies" element={<PrivacyPage />} />
+                          <Route path="/terms" element={<TermsPage />} />
+                          <Route path="/legal" element={<TermsPage />} />
+                          <Route path="/support" element={<SupportPage />} />
 
                           {/* Auth Routes */}
                           <Route path="/login" element={<LoginPage />} />

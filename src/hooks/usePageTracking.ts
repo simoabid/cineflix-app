@@ -15,7 +15,13 @@ function derivePageTitle(pathname: string): string {
     '/continue-watching': 'Continue Watching',
     '/account': 'Account',
     '/login': 'Login',
-    '/signup': 'Sign Up'
+    '/signup': 'Sign Up',
+    '/privacy': 'Privacy Policy',
+    '/settings/privacy': 'Privacy Policy',
+    '/cookies': 'Privacy Policy',
+    '/terms': 'Terms of Service',
+    '/legal': 'Terms of Service',
+    '/support': 'Support',
   };
   if (routes[pathname]) {
     return routes[pathname];
