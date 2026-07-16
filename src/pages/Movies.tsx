@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Movie } from '../types';
 import {
   getTrendingMovies,
@@ -13,8 +13,10 @@ import {
 } from '../services/tmdb';
 import HeroCarousel from '../components/HeroCarousel';
 import ContentCarousel from '../components/ContentCarousel';
+import LazySection from '../components/LazySection';
 import FilterBar from '../components/FilterBar';
 import { SEOHead } from '../components/layout/SEOHead';
+import { DEFAULT_ROW_ITEM_LIMIT, limitForInitialPaint } from '../utils/progressiveRender';
 
 interface MoviesProps { }
 
@@ -121,13 +123,22 @@ export const formatApiError = (err: unknown, defaultMessage = 'An unexpected err
 export const fetchHeroSlides = async (
   limit = 5,
   getTrendingFn: (page?: number) => Promise<any> = getTrendingMovies,
-  getVideosFn: (movieId: number) => Promise<any> = getMovieVideos
+  getVideosFn: (movieId: number) => Promise<any> = getMovieVideos,
+  /** Only enrich first N slides with trailer keys (rest show without trailer) */
+  trailerEnrichLimit = 2
 ): Promise<HeroSlide[]> => {
   const trending = await getTrendingFn(1);
   const featured = Array.isArray(trending?.results) ? trending.results.slice(0, limit) : [];
 
   const heroData: HeroSlide[] = await Promise.all(
-    featured.map(async (movie: any) => {
+    featured.map(async (movie: any, index: number) => {
+      if (index >= trailerEnrichLimit) {
+        return {
+          ...movie,
+          title: movie.title,
+          trailerKey: undefined
+        } as HeroSlide;
+      }
       try {
         const videos = await getVideosFn(movie.id);
         const trailer = Array.isArray(videos) ? videos.find((v: any) => v.type === 'Trailer' && v.site === 'YouTube') : undefined;
@@ -137,7 +148,6 @@ export const fetchHeroSlides = async (
           trailerKey: trailer?.key
         } as HeroSlide;
       } catch (err) {
-        // Non-fatal for hero slides: log and continue without trailer
         console.error(`Error fetching videos for movie ${movie.id}:`, err);
         return {
           ...movie,
@@ -176,29 +186,17 @@ export const fetchMoviesForGenre = async (
 };
 
 /**
- * Load all primary movie data in parallel (trending, popular, top rated, now playing, upcoming, and genres).
- * Genre-specific movie rows are also fetched; individual genre failures result in empty arrays for that genre.
- *
- * Dependencies are injectable for testing.
- *
- * @returns Promise<{
- *   trending: Movie[];
- *   popular: Movie[];
- *   topRated: Movie[];
- *   nowPlaying: Movie[];
- *   upcoming: Movie[];
- *   genres: Genre[];
- *   genreRows: { [key: string]: Movie[] };
- * }>
+ * Primary (above-the-fold) movie rows only — no per-genre discovers.
+ * Keeps first paint light; genre rows load via fetchMoviesForGenre on demand.
  */
-export const loadAllMovies = async (
+export const loadPrimaryMovies = async (
   getTrendingFn: (page?: number) => Promise<any> = getTrendingMovies,
   getPopularFn: (page?: number) => Promise<any> = getPopularMovies,
   getTopRatedFn: (page?: number) => Promise<any> = getTopRatedMovies,
   getNowPlayingFn: (page?: number) => Promise<any> = getNowPlayingMovies,
   getUpcomingFn: (page?: number) => Promise<any> = getUpcomingMovies,
   getGenresFn: () => Promise<any> = getMovieGenres,
-  discoverFn: (genreId: number, page?: number) => Promise<any> = discoverMoviesByGenre
+  itemLimit: number = DEFAULT_ROW_ITEM_LIMIT
 ) => {
   const [
     trendingRes,
@@ -217,15 +215,53 @@ export const loadAllMovies = async (
   ]);
 
   const genresArray: Genre[] = Array.isArray(genreList) ? genreList : genreList || [];
+  const cap = (res: { results?: Movie[] } | null | undefined): Movie[] => {
+    const results: Movie[] = Array.isArray(res?.results) ? res.results : [];
+    return limitForInitialPaint(results, itemLimit);
+  };
+
+  return {
+    trending: cap(trendingRes),
+    popular: cap(popularRes),
+    topRated: cap(topRatedRes),
+    nowPlaying: cap(nowPlayingRes),
+    upcoming: cap(upcomingRes),
+    genres: genresArray,
+    genreRows: {} as { [key: string]: Movie[] },
+  };
+};
+
+/**
+ * Load all primary movie data + all genre rows (legacy full load).
+ * Prefer loadPrimaryMovies + on-demand fetchMoviesForGenre for snappy UX.
+ */
+export const loadAllMovies = async (
+  getTrendingFn: (page?: number) => Promise<any> = getTrendingMovies,
+  getPopularFn: (page?: number) => Promise<any> = getPopularMovies,
+  getTopRatedFn: (page?: number) => Promise<any> = getTopRatedMovies,
+  getNowPlayingFn: (page?: number) => Promise<any> = getNowPlayingMovies,
+  getUpcomingFn: (page?: number) => Promise<any> = getUpcomingMovies,
+  getGenresFn: () => Promise<any> = getMovieGenres,
+  discoverFn: (genreId: number, page?: number) => Promise<any> = discoverMoviesByGenre
+) => {
+  const primary = await loadPrimaryMovies(
+    getTrendingFn,
+    getPopularFn,
+    getTopRatedFn,
+    getNowPlayingFn,
+    getUpcomingFn,
+    getGenresFn
+  );
 
   const genreRows: { [key: string]: Movie[] } = {};
   await Promise.all(
-    genresArray.map(async (genre) => {
+    primary.genres.map(async (genre) => {
       try {
         const res = await discoverFn(genre.id, 1);
-        genreRows[genre.name] = Array.isArray(res?.results) ? res.results : [];
+        genreRows[genre.name] = limitForInitialPaint(
+          Array.isArray(res?.results) ? res.results : []
+        );
       } catch (err) {
-        // Log and continue with empty list for this genre
         console.error(`Error fetching movies for genre ${genre.id}:`, err);
         genreRows[genre.name] = [];
       }
@@ -233,12 +269,7 @@ export const loadAllMovies = async (
   );
 
   return {
-    trending: Array.isArray(trendingRes?.results) ? trendingRes.results : [],
-    popular: Array.isArray(popularRes?.results) ? popularRes.results : [],
-    topRated: Array.isArray(topRatedRes?.results) ? topRatedRes.results : [],
-    nowPlaying: Array.isArray(nowPlayingRes?.results) ? nowPlayingRes.results : [],
-    upcoming: Array.isArray(upcomingRes?.results) ? upcomingRes.results : [],
-    genres: genresArray,
+    ...primary,
     genreRows
   };
 };
@@ -264,31 +295,30 @@ const Movies: React.FC<MoviesProps> = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Cache for genre data (used when fetching individual genre pages)
-  // const genreCache = useMemo(() => new Map<number, Movie[]>(), []);
+  const [genreLoadingIds, setGenreLoadingIds] = useState<Record<number, boolean>>({});
+  const genreFetchInflight = useRef<Set<number>>(new Set());
 
   const fetchHero = useCallback(async () => {
     try {
-      const slides = await fetchHeroSlides(5, getTrendingMovies, getMovieVideos);
+      const slides = await fetchHeroSlides(5, getTrendingMovies, getMovieVideos, 2);
       setHeroMovies(slides);
     } catch (err) {
       setError(formatApiError(err, 'Failed to load hero movies. Please try again.'));
     }
   }, []);
 
-  const fetchAllData = useCallback(async () => {
+  /** Critical primary rows only — genre rows hydrate near viewport */
+  const fetchPrimaryData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await loadAllMovies(
+      const data = await loadPrimaryMovies(
         getTrendingMovies,
         getPopularMovies,
         getTopRatedMovies,
         getNowPlayingMovies,
         getUpcomingMovies,
-        getMovieGenres,
-        discoverMoviesByGenre
+        getMovieGenres
       );
 
       setTrendingMovies(data.trending);
@@ -297,7 +327,7 @@ const Movies: React.FC<MoviesProps> = () => {
       setNowPlayingMovies(data.nowPlaying);
       setUpcomingMovies(data.upcoming);
       setGenres(data.genres);
-      setGenreRows(data.genreRows);
+      setGenreRows({});
     } catch (err) {
       setError(formatApiError(err, 'Failed to load movies. Please try again.'));
     } finally {
@@ -305,15 +335,35 @@ const Movies: React.FC<MoviesProps> = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchAllData();
-    fetchHero();
-  }, [fetchAllData, fetchHero]);
+  const ensureGenreRow = useCallback(async (genre: Genre) => {
+    if (genreFetchInflight.current.has(genre.id)) return;
+    genreFetchInflight.current.add(genre.id);
+    setGenreLoadingIds((prev) => ({ ...prev, [genre.id]: true }));
+    try {
+      const movies = limitForInitialPaint(
+        await fetchMoviesForGenre(genre.id, discoverMoviesByGenre)
+      );
+      setGenreRows((prev) => {
+        if (prev[genre.name] !== undefined) return prev;
+        return { ...prev, [genre.name]: movies };
+      });
+    } catch (err) {
+      console.error(`Error loading genre row ${genre.name}:`, err);
+      setGenreRows((prev) => ({ ...prev, [genre.name]: prev[genre.name] ?? [] }));
+    } finally {
+      genreFetchInflight.current.delete(genre.id);
+      setGenreLoadingIds((prev) => {
+        const next = { ...prev };
+        delete next[genre.id];
+        return next;
+      });
+    }
+  }, []);
 
-  // Memoize combined lists for performance
-  const combinedMovies = useMemo(() => {
-    return combineMovieLists([trendingMovies, popularMovies, topRatedMovies, nowPlayingMovies, upcomingMovies]);
-  }, [trendingMovies, popularMovies, topRatedMovies, nowPlayingMovies, upcomingMovies]);
+  useEffect(() => {
+    void fetchPrimaryData();
+    void fetchHero();
+  }, [fetchPrimaryData, fetchHero]);
 
   // Fetch advanced search/filter results from TMDB API dynamically
   useEffect(() => {
@@ -373,7 +423,7 @@ const Movies: React.FC<MoviesProps> = () => {
 
   const handleRetry = async () => {
     setError(null);
-    await fetchAllData();
+    await fetchPrimaryData();
     await fetchHero();
   };
 
@@ -466,50 +516,65 @@ const Movies: React.FC<MoviesProps> = () => {
             </div>
           )
         ) : (
-          // Default rows
+          // Default rows — first eager; rest near-viewport; genres fetch on activate
           <>
             <ContentCarousel
               title="Trending Now"
               items={trendingMovies}
               type="movie"
+              eager
             />
 
-            <ContentCarousel
-              title="Popular on CineFlix"
-              items={popularMovies}
-              type="movie"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Popular movies">
+              <ContentCarousel
+                title="Popular on CineFlix"
+                items={popularMovies}
+                type="movie"
+              />
+            </LazySection>
 
-            <ContentCarousel
-              title="Top Rated"
-              items={topRatedMovies}
-              type="movie"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Top rated movies">
+              <ContentCarousel
+                title="Top Rated"
+                items={topRatedMovies}
+                type="movie"
+              />
+            </LazySection>
 
-            <ContentCarousel
-              title="Now Playing"
-              items={nowPlayingMovies}
-              type="movie"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Now playing movies">
+              <ContentCarousel
+                title="Now Playing"
+                items={nowPlayingMovies}
+                type="movie"
+              />
+            </LazySection>
 
-            <ContentCarousel
-              title="Upcoming"
-              items={upcomingMovies}
-              type="movie"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Upcoming movies">
+              <ContentCarousel
+                title="Upcoming"
+                items={upcomingMovies}
+                type="movie"
+              />
+            </LazySection>
 
-            {/* Genre Rows */}
-            {genres.map((genre) => {
-              const movies = genreRows[genre.name];
-              return movies && movies.length > 0 ? (
+            {genres.map((genre) => (
+              <LazySection
+                key={genre.id}
+                minHeight={340}
+                rootMargin="160px 0px"
+                onActivate={() => {
+                  void ensureGenreRow(genre);
+                }}
+                aria-label={`${genre.name} movies`}
+              >
                 <ContentCarousel
-                  key={genre.id}
                   title={genre.name}
-                  items={movies}
+                  items={genreRows[genre.name] || []}
                   type="movie"
+                  loading={Boolean(genreLoadingIds[genre.id]) || genreRows[genre.name] === undefined}
                 />
-              ) : null;
-            })}
+              </LazySection>
+            ))}
           </>
         )}
       </div>

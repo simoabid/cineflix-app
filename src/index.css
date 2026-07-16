@@ -45,11 +45,14 @@ html.lenis, html.lenis body {
   contain-intrinsic-size: auto 340px; /* Estimate height of a carousel to prevent scrollbar jumps */
 }
 
-/* Optimize card rendering */
+/* Optimize card rendering — avoid permanent will-change (creates a layer per card) */
 .browse-card {
   contain: layout style paint;
+}
+
+.browse-card:hover,
+.browse-card:focus-within {
   will-change: transform;
-  transform: translateZ(0);
 }
 
 /* Staggered fade-in animation for cards */

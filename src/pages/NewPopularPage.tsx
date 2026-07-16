@@ -25,10 +25,12 @@ import {
   getImageUrl
 } from '../services/tmdb';
 import LogoImage from '../components/LogoImage';
+import LazySection from '../components/LazySection';
 import { Movie, TVShow } from '../types';
 import { handleImageError } from '../utils/imageLoader';
 import { SEOHead } from '../components/layout/SEOHead';
 import { analytics } from '../services/analytics';
+import { limitForInitialPaint } from '../utils/progressiveRender';
 
 // Genre mapping for display
 const GENRES = {
@@ -64,6 +66,24 @@ const GENRES = {
 const getGenreNames = (genreIds: number[] = []) => {
   return genreIds.map(id => GENRES[id as keyof typeof GENRES] || 'Unknown').slice(0, 2);
 };
+
+/**
+ * Decide how a New & Popular content section mounts.
+ * - skip: empty / not yet loaded (no LazySection shell)
+ * - eager: trendingNow (critical first-paint row after hero data)
+ * - lazy: near-viewport gated
+ * Exported for unit tests that drive the real shipped policy.
+ */
+export type NewPopularSectionMount = 'skip' | 'eager' | 'lazy';
+
+export function resolveNewPopularSectionMount(
+  key: string,
+  items: readonly unknown[] | null | undefined
+): NewPopularSectionMount {
+  if (!items || items.length === 0) return 'skip';
+  if (key === 'trendingNow') return 'eager';
+  return 'lazy';
+}
 
 interface ContentItem extends Partial<Movie & TVShow> {
   media_type?: 'movie' | 'tv';
@@ -125,116 +145,130 @@ const NewPopularPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [sections.trendingNow.items]);
 
+  const processItems = (items: any[], type: 'movie' | 'tv') =>
+    items.map(item => ({
+      ...item,
+      media_type: type,
+      release_date: item.release_date || item.first_air_date,
+      title: item.title || item.name,
+      original_title: item.original_title || item.original_name
+    }));
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // Critical path: trending only (powers hero + first section)
+      const [trendingMoviesData, trendingTVData] = await Promise.all([
+        getTrendingMovies(),
+        getTrendingTVShows(),
+      ]);
+
+      let movies = processItems(limitForInitialPaint(trendingMoviesData.results, 16), 'movie');
+      let tvShows = processItems(limitForInitialPaint(trendingTVData.results, 16), 'tv');
+
+      if (contentType === 'movies') tvShows = [];
+      if (contentType === 'tv') movies = [];
+
+      setSections((prev) => ({
+        ...prev,
+        trendingNow: {
+          title: 'Trending Now',
+          items: [...movies, ...tvShows].sort(
+            (a, b) => (b.popularity || 0) - (a.popularity || 0)
+          ),
+          type: 'mixed',
+        },
+      }));
+      setLoading(false);
+
+      // Secondary sections after first paint
       const [
-        trendingMoviesData,
-        trendingTVData,
         popularMoviesData,
         popularTVData,
         upcomingMoviesData,
         recentMoviesResponse,
-        airingTodayTVData
+        airingTodayTVData,
       ] = await Promise.all([
-        getTrendingMovies(),
-        getTrendingTVShows(),
         getPopularMovies(),
         getPopularTVShows(),
         getUpcomingMovies(),
         getNowPlayingMovies(1),
-        getAiringTodayTVShows()
+        getAiringTodayTVShows(),
       ]);
 
-
-
-      // Combine and process data based on filters
-      const processItems = (items: any[], type: 'movie' | 'tv') => {
-        return items.map(item => ({
-          ...item,
-          media_type: type,
-          release_date: item.release_date || item.first_air_date,
-          title: item.title || item.name,
-          original_title: item.original_title || item.original_name
-        }));
-      };
-
-      const movies = processItems(trendingMoviesData.results.slice(0, 20), 'movie');
-      const tvShows = processItems(trendingTVData.results.slice(0, 20), 'tv');
-      const popularMovies = processItems(popularMoviesData.results.slice(0, 20), 'movie');
-      const popularTV = processItems(popularTVData.results.slice(0, 20), 'tv');
-      const upcoming = processItems(upcomingMoviesData.results.slice(0, 20), 'movie');
-      const nowPlaying = processItems(recentMoviesResponse.results.slice(0, 20), 'movie');
-      const airingToday = processItems(airingTodayTVData.results.slice(0, 20), 'tv');
-
-      // Filter by content type
-      let filteredMovies = movies;
-      let filteredTV = tvShows;
-      let filteredPopularMovies = popularMovies;
-      let filteredPopularTV = popularTV;
-      let filteredUpcoming = upcoming;
-      let filteredNowPlaying = nowPlaying;
-      let filteredAiringToday = airingToday;
+      let popularMovies = processItems(limitForInitialPaint(popularMoviesData.results, 16), 'movie');
+      let popularTV = processItems(limitForInitialPaint(popularTVData.results, 16), 'tv');
+      let upcoming = processItems(limitForInitialPaint(upcomingMoviesData.results, 16), 'movie');
+      let nowPlaying = processItems(limitForInitialPaint(recentMoviesResponse.results, 16), 'movie');
+      let airingToday = processItems(limitForInitialPaint(airingTodayTVData.results, 16), 'tv');
 
       if (contentType === 'movies') {
-        filteredTV = [];
-        filteredPopularTV = [];
-        filteredAiringToday = [];
+        popularTV = [];
+        airingToday = [];
       } else if (contentType === 'tv') {
-        filteredMovies = [];
-        filteredPopularMovies = [];
-        filteredUpcoming = [];
-        filteredNowPlaying = [];
+        popularMovies = [];
+        upcoming = [];
+        nowPlaying = [];
       }
 
       setSections({
         newReleases: {
           title: 'New Releases',
-          items: [...filteredNowPlaying, ...filteredAiringToday].sort((a, b) =>
-            new Date(b.release_date || 0).getTime() - new Date(a.release_date || 0).getTime()
-          ).slice(0, 20),
-          type: 'mixed'
+          items: [...nowPlaying, ...airingToday]
+            .sort(
+              (a, b) =>
+                new Date(b.release_date || 0).getTime() -
+                new Date(a.release_date || 0).getTime()
+            )
+            .slice(0, 16),
+          type: 'mixed',
         },
         trendingNow: {
           title: 'Trending Now',
-          items: [...filteredMovies, ...filteredTV].sort((a, b) => (b.popularity || 0) - (a.popularity || 0)),
-          type: 'mixed'
+          items: [...movies, ...tvShows].sort(
+            (a, b) => (b.popularity || 0) - (a.popularity || 0)
+          ),
+          type: 'mixed',
         },
         comingSoon: {
           title: 'Coming Soon',
-          items: filteredUpcoming.sort((a, b) =>
-            new Date(a.release_date || 0).getTime() - new Date(b.release_date || 0).getTime()
+          items: upcoming.sort(
+            (a, b) =>
+              new Date(a.release_date || 0).getTime() -
+              new Date(b.release_date || 0).getTime()
           ),
-          type: 'movie'
+          type: 'movie',
         },
         top10Movies: {
           title: 'Top 10 Movies',
-          items: filteredPopularMovies.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0)).slice(0, 10),
-          type: 'movie'
+          items: popularMovies
+            .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0))
+            .slice(0, 10),
+          type: 'movie',
         },
         top10TV: {
           title: 'Top 10 TV Shows',
-          items: filteredPopularTV.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0)).slice(0, 10),
-          type: 'tv'
+          items: popularTV
+            .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0))
+            .slice(0, 10),
+          type: 'tv',
         },
         recentlyAddedMovies: {
           title: 'Recently Added Movies',
-          items: filteredNowPlaying.slice(0, 20),
-          type: 'movie'
+          items: nowPlaying.slice(0, 16),
+          type: 'movie',
         },
         recentlyAddedTV: {
           title: 'Recently Added TV Shows',
-          items: filteredAiringToday.slice(0, 20),
-          type: 'tv'
+          items: airingToday.slice(0, 16),
+          type: 'tv',
         },
       });
-
     } catch (err) {
       setError('Failed to load content. Please try again later.');
       console.error('Error fetching data:', err);
-    } finally {
       setLoading(false);
     }
   };
@@ -314,9 +348,12 @@ const NewPopularPage: React.FC = () => {
         >
           <div className="absolute inset-0">
             <img
-              src={getImageUrl(heroContent[heroIndex]?.backdrop_path || null, 'original')}
+              src={getImageUrl(heroContent[heroIndex]?.backdrop_path || null, 'w1280')}
               alt={heroContent[heroIndex]?.title || heroContent[heroIndex]?.name}
-              className="w-full h-full object-cover transition-transform duration-1000 ease-in-out"
+              className="w-full h-full object-cover transition-opacity duration-700 ease-in-out"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               onError={handleImageError}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-background-main via-background-main/60 to-transparent"></div>
@@ -496,17 +533,36 @@ const NewPopularPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Content Sections */}
+      {/* Content Sections — trendingNow eager; skip empty; lazy-gate rest (no empty shells) */}
       <div className="px-4 md:px-16 py-8 space-y-12">
-        {Object.entries(sections).map(([key, section]) => (
-          <ContentSection
-            key={key}
-            id={key}
-            title={section.title}
-            items={section.items}
-            type={section.type}
-          />
-        ))}
+        {Object.entries(sections).map(([key, section]) => {
+          const mount = resolveNewPopularSectionMount(key, section.items);
+          if (mount === 'skip') return null;
+
+          const body = (
+            <ContentSection
+              id={key}
+              title={section.title}
+              items={section.items}
+              type={section.type}
+            />
+          );
+
+          if (mount === 'eager') {
+            return <React.Fragment key={key}>{body}</React.Fragment>;
+          }
+
+          return (
+            <LazySection
+              key={key}
+              minHeight={360}
+              rootMargin="140px 0px"
+              aria-label={section.title}
+            >
+              {body}
+            </LazySection>
+          );
+        })}
       </div>
 
       {/* Back to top button */}
@@ -683,6 +739,7 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
   const actualHovered = shouldShowHover && (isHovered !== undefined ? isHovered : localIsHovered);
 
   const handleClick = () => {
+    if (item.id == null) return;
     analytics.trackContentClick({
       contentId: item.id,
       contentTitle: item.title || item.name || '',
@@ -706,10 +763,12 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
           )}
 
           <img
-            src={getImageUrl(item.poster_path || null, 'w500')}
+            src={getImageUrl(item.poster_path || null, 'w342')}
             alt={item.title || item.name}
-            className={`w-full h-full object-cover transition-all duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+            className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
               } ${actualHovered ? 'scale-110' : 'scale-100'}`}
+            loading="lazy"
+            decoding="async"
             onError={handleImageError}
             onLoad={() => setImageLoaded(true)}
           />

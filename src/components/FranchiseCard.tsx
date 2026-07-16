@@ -74,9 +74,11 @@ const FranchiseCard: React.FC<FranchiseCardProps> = ({ collection, onClick }) =>
         <div className="relative h-64 w-full overflow-hidden bg-gray-900">
           {collection.backdrop_path ? (
             <img
-              src={getBackdropUrl(collection.backdrop_path, 'w780')}
+              src={getBackdropUrl(collection.backdrop_path, 'w500')}
               alt={collection.name}
               className={`w-full h-full object-cover transition-transform duration-300 ${shouldShowHover ? 'group-hover:scale-110' : ''}`}
+              loading="lazy"
+              decoding="async"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = '/fallback-poster.jpg'; // A generic fallback
@@ -91,6 +93,8 @@ const FranchiseCard: React.FC<FranchiseCardProps> = ({ collection, onClick }) =>
                   src={getPosterUrl(film.poster_path, 'w342')}
                   alt={film.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/fallback-poster.jpg';
@@ -198,6 +202,8 @@ const FranchiseCard: React.FC<FranchiseCardProps> = ({ collection, onClick }) =>
                   src={getPosterUrl(film.poster_path, 'w92')}
                   alt={film.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     // Fallback to small themed poster placeholder

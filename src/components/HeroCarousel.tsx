@@ -169,12 +169,13 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
           }
         `}</style>
 
-        {/* Previous Image Layer (rendered underneath) */}
-        {prevBackdrop && (
+        {/* Previous Image Layer (rendered underneath) — w1280 not original */}
+        {prevBackdrop && isCrossFading && (
           <img
-            src={getImageUrl(prevBackdrop, 'original')}
+            src={getImageUrl(prevBackdrop, 'w1280')}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-top md:object-center brightness-[0.95] md:brightness-100 scale-102"
+            className="absolute inset-0 w-full h-full object-cover object-top md:object-center brightness-[0.95] md:brightness-100"
+            decoding="async"
           />
         )}
         
@@ -182,14 +183,17 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
         {activeBackdrop && (
           <img
             key={activeBackdrop}
-            src={getImageUrl(activeBackdrop, 'original')}
+            src={getImageUrl(activeBackdrop, 'w1280')}
             alt={currentItem.title}
             className={`absolute inset-0 w-full h-full object-cover object-top md:object-center brightness-[0.95] md:brightness-100 ${
-              isCrossFading ? 'opacity-0 animate-bg-fade' : 'scale-102 opacity-100'
+              isCrossFading ? 'opacity-0 animate-bg-fade' : 'opacity-100'
             }`}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = getImageUrl(currentItem.poster_path, 'original');
+              target.src = getImageUrl(currentItem.poster_path, 'w780');
             }}
           />
         )}

@@ -291,10 +291,11 @@ const ContinueWatchingPage: React.FC = () => {
                                 <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-gray-900 border border-white/5 shadow-md">
                                     {item.content.backdrop_path || item.content.poster_path ? (
                                         <img
-                                            src={getPosterUrl(item.content.backdrop_path || item.content.poster_path, 'w500')}
+                                            src={getPosterUrl(item.content.backdrop_path || item.content.poster_path, 'w342')}
                                             alt={item.content.title || item.content.name}
                                             className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
                                             loading="lazy"
+                                            decoding="async"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-gray-800">

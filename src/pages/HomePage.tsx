@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useSmartPlayer } from '../hooks/useSmartPlayer';
 import {
@@ -32,11 +32,14 @@ import { Movie, TVShow, MovieCredits } from '../types';
 import AddToListButton from '../components/AddToListButton';
 import LikeButton from '../components/LikeButton';
 import ContentCarousel from '../components/ContentCarousel';
+import LazySection from '../components/LazySection';
 import { SEOHead } from '../components/layout/SEOHead';
 
 import ContinueWatching from '../components/Home/ContinueWatching';
-import BrowseByGenre from '../components/Home/BrowseByGenre';
-import PlatformsSection from '../components/Home/PlatformsSection';
+
+// Below-the-fold home sections — code-split so they don't block first paint
+const BrowseByGenre = lazy(() => import('../components/Home/BrowseByGenre'));
+const PlatformsSection = lazy(() => import('../components/Home/PlatformsSection'));
 
 interface TypeToggleProps {
   readonly selected: 'movie' | 'tv';
@@ -87,7 +90,6 @@ const HomePage = (): JSX.Element => {
   const [activeBackdrop, setActiveBackdrop] = useState<string | null>(null);
   const [prevBackdrop, setPrevBackdrop] = useState<string | null>(null);
   const [activePoster, setActivePoster] = useState<string | null>(null);
-  const [prevPoster, setPrevPoster] = useState<string | null>(null);
   const [isCrossFading, setIsCrossFading] = useState(false);
 
   const currentBackdrop = heroMovie?.backdrop_path || heroMovie?.poster_path;
@@ -101,7 +103,6 @@ const HomePage = (): JSX.Element => {
         const timer = setTimeout(() => setIsCrossFading(false), 1000);
         setActiveBackdrop(currentBackdrop);
         if (currentPoster) {
-          setPrevPoster(activePoster);
           setActivePoster(currentPoster);
         }
         return () => clearTimeout(timer);
@@ -112,7 +113,7 @@ const HomePage = (): JSX.Element => {
         }
       }
     }
-  }, [currentBackdrop, activeBackdrop, currentPoster, activePoster]);
+  }, [currentBackdrop, activeBackdrop, currentPoster]);
 
   // Content Types
   const [trendingType, setTrendingType] = useState<'movie' | 'tv'>('movie');
@@ -131,6 +132,7 @@ const HomePage = (): JSX.Element => {
   const [isPopularLoading, setIsPopularLoading] = useState(false);
   const [isTopRatedLoading, setIsTopRatedLoading] = useState(false);
   const [isNowPlayingLoading, setIsNowPlayingLoading] = useState(false);
+  const [secondaryRowsLoaded, setSecondaryRowsLoaded] = useState(false);
 
   const handleToggleSection = async (section: 'trending' | 'popular' | 'topRated' | 'nowPlaying', type: 'movie' | 'tv'): Promise<void> => {
     if (section === 'trending') {
@@ -139,7 +141,7 @@ const HomePage = (): JSX.Element => {
         setIsTrendingLoading(true);
         try {
           const response = await getTrendingTVShows();
-          setTrendingTVShows(response.results.slice(0, 20));
+          setTrendingTVShows(response.results.slice(0, 16));
         } catch (error) {
           console.error('Error fetching trending TV shows:', error);
         } finally {
@@ -152,7 +154,7 @@ const HomePage = (): JSX.Element => {
         setIsPopularLoading(true);
         try {
           const response = await getPopularTVShows();
-          setPopularTVShows(response.results.slice(0, 20));
+          setPopularTVShows(response.results.slice(0, 16));
         } catch (error) {
           console.error('Error fetching popular TV shows:', error);
         } finally {
@@ -165,7 +167,7 @@ const HomePage = (): JSX.Element => {
         setIsTopRatedLoading(true);
         try {
           const response = await getTopRatedTVShows();
-          setTopRatedTVShows(response.results.slice(0, 20));
+          setTopRatedTVShows(response.results.slice(0, 16));
         } catch (error) {
           console.error('Error fetching top rated TV shows:', error);
         } finally {
@@ -178,7 +180,7 @@ const HomePage = (): JSX.Element => {
         setIsNowPlayingLoading(true);
         try {
           const response = await getAiringTodayTVShows();
-          setNowPlayingTVShows(response.results.slice(0, 20));
+          setNowPlayingTVShows(response.results.slice(0, 16));
         } catch (error) {
           console.error('Error fetching now playing TV shows:', error);
         } finally {
@@ -188,19 +190,18 @@ const HomePage = (): JSX.Element => {
     }
   };
 
-
+  /** Critical path: hero + trending only — paint ASAP */
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCritical = async () => {
       try {
         setLoading(true);
 
-        // Fetch trending movies for hero rotation
         const trendingResponse = await getTrendingMovies();
         if (trendingResponse.results.length > 0) {
-          const heroMoviesList = trendingResponse.results.slice(0, 12); // Use top 12 for hero rotation
+          // Fewer hero slides = fewer detail/credits round-trips while rotating
+          const heroMoviesList = trendingResponse.results.slice(0, 6);
           setHeroMovies(heroMoviesList);
 
-          // Fetch detailed info for the first hero movie
           const firstHeroMovie = heroMoviesList[0];
           const [movieDetails, movieCredits] = await Promise.all([
             getMovieDetails(firstHeroMovie.id),
@@ -209,28 +210,57 @@ const HomePage = (): JSX.Element => {
 
           setHeroMovie(movieDetails);
           setHeroCredits(movieCredits);
-          setTrendingMovies(trendingResponse.results.slice(5, 20)); // Use original slice for carousel (15 movies like original)
+          setTrendingMovies(trendingResponse.results.slice(5, 18));
         }
-
-        // Fetch other categories
-        const [popularResponse, topRatedResponse, nowPlayingResponse] = await Promise.all([
-          getPopularMovies(),
-          getTopRatedMovies(),
-          getNowPlayingMovies(),
-        ]);
-
-        setPopularMovies(popularResponse.results.slice(0, 20));
-        setTopRatedMovies(topRatedResponse.results.slice(0, 20));
-        setNowPlayingMovies(nowPlayingResponse.results.slice(0, 20));
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching critical home data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchCritical();
   }, []);
+
+  /** Secondary rows: idle / after first paint so they don't compete with hero images */
+  const loadSecondaryRows = useCallback(async () => {
+    if (secondaryRowsLoaded) return;
+    setSecondaryRowsLoaded(true);
+    try {
+      const [popularResponse, topRatedResponse, nowPlayingResponse] = await Promise.all([
+        getPopularMovies(),
+        getTopRatedMovies(),
+        getNowPlayingMovies(),
+      ]);
+
+      setPopularMovies(popularResponse.results.slice(0, 16));
+      setTopRatedMovies(topRatedResponse.results.slice(0, 16));
+      setNowPlayingMovies(nowPlayingResponse.results.slice(0, 16));
+    } catch (error) {
+      console.error('Error fetching secondary home rows:', error);
+      setSecondaryRowsLoaded(false);
+    }
+  }, [secondaryRowsLoaded]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const schedule =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 1500 })
+        : (cb: () => void) => window.setTimeout(cb, 200);
+
+    const cancel =
+      typeof window !== 'undefined' && 'cancelIdleCallback' in window
+        ? (id: number) => window.cancelIdleCallback(id)
+        : (id: number) => window.clearTimeout(id);
+
+    const id = schedule(() => {
+      void loadSecondaryRows();
+    }) as number;
+
+    return () => cancel(id);
+  }, [loading, loadSecondaryRows]);
 
   // Hero auto-play functionality
   useEffect(() => {
@@ -383,50 +413,47 @@ const HomePage = (): JSX.Element => {
               }
             `}</style>
 
-            {/* Mobile/Tablet: Blurred poster for ambient color background */}
-            {prevPoster && (
-              <img
-                src={getPosterUrl(prevPoster, 'w342')}
-                alt=""
-                aria-hidden="true"
-                className="md:hidden absolute inset-0 w-full h-full object-cover scale-110"
-                style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
-              />
-            )}
+            {/* Mobile ambient: tiny poster scaled up — avoid live CSS blur (main-thread jank) */}
             {activePoster && (
               <img
                 key={`mobile-${activePoster}`}
-                src={getPosterUrl(activePoster, 'w342')}
+                src={getPosterUrl(activePoster, 'w185')}
                 alt=""
                 aria-hidden="true"
-                className={`md:hidden absolute inset-0 w-full h-full object-cover scale-110 transition-opacity duration-1000 ${
-                  isCrossFading ? 'opacity-0' : 'opacity-100'
+                className={`md:hidden absolute inset-0 w-full h-full object-cover scale-125 transition-opacity duration-700 ${
+                  isCrossFading ? 'opacity-40' : 'opacity-70'
                 }`}
-                style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
                 }}
               />
             )}
 
-            {/* Desktop: Horizontal Backdrop */}
-            {prevBackdrop && (
+            {/* Desktop: w1280 is enough for full-bleed hero (original can be 5MB+) */}
+            {prevBackdrop && isCrossFading && (
               <img
-                src={getBackdropUrl(prevBackdrop, 'original')}
+                src={getBackdropUrl(prevBackdrop, 'w1280')}
                 alt=""
-                className="hidden md:block absolute inset-0 w-full h-full object-cover brightness-[0.95] md:brightness-100 scale-102"
+                className="hidden md:block absolute inset-0 w-full h-full object-cover brightness-[0.95] md:brightness-100"
+                decoding="async"
               />
             )}
             {activeBackdrop && (
               <img
                 key={`desktop-${activeBackdrop}`}
-                src={getBackdropUrl(activeBackdrop, 'original')}
+                src={getBackdropUrl(activeBackdrop, 'w1280')}
                 alt={heroMovie.title}
                 className={`hidden md:block absolute inset-0 w-full h-full object-cover brightness-[0.95] md:brightness-100 ${
-                  isCrossFading ? 'opacity-0 animate-bg-fade' : 'scale-102 opacity-100'
+                  isCrossFading ? 'opacity-0 animate-bg-fade' : 'opacity-100'
                 }`}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = getImageUrl(heroMovie.poster_path, 'original');
+                  (e.target as HTMLImageElement).src = getImageUrl(heroMovie.poster_path, 'w780');
                 }}
               />
             )}
@@ -469,9 +496,12 @@ const HomePage = (): JSX.Element => {
             {/* Floating Poster Card */}
             <div className="w-[58%] max-w-[220px] sm:max-w-[240px] flex-shrink-0 mb-4 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
               <img
-                src={getPosterUrl(heroMovie.poster_path, 'w500')}
+                src={getPosterUrl(heroMovie.poster_path, 'w342')}
                 alt={heroMovie.title}
-                className="w-full rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-white/10 transition-transform duration-300"
+                className="w-full rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-white/10"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
                 }}
@@ -605,6 +635,9 @@ const HomePage = (): JSX.Element => {
                     src={getPosterUrl(heroMovie.poster_path, 'w500')}
                     alt={heroMovie.title}
                     className="w-full rounded-xl shadow-2xl border-4 border-white/10 hover:scale-105 transition-transform duration-300"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
                     }}
@@ -754,89 +787,90 @@ const HomePage = (): JSX.Element => {
         </div>
       )}
 
-      {/* Content Carousels */}
+      {/* Content Carousels — staggered mount; only near-viewport rows hydrate cards */}
       <div className="relative mt-8 sm:mt-12 md:-mt-32 z-10">
-        <div className="space-y-6 pb-6">
-          <div className="animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+        <div className="space-y-10 pb-6">
+          <LazySection minHeight={200} rootMargin="80px 0px" aria-label="Continue watching">
             <ContinueWatching />
-          </div>
+          </LazySection>
 
           {(trendingMovies.length > 0 || trendingTVShows.length > 0) && (
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-              <ContentCarousel
-                title="🔥 Trending Now"
-                items={trendingType === 'movie' ? trendingMovies : trendingTVShows}
-                type={trendingType}
-                loading={isTrendingLoading}
-                headerAction={
-                  <TypeToggle
-                    selected={trendingType}
-                    onChange={(type) => handleToggleSection('trending', type)}
-                  />
-                }
-              />
-            </div>
+            <ContentCarousel
+              title="🔥 Trending Now"
+              items={trendingType === 'movie' ? trendingMovies : trendingTVShows}
+              type={trendingType}
+              loading={isTrendingLoading}
+              eager
+              headerAction={
+                <TypeToggle
+                  selected={trendingType}
+                  onChange={(type) => handleToggleSection('trending', type)}
+                />
+              }
+            />
           )}
 
-          {(popularMovies.length > 0 || popularTVShows.length > 0) && (
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
-              <ContentCarousel
-                title="⭐ Popular on CINEFLIX"
-                items={popularType === 'movie' ? popularMovies : popularTVShows}
-                type={popularType}
-                loading={isPopularLoading}
-                headerAction={
-                  <TypeToggle
-                    selected={popularType}
-                    onChange={(type) => handleToggleSection('popular', type)}
-                  />
-                }
-              />
-            </div>
-          )}
+          <LazySection
+            minHeight={340}
+            rootMargin="160px 0px"
+            onActivate={loadSecondaryRows}
+            aria-label="Popular titles"
+          >
+            <ContentCarousel
+              title="⭐ Popular on CINEFLIX"
+              items={popularType === 'movie' ? popularMovies : popularTVShows}
+              type={popularType}
+              loading={isPopularLoading || (!secondaryRowsLoaded && popularMovies.length === 0)}
+              headerAction={
+                <TypeToggle
+                  selected={popularType}
+                  onChange={(type) => handleToggleSection('popular', type)}
+                />
+              }
+            />
+          </LazySection>
 
-          {(topRatedMovies.length > 0 || topRatedTVShows.length > 0) && (
-            <div className="-mt-32 animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
-              <ContentCarousel
-                title="🏆 Top Rated"
-                items={topRatedType === 'movie' ? topRatedMovies : topRatedTVShows}
-                type={topRatedType}
-                loading={isTopRatedLoading}
-                headerAction={
-                  <TypeToggle
-                    selected={topRatedType}
-                    onChange={(type) => handleToggleSection('topRated', type)}
-                  />
-                }
-              />
-            </div>
-          )}
+          <LazySection minHeight={340} rootMargin="160px 0px" aria-label="Top rated titles">
+            <ContentCarousel
+              title="🏆 Top Rated"
+              items={topRatedType === 'movie' ? topRatedMovies : topRatedTVShows}
+              type={topRatedType}
+              loading={isTopRatedLoading || (!secondaryRowsLoaded && topRatedMovies.length === 0)}
+              headerAction={
+                <TypeToggle
+                  selected={topRatedType}
+                  onChange={(type) => handleToggleSection('topRated', type)}
+                />
+              }
+            />
+          </LazySection>
 
-          {(nowPlayingMovies.length > 0 || nowPlayingTVShows.length > 0) && (
-            <div className="-mt-32 animate-fade-in-up" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
-              <ContentCarousel
-                title="🎬 Now Playing"
-                items={nowPlayingType === 'movie' ? nowPlayingMovies : nowPlayingTVShows}
-                type={nowPlayingType}
-                loading={isNowPlayingLoading}
-                headerAction={
-                  <TypeToggle
-                    selected={nowPlayingType}
-                    onChange={(type) => handleToggleSection('nowPlaying', type)}
-                  />
-                }
-              />
-            </div>
-          )}
+          <LazySection minHeight={340} rootMargin="160px 0px" aria-label="Now playing titles">
+            <ContentCarousel
+              title="🎬 Now Playing"
+              items={nowPlayingType === 'movie' ? nowPlayingMovies : nowPlayingTVShows}
+              type={nowPlayingType}
+              loading={isNowPlayingLoading || (!secondaryRowsLoaded && nowPlayingMovies.length === 0)}
+              headerAction={
+                <TypeToggle
+                  selected={nowPlayingType}
+                  onChange={(type) => handleToggleSection('nowPlaying', type)}
+                />
+              }
+            />
+          </LazySection>
 
-          <div className="-mt-24 md:-mt-28 animate-fade-in-up" style={{ animationDelay: '1.0s', animationFillMode: 'both' }}>
-            <BrowseByGenre />
-          </div>
+          <LazySection minHeight={420} rootMargin="120px 0px" aria-label="Browse by genre">
+            <Suspense fallback={<div className="h-[420px] animate-pulse rounded-xl bg-white/[0.03]" />}>
+              <BrowseByGenre />
+            </Suspense>
+          </LazySection>
 
-          {/* Platforms Logo Loop — bottom of page */}
-          <div className="-mt-16 md:-mt-20 animate-fade-in-up" style={{ animationDelay: '1.2s', animationFillMode: 'both' }}>
-            <PlatformsSection />
-          </div>
+          <LazySection minHeight={200} rootMargin="100px 0px" aria-label="Streaming platforms">
+            <Suspense fallback={<div className="h-[200px] animate-pulse rounded-xl bg-white/[0.03]" />}>
+              <PlatformsSection />
+            </Suspense>
+          </LazySection>
         </div>
       </div>
     </div>

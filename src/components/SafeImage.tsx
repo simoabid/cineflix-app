@@ -8,6 +8,10 @@ interface SafeImageProps {
   readonly mediaType: 'movie' | 'tv';
   readonly className?: string;
   readonly loading?: 'lazy' | 'eager';
+  /** Hint browser for LCP / priority images */
+  readonly fetchPriority?: 'high' | 'low' | 'auto';
+  /** Responsive sizes hint for the browser */
+  readonly sizes?: string;
 }
 
 /**
@@ -22,6 +26,8 @@ const SafeImage: React.FC<SafeImageProps> = ({
   mediaType,
   className = '',
   loading = 'lazy',
+  fetchPriority = 'auto',
+  sizes,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -53,14 +59,12 @@ const SafeImage: React.FC<SafeImageProps> = ({
   return (
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
       {isLoading && (
-        <div className="absolute inset-0 bg-background-secondary animate-pulse flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-buttons-purple border-t-transparent rounded-full animate-spin" />
-        </div>
+        <div className="absolute inset-0 bg-background-secondary animate-pulse" aria-hidden="true" />
       )}
       <img
         src={src}
         alt={alt}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
+        className={`w-full h-full object-cover transition-opacity duration-200 ${
           isLoading ? 'opacity-0' : 'opacity-100'
         }`}
         onLoad={() => setIsLoading(false)}
@@ -69,6 +73,10 @@ const SafeImage: React.FC<SafeImageProps> = ({
           setHasError(true);
         }}
         loading={loading}
+        decoding="async"
+        fetchPriority={fetchPriority}
+        sizes={sizes}
+        draggable={false}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { TVShow, Genre } from '../types';
 import {
   getTrendingTVShows,
@@ -12,8 +12,10 @@ import {
 } from '../services/tmdb';
 import HeroCarousel from '../components/HeroCarousel';
 import ContentCarousel from '../components/ContentCarousel';
+import LazySection from '../components/LazySection';
 import FilterBar from '../components/FilterBar';
 import { SEOHead } from '../components/layout/SEOHead';
+import { DEFAULT_ROW_ITEM_LIMIT, limitForInitialPaint } from '../utils/progressiveRender';
 
 interface TVShowsProps { }
 
@@ -27,6 +29,37 @@ interface HeroSlide {
   first_air_date: string;
   trailerKey?: string;
 }
+
+/** Primary rows only — injectable for tests */
+export const loadPrimaryTVShows = async (
+  getTrendingFn: (page?: number) => Promise<any> = getTrendingTVShows,
+  getPopularFn: (page?: number) => Promise<any> = getPopularTVShows,
+  getTopRatedFn: (page?: number) => Promise<any> = getTopRatedTVShows,
+  getOnAirFn: (page?: number) => Promise<any> = getAiringTodayTVShows,
+  getGenresFn: () => Promise<any> = getTVGenres,
+  itemLimit: number = DEFAULT_ROW_ITEM_LIMIT
+) => {
+  const [trending, popular, topRated, onAir, genreList] = await Promise.all([
+    getTrendingFn(1),
+    getPopularFn(1),
+    getTopRatedFn(1),
+    getOnAirFn(1),
+    getGenresFn(),
+  ]);
+
+  const cap = (res: { results?: TVShow[] } | null | undefined): TVShow[] => {
+    const results: TVShow[] = Array.isArray(res?.results) ? res.results : [];
+    return limitForInitialPaint(results, itemLimit);
+  };
+
+  return {
+    trending: cap(trending),
+    popular: cap(popular),
+    topRated: cap(topRated),
+    onAir: cap(onAir),
+    genres: (Array.isArray(genreList) ? genreList : []) as Genre[],
+  };
+};
 
 const TVShows: React.FC<TVShowsProps> = () => {
   const [heroShows, setHeroShows] = useState<HeroSlide[]>([]);
@@ -44,32 +77,39 @@ const TVShows: React.FC<TVShowsProps> = () => {
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-
-  // Cache for genre data
-  const genreCache = useMemo(() => new Map(), []);
+  const [genreLoadingIds, setGenreLoadingIds] = useState<Record<number, boolean>>({});
+  const genreFetchInflight = useRef<Set<number>>(new Set());
+  const genreCache = useMemo(() => new Map<number, TVShow[]>(), []);
 
   const fetchHeroShows = useCallback(async () => {
     try {
       const trending = await getTrendingTVShows(1);
       const featured = trending.results.slice(0, 5);
 
-      // Fetch trailer data for each featured show
+      // Only enrich first 2 with trailer network calls
       const heroData = await Promise.all(
-        featured.map(async (show) => {
+        featured.map(async (show, index) => {
+          if (index >= 2) {
+            return {
+              ...show,
+              title: show.name,
+              trailerKey: undefined,
+            };
+          }
           try {
             const videos = await getTVShowVideos(show.id);
             const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             return {
               ...show,
               title: show.name,
-              trailerKey: trailer?.key
+              trailerKey: trailer?.key,
             };
           } catch (error) {
             console.error(`Error fetching videos for show ${show.id}:`, error);
             return {
               ...show,
               title: show.name,
-              trailerKey: undefined
+              trailerKey: undefined,
             };
           }
         })
@@ -83,71 +123,67 @@ const TVShows: React.FC<TVShowsProps> = () => {
 
   const fetchGenreShows = useCallback(async (genreId: number) => {
     if (genreCache.has(genreId)) {
-      return genreCache.get(genreId);
+      return genreCache.get(genreId)!;
     }
 
     try {
       const response = await discoverTVShowsByGenre(genreId, 1);
-      genreCache.set(genreId, response.results);
-      return response.results;
+      const results = limitForInitialPaint(response.results);
+      genreCache.set(genreId, results);
+      return results;
     } catch (error) {
       console.error(`Error fetching shows for genre ${genreId}:`, error);
       return [];
     }
   }, [genreCache]);
 
-  const fetchAllData = useCallback(async () => {
+  const fetchPrimaryData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all data in parallel
-      const [
-        trending,
-        popular,
-        topRated,
-        onAir,
-        genreList
-      ] = await Promise.all([
-        getTrendingTVShows(1),
-        getPopularTVShows(1),
-        getTopRatedTVShows(1),
-        getAiringTodayTVShows(1),
-        getTVGenres()
-      ]);
-
-      setTrendingShows(trending.results);
-      setPopularShows(popular.results);
-      setTopRatedShows(topRated.results);
-      setOnAirShows(onAir.results);
-      setGenres(genreList);
-
-      // Fetch shows for each genre
-      const genreShowsData: { [key: string]: TVShow[] } = {};
-      await Promise.all(
-        genreList.map(async (genre) => {
-          const shows = await fetchGenreShows(genre.id);
-          genreShowsData[genre.name] = shows;
-        })
-      );
-      setGenreRows(genreShowsData);
-
-      // Initialize filtered shows with trending
-      setFilteredShows(trending.results);
+      const data = await loadPrimaryTVShows();
+      setTrendingShows(data.trending);
+      setPopularShows(data.popular);
+      setTopRatedShows(data.topRated);
+      setOnAirShows(data.onAir);
+      setGenres(data.genres);
+      setGenreRows({});
+      setFilteredShows(data.trending);
     } catch (error) {
       console.error('Error fetching TV shows data:', error);
     } finally {
       setLoading(false);
     }
-  }, [fetchGenreShows]);
+  }, []);
+
+  const ensureGenreRow = useCallback(async (genre: Genre) => {
+    if (genreRows[genre.name] !== undefined) return;
+    if (genreFetchInflight.current.has(genre.id)) return;
+    genreFetchInflight.current.add(genre.id);
+    setGenreLoadingIds((prev) => ({ ...prev, [genre.id]: true }));
+    try {
+      const shows = await fetchGenreShows(genre.id);
+      setGenreRows((prev) => ({ ...prev, [genre.name]: shows }));
+    } catch (err) {
+      console.error(`Error loading genre row ${genre.name}:`, err);
+      setGenreRows((prev) => ({ ...prev, [genre.name]: [] }));
+    } finally {
+      genreFetchInflight.current.delete(genre.id);
+      setGenreLoadingIds((prev) => {
+        const next = { ...prev };
+        delete next[genre.id];
+        return next;
+      });
+    }
+  }, [genreRows, fetchGenreShows]);
 
   useEffect(() => {
-    fetchAllData();
-    fetchHeroShows();
-  }, [fetchAllData, fetchHeroShows]);
+    void fetchPrimaryData();
+    void fetchHeroShows();
+  }, [fetchPrimaryData, fetchHeroShows]);
 
-  // Fetch advanced search/filter results from TMDB API dynamically
   useEffect(() => {
     const isFilteringActive = Boolean(searchQuery) || Boolean(selectedGenre) || Boolean(selectedYear) || selectedRating > 0;
-    
+
     if (!isFilteringActive) {
       setFilteredShows([]);
       setIsFilteringLoading(false);
@@ -167,7 +203,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
           minRating: selectedRating,
           page: 1
         });
-        
+
         if (active) {
           setFilteredShows(response.results || []);
         }
@@ -183,7 +219,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
       }
     };
 
-    fetchFilteredResults();
+    void fetchFilteredResults();
     return () => {
       active = false;
     };
@@ -204,10 +240,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
     return (
       <div className="min-h-screen bg-background-main flex items-center justify-center">
         <div className="relative">
-          {/* Main thick spinner */}
           <div className="h-32 w-32 netflix-spinner-thick" />
-
-          {/* Ripple effects */}
           <div className="h-32 w-32 netflix-ripple" />
           <div className="h-32 w-32 netflix-ripple" style={{ animationDelay: '0.5s' }} />
         </div>
@@ -221,7 +254,6 @@ const TVShows: React.FC<TVShowsProps> = () => {
         title="TV Shows"
         description="Browse trending, popular, top-rated, and on-the-air TV shows on CINEFLIX."
       />
-      {/* Hero Carousel */}
       {heroShows.length > 0 && (
         <HeroCarousel
           items={heroShows}
@@ -230,7 +262,6 @@ const TVShows: React.FC<TVShowsProps> = () => {
         />
       )}
 
-      {/* Filter Bar */}
       <FilterBar
         genres={genres}
         years={years}
@@ -247,10 +278,8 @@ const TVShows: React.FC<TVShowsProps> = () => {
         type="tv"
       />
 
-      {/* Content Rows */}
       <div className="px-4 sm:px-8 py-8 space-y-12">
         {searchQuery || selectedGenre || selectedYear || selectedRating > 0 ? (
-          // Filtered results
           isFilteringLoading ? (
             <div className="flex flex-col gap-4 py-8">
               <h2 className="text-2xl font-bold tracking-tight text-white/90 px-4">Searching catalog...</h2>
@@ -265,6 +294,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
               title="Search Results"
               items={filteredShows}
               type="tv"
+              eager
             />
           ) : (
             <div className="text-center py-16">
@@ -273,44 +303,56 @@ const TVShows: React.FC<TVShowsProps> = () => {
             </div>
           )
         ) : (
-          // Default rows
           <>
             <ContentCarousel
               title="Trending Now"
               items={trendingShows}
               type="tv"
+              eager
             />
 
-            <ContentCarousel
-              title="Popular on CineFlix"
-              items={popularShows}
-              type="tv"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Popular TV shows">
+              <ContentCarousel
+                title="Popular on CineFlix"
+                items={popularShows}
+                type="tv"
+              />
+            </LazySection>
 
-            <ContentCarousel
-              title="Top Rated"
-              items={topRatedShows}
-              type="tv"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="Top rated TV shows">
+              <ContentCarousel
+                title="Top Rated"
+                items={topRatedShows}
+                type="tv"
+              />
+            </LazySection>
 
-            <ContentCarousel
-              title="On the Air"
-              items={onAirShows}
-              type="tv"
-            />
+            <LazySection minHeight={340} rootMargin="140px 0px" aria-label="On the air shows">
+              <ContentCarousel
+                title="On the Air"
+                items={onAirShows}
+                type="tv"
+              />
+            </LazySection>
 
-            {/* Genre Rows */}
-            {genres.map((genre) => {
-              const shows = genreRows[genre.name];
-              return shows && shows.length > 0 ? (
+            {genres.map((genre) => (
+              <LazySection
+                key={genre.id}
+                minHeight={340}
+                rootMargin="160px 0px"
+                onActivate={() => {
+                  void ensureGenreRow(genre);
+                }}
+                aria-label={`${genre.name} TV shows`}
+              >
                 <ContentCarousel
-                  key={genre.id}
                   title={genre.name}
-                  items={shows}
+                  items={genreRows[genre.name] || []}
                   type="tv"
+                  loading={Boolean(genreLoadingIds[genre.id]) || genreRows[genre.name] === undefined}
                 />
-              ) : null;
-            })}
+              </LazySection>
+            ))}
           </>
         )}
       </div>

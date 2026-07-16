@@ -378,6 +378,7 @@ const GridView: React.FC<GridViewProps> = ({
               alt={title}
               className="w-full h-full object-cover"
               loading="lazy"
+              decoding="async"
             />
 
             {/* Progress Bar */}

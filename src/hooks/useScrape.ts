@@ -115,7 +115,7 @@ function extractBaseUrl(url: string): string {
  * Checks if two streams point to the same underlying source.
  * Handles CinePro proxy URLs by extracting the original URL before comparing.
  */
-function isDuplicateStream(s1: Stream, s2: Stream): boolean {
+export function isDuplicateStream(s1: Stream, s2: Stream): boolean {
   if (s1.type === 'hls' && s2.type === 'hls') {
     return extractBaseUrl(s1.playlist) === extractBaseUrl(s2.playlist);
   }

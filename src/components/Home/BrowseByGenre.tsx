@@ -23,9 +23,9 @@ const GenreLandscapeCard: React.FC<GenreLandscapeCardProps> = ({ item, type }) =
     const year = dateStr ? new Date(dateStr).getFullYear() : '';
     const rating = item.vote_average;
 
-    const backdropUrl = item.backdrop_path 
-        ? getBackdropUrl(item.backdrop_path, 'w500') 
-        : (item.poster_path ? getPosterUrl(item.poster_path, 'w500') : '');
+    const backdropUrl = item.backdrop_path
+        ? getBackdropUrl(item.backdrop_path, 'w300')
+        : (item.poster_path ? getPosterUrl(item.poster_path, 'w342') : '');
 
     return (
         <Link
@@ -119,29 +119,64 @@ const BrowseByGenre: React.FC = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Fetch genres on mount
+    // Defer network until near viewport (parent LazySection may still mount us early)
     useEffect(() => {
-        const fetchGenres = async () => {
-            try {
-                const [movieGenresList, tvGenresList] = await Promise.all([
-                    getMovieGenres(),
-                    getTVGenres()
-                ]);
-                setMovieGenres(movieGenresList);
-                setTVGenres(tvGenresList);
+        const node = sectionRef.current;
+        if (!node) return;
 
-                // Set initial genre
-                if (movieGenresList.length > 0) {
-                    setSelectedGenreId(movieGenresList[0].id);
+        let cancelled = false;
+
+        const startDataLoad = () => {
+            if (cancelled) return;
+            setIsVisible(true);
+            const fetchGenres = async () => {
+                try {
+                    const [movieGenresList, tvGenresList] = await Promise.all([
+                        getMovieGenres(),
+                        getTVGenres()
+                    ]);
+                    if (cancelled) return;
+                    setMovieGenres(movieGenresList);
+                    setTVGenres(tvGenresList);
+                    if (movieGenresList.length > 0) {
+                        setSelectedGenreId(movieGenresList[0].id);
+                    }
+                } catch (error) {
+                    console.error('Error fetching genres in BrowseByGenre component:', error);
+                } finally {
+                    if (!cancelled) setGenresLoading(false);
                 }
-            } catch (error) {
-                console.error('Error fetching genres in BrowseByGenre component:', error);
-            } finally {
-                setGenresLoading(false);
-            }
+            };
+            void fetchGenres();
         };
 
-        fetchGenres();
+        if (typeof IntersectionObserver === 'undefined') {
+            startDataLoad();
+            return () => {
+                cancelled = true;
+            };
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        startDataLoad();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            {
+                threshold: 0,
+                rootMargin: '150px 0px 0px 0px'
+            }
+        );
+
+        observer.observe(node);
+        return () => {
+            cancelled = true;
+            observer.disconnect();
+        };
     }, []);
 
     // Current active genres based on selected type
@@ -155,9 +190,9 @@ const BrowseByGenre: React.FC = () => {
         return found ? found.name : '';
     }, [selectedGenreId, activeGenres]);
 
-    // Fetch items when type or genre changes
+    // Fetch items when type or genre changes (only after section activated)
     useEffect(() => {
-        if (selectedGenreId === null) return;
+        if (!isVisible || selectedGenreId === null) return;
 
         const fetchItems = async () => {
             setItemsLoading(true);
@@ -166,45 +201,20 @@ const BrowseByGenre: React.FC = () => {
                     ? await discoverMoviesByGenre(selectedGenreId, 1)
                     : await discoverTVShowsByGenre(selectedGenreId, 1);
 
-                setItems(response.results);
+                setItems(response.results.slice(0, 16));
             } catch (error) {
                 console.error(`Error fetching browse genre items (genreId: ${selectedGenreId}):`, error);
                 setItems([]);
             } finally {
                 setItemsLoading(false);
-                // Reset scroll position to beginning on new category load
                 if (scrollRef.current) {
                     scrollRef.current.scrollLeft = 0;
                 }
             }
         };
 
-        fetchItems();
-    }, [selectedType, selectedGenreId]);
-
-    // Intersection Observer for section entry animation
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setIsVisible(true);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            },
-            {
-                threshold: 0.05,
-                rootMargin: '100px 0px 0px 0px'
-            }
-        );
-
-        if (sectionRef.current) {
-            observer.observe(sectionRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, []);
+        void fetchItems();
+    }, [selectedType, selectedGenreId, isVisible]);
 
     // Monitor scroll behavior of the items container
     const updateScrollState = useCallback(() => {

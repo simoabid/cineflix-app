@@ -7,15 +7,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  Info,
   Layers,
   LayoutGrid
 } from 'lucide-react';
 
 import { Movie, TVShow } from '../../types';
 import { getPosterUrl } from '../../services/tmdb';
-import AddToListButton from '../AddToListButton';
-import LikeButton from '../LikeButton';
 import { useSmartPlayer } from '../../hooks/useSmartPlayer';
 import { analytics } from '../../services/analytics';
 
@@ -30,7 +27,6 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
   const { openPlayer } = useSmartPlayer();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'similar' | 'recommended'>('similar');
-  const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -72,7 +68,6 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
 
   const switchTab = (tab: 'similar' | 'recommended') => {
     setActiveTab(tab);
-    setHoveredItem(null);
   };
 
   const handleWatchContent = (item: Movie | TVShow) => {
@@ -198,11 +193,10 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
                 WebkitOverflowScrolling: 'touch'
               }}
             >
-              {content.map((item, index) => {
+              {content.map((item) => {
                 const itemTitle = 'title' in item ? item.title : item.name;
                 const itemDate = 'release_date' in item ? item.release_date : item.first_air_date;
                 const contentType = 'title' in item ? 'movie' : 'tv';
-                const isHovered = hoveredItem === index;
 
                 return (
                   <motion.button

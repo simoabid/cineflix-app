@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { Movie, TVShow } from '../types';
@@ -71,6 +71,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
   });
 
   const widthClass = size === 'sm' ? 'w-32 sm:w-36 md:w-40 lg:w-48' : 'w-36 sm:w-40 md:w-48 lg:w-64';
+  // Card display width is ~128–256px — w342 is enough and ~40% smaller than w500
+  const posterSize = size === 'sm' ? 'w342' : 'w500';
 
   const handleClick = () => {
     if (item.id) {
@@ -89,7 +91,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
         (anchorRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
         (imdbContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
       }}
-      className={`relative flex-shrink-0 browse-card gpu-accelerate will-change-[transform,opacity] ${widthClass} ${className}`}
+      className={`relative flex-shrink-0 browse-card ${widthClass} ${className}`}
       onPointerEnter={shouldShowHover ? onPointerEnter : undefined}
       onPointerLeave={shouldShowHover ? onPointerLeave : undefined}
       onFocus={shouldShowHover ? onFocus : undefined}
@@ -102,15 +104,16 @@ const ContentCard: React.FC<ContentCardProps> = ({
         onClick={handleClick}
       >
         <div
-          className="relative aspect-[2/3] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gray-800 transition-opacity duration-300"
+          className="relative aspect-[2/3] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gray-800"
         >
           <SafeImage
-            src={getImageUrl(item.poster_path || null, 'w500')}
+            src={getImageUrl(item.poster_path || null, posterSize)}
             alt={title}
             title={title}
             mediaType={derivedType}
             className="w-full h-full"
             loading="lazy"
+            sizes={size === 'sm' ? '(max-width: 640px) 128px, (max-width: 1024px) 160px, 192px' : '(max-width: 640px) 144px, 256px'}
           />
 
           {/* Type badge */}
@@ -176,6 +179,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
   );
 };
 
-export default ContentCard;
+export default memo(ContentCard);
 
 

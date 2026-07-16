@@ -239,35 +239,36 @@ const Footer: React.FC = () => {
       id="cineflix-footer"
       className="relative bg-background-main overflow-hidden"
     >
-      {/* Premium Background Effects */}
+      {/* Premium Background Effects — heavy blurs only when footer is near viewport */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
-        {/* Deep gradient wash - blends into page background-main for seamless transition */}
         <div className="absolute top-0 w-full h-full bg-gradient-to-b from-background-main via-black/60 to-background-main" />
-
-        {/* Vibrant Glow Spot at bottom center */}
-        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[80%] h-[60%] bg-blue-900/30 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[60%] h-[40%] bg-indigo-600/10 blur-[100px] rounded-full" />
-
-
+        {isVisible && (
+          <>
+            <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[80%] h-[60%] bg-blue-900/30 blur-[120px] rounded-full" />
+            <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[60%] h-[40%] bg-indigo-600/10 blur-[100px] rounded-full" />
+          </>
+        )}
       </div>
 
-      {/* Massive Watermark Text */}
-      <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-full flex justify-center opacity-30 select-none pointer-events-none z-10">
-        <div className="flex items-start gap-[0.5vw]" style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}>
-          {['C', 'I', 'N', 'E', 'F', 'L', 'I', 'X'].map((letter, i) => {
-            const scales = [1.35, 1.25, 1.15, 1.1, 1.1, 1.15, 1.25, 1.35];
-            return (
-              <span
-                key={i}
-                className="text-type-logo text-[15vw] leading-none origin-top block"
-                style={{ transform: `scaleY(${scales[i]})` }}
-              >
-                {letter}
-              </span>
-            );
-          })}
+      {/* Watermark — skip giant per-letter DOM until footer is near */}
+      {isVisible && (
+        <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-full flex justify-center opacity-30 select-none pointer-events-none z-10">
+          <div className="flex items-start gap-[0.5vw]" style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}>
+            {['C', 'I', 'N', 'E', 'F', 'L', 'I', 'X'].map((letter, i) => {
+              const scales = [1.35, 1.25, 1.15, 1.1, 1.1, 1.15, 1.25, 1.35];
+              return (
+                <span
+                  key={i}
+                  className="text-type-logo text-[15vw] leading-none origin-top block"
+                  style={{ transform: `scaleY(${scales[i]})` }}
+                >
+                  {letter}
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <Container className="relative z-20">
 
