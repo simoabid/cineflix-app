@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { HelmetProvider } from 'react-helmet-async';
@@ -18,7 +18,7 @@ import CollectionsPage from './pages/CollectionsPage';
 import CollectionDetailPage from './pages/CollectionDetailPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import AccountPage from './pages/AccountPage';
+import SettingsPage from './pages/SettingsPage';
 import BrowsePage from './pages/BrowsePage';
 import ContinueWatchingPage from './pages/ContinueWatchingPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -38,6 +38,12 @@ import { useServiceWorker } from './hooks/useServiceWorker';
 function AnalyticsTracker(): null {
   usePageTracking();
   return null;
+}
+
+/** Legacy `/account` → `/settings`, keeping query + hash (e.g. #appearance). */
+function AccountToSettingsRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: '/settings', search, hash }} replace />;
 }
 
 function App() {
@@ -101,11 +107,10 @@ function App() {
                               <ContinueWatchingPage />
                             </ProtectedRoute>
                           } />
-                          <Route path="/account" element={
-                            <ProtectedRoute>
-                              <AccountPage />
-                            </ProtectedRoute>
-                          } />
+                          {/* Public settings (profile section gated inside page) */}
+                          <Route path="/settings" element={<SettingsPage />} />
+                          {/* Legacy account URL → settings (preserve hash via client location) */}
+                          <Route path="/account" element={<AccountToSettingsRedirect />} />
 
                           {/* Fallback */}
                           <Route path="*" element={<HomePage />} />

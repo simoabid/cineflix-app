@@ -52,7 +52,7 @@ export function SupportBanner(): JSX.Element | null {
               Learn more
             </Link>
             <Link
-              to="/account#support"
+              to="/settings#support"
               className="inline-flex min-h-[40px] items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-type-dimmed transition-colors hover:text-type-secondary"
             >
               Ad preferences

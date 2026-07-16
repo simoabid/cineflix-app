@@ -90,6 +90,7 @@ const HomePage = (): JSX.Element => {
   const [activeBackdrop, setActiveBackdrop] = useState<string | null>(null);
   const [prevBackdrop, setPrevBackdrop] = useState<string | null>(null);
   const [activePoster, setActivePoster] = useState<string | null>(null);
+  const [prevPoster, setPrevPoster] = useState<string | null>(null);
   const [isCrossFading, setIsCrossFading] = useState(false);
 
   const currentBackdrop = heroMovie?.backdrop_path || heroMovie?.poster_path;
@@ -103,6 +104,7 @@ const HomePage = (): JSX.Element => {
         const timer = setTimeout(() => setIsCrossFading(false), 1000);
         setActiveBackdrop(currentBackdrop);
         if (currentPoster) {
+          setPrevPoster(activePoster);
           setActivePoster(currentPoster);
         }
         return () => clearTimeout(timer);
@@ -113,7 +115,7 @@ const HomePage = (): JSX.Element => {
         }
       }
     }
-  }, [currentBackdrop, activeBackdrop, currentPoster]);
+  }, [currentBackdrop, activeBackdrop, currentPoster, activePoster]);
 
   // Content Types
   const [trendingType, setTrendingType] = useState<'movie' | 'tv'>('movie');
@@ -413,19 +415,26 @@ const HomePage = (): JSX.Element => {
               }
             `}</style>
 
-            {/* Mobile ambient: tiny poster scaled up — avoid live CSS blur (main-thread jank) */}
+            {/* Mobile/Tablet: Blurred poster for ambient color glow (not a readable poster behind the card) */}
+            {prevPoster && (
+              <img
+                src={getPosterUrl(prevPoster, 'w342')}
+                alt=""
+                aria-hidden="true"
+                className="md:hidden absolute inset-0 w-full h-full object-cover scale-110"
+                style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
+              />
+            )}
             {activePoster && (
               <img
                 key={`mobile-${activePoster}`}
-                src={getPosterUrl(activePoster, 'w185')}
+                src={getPosterUrl(activePoster, 'w342')}
                 alt=""
                 aria-hidden="true"
-                className={`md:hidden absolute inset-0 w-full h-full object-cover scale-125 transition-opacity duration-700 ${
-                  isCrossFading ? 'opacity-40' : 'opacity-70'
+                className={`md:hidden absolute inset-0 w-full h-full object-cover scale-110 transition-opacity duration-1000 ${
+                  isCrossFading ? 'opacity-0' : 'opacity-100'
                 }`}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
+                style={{ filter: 'blur(60px) saturate(1.8) brightness(0.35)' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/fallback-poster.jpg';
                 }}

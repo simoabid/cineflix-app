@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     User,
@@ -43,8 +43,7 @@ import { PasswordInput } from '../components/auth';
 import { validatePassword, validatePasswordMatch } from '../utils/validation';
 import { AUTH_STRINGS } from '../utils/strings';
 import { useAccountSettings, SaveStatus } from '../hooks/useAccountSettings';
-import { AVATARS, renderAvatarById } from '../constants/avatars';
-import DynamicBackground from '../components/DynamicBackground';
+import { AVATARS, renderAvatarById, resolveAvatarId } from '../constants/avatars';
 import { CineProSettingsView } from '../components/CineProSettingsView';
 import { SEOHead } from '../components/layout/SEOHead';
 import { ThemePicker } from '../components/settings/ThemePicker';
@@ -72,20 +71,67 @@ interface TabItem {
     id: SettingsTab;
     label: string;
     icon: React.ElementType;
+    /** When true, tab is only listed for signed-in users */
+    authRequired?: boolean;
 }
 
 const tabs: TabItem[] = [
-    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'profile', label: 'Profile', icon: User, authRequired: true },
     { id: 'playback', label: 'Playback', icon: Play },
     { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'notifications', label: 'Notifications', icon: Bell, authRequired: true },
     { id: 'privacy', label: 'Privacy', icon: Shield },
-    { id: 'devices', label: 'Devices', icon: Monitor },
+    { id: 'devices', label: 'Devices', icon: Monitor, authRequired: true },
     { id: 'support', label: 'Support', icon: Heart },
     { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'cinepro', label: 'CinePro Core', icon: Settings },
 ];
+
+const AUTH_REQUIRED_TAB_IDS = new Set(
+    tabs.filter((t) => t.authRequired).map((t) => t.id),
+);
+
+function resolveInitialTab(isAuthenticated: boolean): SettingsTab {
+    if (typeof window === 'undefined') {
+        return isAuthenticated ? 'profile' : 'appearance';
+    }
+    const hash = window.location.hash.replace('#', '') as SettingsTab | '';
+    const validIds = new Set(tabs.map((t) => t.id));
+    if (hash && validIds.has(hash as SettingsTab)) {
+        const tab = hash as SettingsTab;
+        if (!isAuthenticated && AUTH_REQUIRED_TAB_IDS.has(tab)) {
+            // Allow profile deep-link to show sign-in CTA; other auth tabs fall back
+            if (tab === 'profile') return 'profile';
+            return 'appearance';
+        }
+        return tab;
+    }
+    return isAuthenticated ? 'profile' : 'appearance';
+}
+
+/** Sign-in prompt used for auth-only sections when guest deep-links in */
+const SignInRequiredCard: React.FC<{ title?: string; description?: string }> = ({
+    title = 'Sign in required',
+    description = 'Create a free account or sign in to manage this section.',
+}) => (
+    <SettingsCard title={title} description={description} icon={User}>
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Link
+                to="/login"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-buttons-purple px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-buttons-purpleHover"
+            >
+                Sign In
+            </Link>
+            <Link
+                to="/signup"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-gray-600 px-5 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:text-white"
+            >
+                Create Account
+            </Link>
+        </div>
+    </SettingsCard>
+);
 
 // Toggle Switch Component
 const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; disabled?: boolean }> = ({ enabled, onChange, disabled }) => (
@@ -162,8 +208,14 @@ const SelectDropdown: React.FC<{
 );
 
 // Save Status Indicator Component
-const SaveStatusIndicator: React.FC<{ status: SaveStatus; error: string | null }> = ({ status, error }) => {
+const SaveStatusIndicator: React.FC<{
+    status: SaveStatus;
+    error: string | null;
+    persistenceMode: 'local' | 'cloud';
+}> = ({ status, error, persistenceMode }) => {
     if (status === 'idle' && !error) return null;
+
+    const savedLabel = persistenceMode === 'local' ? 'Saved on this device' : 'Settings saved';
 
     return (
         <div className="fixed bottom-6 right-6 z-50 animate-scale-in">
@@ -176,7 +228,7 @@ const SaveStatusIndicator: React.FC<{ status: SaveStatus; error: string | null }
             {status === 'saved' && (
                 <div className="flex items-center gap-2 px-4 py-2 bg-green-900/80 border border-green-600 rounded-lg shadow-lg">
                     <CheckCircle2 className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-green-300">Settings saved</span>
+                    <span className="text-sm text-green-300">{savedLabel}</span>
                 </div>
             )}
             {(status === 'error' || error) && (
@@ -217,23 +269,56 @@ const SettingsSkeleton: React.FC = () => (
     </div>
 );
 
-const AccountPage: React.FC = () => {
+const SettingsPage: React.FC = () => {
     const navigate = useNavigate();
-    const { user, logout, updateProfile, changePassword } = useAuth();
-    const { settings, isLoading, saveStatus, error, updateSetting } = useAccountSettings();
+    const { user, isAuthenticated, isLoading: authLoading, logout, updateProfile, changePassword } = useAuth();
+    const { settings, isLoading, saveStatus, error, updateSetting, persistenceMode } = useAccountSettings();
     const showSupportAds = useSupportStore((s) => s.showSupportAds);
     const isSupporter = useSupportStore((s) => s.isSupporter);
     const setShowSupportAds = useSupportStore((s) => s.setShowSupportAds);
     const setIsSupporter = useSupportStore((s) => s.setIsSupporter);
     const hydrateFromServer = useSupportStore((s) => s.hydrateFromServer);
 
-    // Active tab (support #appearance / #support deep-links)
-    const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
-        if (typeof window === 'undefined') return 'profile';
-        if (window.location.hash === '#appearance') return 'appearance';
-        if (window.location.hash === '#support') return 'support';
-        return 'profile';
-    });
+    const visibleTabs = tabs.filter((tab) => isAuthenticated || !tab.authRequired);
+
+    // Active tab (support #appearance / #support / #profile deep-links)
+    const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
+        resolveInitialTab(false),
+    );
+    const didResolveAuthTab = useRef(false);
+
+    // Resolve default tab once auth finishes loading (hash wins; else profile vs appearance)
+    useEffect(() => {
+        if (authLoading) return;
+
+        const hash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+        if (hash) {
+            setActiveTab(resolveInitialTab(isAuthenticated));
+            didResolveAuthTab.current = true;
+            return;
+        }
+
+        if (!didResolveAuthTab.current) {
+            didResolveAuthTab.current = true;
+            setActiveTab(isAuthenticated ? 'profile' : 'appearance');
+            return;
+        }
+
+        // After logout, leave auth-only tabs
+        if (!isAuthenticated) {
+            setActiveTab((current) =>
+                AUTH_REQUIRED_TAB_IDS.has(current) || current === 'profile' ? 'appearance' : current,
+            );
+        }
+    }, [authLoading, isAuthenticated]);
+
+    const selectTab = useCallback((tab: SettingsTab) => {
+        setActiveTab(tab);
+        if (typeof window !== 'undefined') {
+            const url = `${window.location.pathname}${window.location.search}#${tab}`;
+            window.history.replaceState(null, '', url);
+        }
+    }, []);
 
     // Sync server preferences → local support store when account settings load
     useEffect(() => {
@@ -288,8 +373,9 @@ const AccountPage: React.FC = () => {
     const [showAvatarModal, setShowAvatarModal] = useState(false);
     const [avatarLoading, setAvatarLoading] = useState(false);
 
-    // Handle avatar change
+    // Handle avatar change (auth-only — never call profile API as guest)
     const handleAvatarChange = async (avatarId: string) => {
+        if (!isAuthenticated || !user) return;
         setAvatarLoading(true);
         try {
             const result = await updateProfile({ avatar: avatarId });
@@ -300,7 +386,7 @@ const AccountPage: React.FC = () => {
             } else {
                 setProfileError(result.error || 'Failed to update avatar');
             }
-        } catch (error) {
+        } catch {
             setProfileError('An error occurred');
         } finally {
             setAvatarLoading(false);
@@ -317,8 +403,9 @@ const AccountPage: React.FC = () => {
         });
     };
 
-    // Handle profile update
+    // Handle profile update (auth-only)
     const handleProfileUpdate = async () => {
+        if (!isAuthenticated || !user) return;
         if (!editName.trim()) {
             setProfileError('Name is required');
             return;
@@ -337,16 +424,17 @@ const AccountPage: React.FC = () => {
             } else {
                 setProfileError(result.error || 'Failed to update profile');
             }
-        } catch (error) {
+        } catch {
             setProfileError('An error occurred');
         } finally {
             setProfileLoading(false);
         }
     };
 
-    // Handle password change
+    // Handle password change (auth-only)
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isAuthenticated || !user) return;
         setPasswordError('');
         setPasswordSuccess('');
 
@@ -375,7 +463,7 @@ const AccountPage: React.FC = () => {
             } else {
                 setPasswordError(result.error || 'Failed to change password');
             }
-        } catch (error) {
+        } catch {
             setPasswordError('An error occurred');
         } finally {
             setPasswordLoading(false);
@@ -384,6 +472,7 @@ const AccountPage: React.FC = () => {
 
     // Handle logout
     const handleLogout = async () => {
+        if (!isAuthenticated) return;
         await logout();
         navigate('/');
     };
@@ -391,13 +480,23 @@ const AccountPage: React.FC = () => {
 
     // Render tab content
     const renderTabContent = () => {
-        // Show loading skeleton during initial load
-        if (isLoading && activeTab !== 'profile') {
+        // Cloud load skeleton only for signed-in users (guest local load is sync)
+        if (isLoading && isAuthenticated && activeTab !== 'profile') {
             return <SettingsSkeleton />;
         }
 
         switch (activeTab) {
             case 'profile':
+                if (!isAuthenticated || !user) {
+                    return (
+                        <div className="space-y-6">
+                            <SignInRequiredCard
+                                title="Your Profile"
+                                description="Sign in to manage your profile, password, and account security."
+                            />
+                        </div>
+                    );
+                }
                 return (
                     <div className="space-y-6">
                         {/* Profile Card */}
@@ -443,7 +542,7 @@ const AccountPage: React.FC = () => {
                                     </button>
                                     {user?.avatar && (
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {AVATARS.find(a => a.id === user.avatar)?.name || 'Custom'}
+                                            {AVATARS.find(a => a.id === resolveAvatarId(user.avatar!))?.name || 'Custom'}
                                         </p>
                                     )}
                                 </div>
@@ -714,6 +813,16 @@ const AccountPage: React.FC = () => {
                 );
 
             case 'notifications':
+                if (!isAuthenticated) {
+                    return (
+                        <div className="space-y-6">
+                            <SignInRequiredCard
+                                title="Notifications"
+                                description="Sign in to manage email, push, and account notification preferences."
+                            />
+                        </div>
+                    );
+                }
                 return (
                     <div className="space-y-6">
                         <SettingsCard title="Notification Channels" description="Choose how you want to receive notifications" icon={Bell}>
@@ -763,22 +872,24 @@ const AccountPage: React.FC = () => {
             case 'privacy':
                 return (
                     <div className="space-y-6">
-                        <SettingsCard title="Profile Privacy" description="Control who can see your profile and activity" icon={Shield}>
-                            <SettingRow label="Profile Visibility" description="Allow others to see your profile">
-                                <ToggleSwitch
-                                    enabled={settings.profileVisible}
-                                    onChange={() => updateSetting('profileVisible', !settings.profileVisible)}
-                                />
-                            </SettingRow>
-                            <SettingRow label="Viewing History Visibility" description="Show your watch history on your profile">
-                                <ToggleSwitch
-                                    enabled={settings.viewingHistoryVisible}
-                                    onChange={() => updateSetting('viewingHistoryVisible', !settings.viewingHistoryVisible)}
-                                />
-                            </SettingRow>
-                        </SettingsCard>
+                        {isAuthenticated ? (
+                            <SettingsCard title="Profile Privacy" description="Control who can see your profile and activity" icon={Shield}>
+                                <SettingRow label="Profile Visibility" description="Allow others to see your profile">
+                                    <ToggleSwitch
+                                        enabled={settings.profileVisible}
+                                        onChange={() => updateSetting('profileVisible', !settings.profileVisible)}
+                                    />
+                                </SettingRow>
+                                <SettingRow label="Viewing History Visibility" description="Show your watch history on your profile">
+                                    <ToggleSwitch
+                                        enabled={settings.viewingHistoryVisible}
+                                        onChange={() => updateSetting('viewingHistoryVisible', !settings.viewingHistoryVisible)}
+                                    />
+                                </SettingRow>
+                            </SettingsCard>
+                        ) : null}
 
-                        <SettingsCard title="Data & Personalization" description="Control how we use your data" icon={Shield}>
+                        <SettingsCard title="Data & Personalization" description="Control how we use your data on this device" icon={Shield}>
                             <SettingRow label="Data Collection" description="Allow us to collect usage data to improve our service">
                                 <ToggleSwitch
                                     enabled={settings.dataCollection}
@@ -793,25 +904,42 @@ const AccountPage: React.FC = () => {
                             </SettingRow>
                         </SettingsCard>
 
-                        <SettingsCard title="Data Management" description="Download or delete your personal data" icon={HardDrive}>
-                            <div className="flex flex-wrap gap-4 pt-2">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors">
-                                    <Download className="w-4 h-4" />
-                                    Download My Data
-                                </button>
-                                <button
-                                    onClick={() => setShowClearHistoryModal(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
-                                >
-                                    <History className="w-4 h-4" />
-                                    Clear Watch History
-                                </button>
-                            </div>
-                        </SettingsCard>
+                        {isAuthenticated ? (
+                            <SettingsCard title="Data Management" description="Download or delete your personal data" icon={HardDrive}>
+                                <div className="flex flex-wrap gap-4 pt-2">
+                                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors">
+                                        <Download className="w-4 h-4" />
+                                        Download My Data
+                                    </button>
+                                    <button
+                                        onClick={() => setShowClearHistoryModal(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                                    >
+                                        <History className="w-4 h-4" />
+                                        Clear Watch History
+                                    </button>
+                                </div>
+                            </SettingsCard>
+                        ) : (
+                            <SignInRequiredCard
+                                title="Account privacy tools"
+                                description="Sign in to manage profile visibility, download your data, or clear watch history."
+                            />
+                        )}
                     </div>
                 );
 
             case 'devices':
+                if (!isAuthenticated) {
+                    return (
+                        <div className="space-y-6">
+                            <SignInRequiredCard
+                                title="Devices"
+                                description="Sign in to view connected devices and sign out of other sessions."
+                            />
+                        </div>
+                    );
+                }
                 return (
                     <div className="space-y-6">
                         <SettingsCard title="Connected Devices" description="Manage devices that are signed in to your account" icon={Monitor}>
@@ -1058,29 +1186,34 @@ const AccountPage: React.FC = () => {
     };
 
     return (
-        <DynamicBackground className="pt-20 pb-12">
+        <div className="min-h-screen bg-background-main pt-20 pb-12">
             <SEOHead
-                title="Account"
-                description="Manage your CINEFLIX profile, playback settings, preferences, and support options."
+                title="Settings"
+                description="Manage CINEFLIX playback, appearance, accessibility, and account preferences."
             />
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Account Settings</h1>
-                    <p className="text-gray-400">Manage your profile, preferences, and account settings</p>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Settings</h1>
+                    <p className="text-gray-400">
+                        {isAuthenticated
+                            ? 'Manage your profile, preferences, and account settings — synced to your account'
+                            : 'Customize playback, appearance, and privacy for this device. Sign in to sync across devices.'}
+                    </p>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Sidebar Navigation */}
                     <div className="lg:w-64 flex-shrink-0">
                         <div className="auth-card rounded-2xl p-2 sticky top-24">
-                            <nav className="space-y-1">
-                                {tabs.map((tab) => {
+                            <nav className="space-y-1" aria-label="Settings sections">
+                                {visibleTabs.map((tab) => {
                                     const Icon = tab.icon;
                                     return (
                                         <button
                                             key={tab.id}
-                                            onClick={() => setActiveTab(tab.id)}
+                                            type="button"
+                                            onClick={() => selectTab(tab.id)}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
                                                 ? 'bg-buttons-purple text-white shadow-lg shadow-buttons-purple/25'
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -1103,10 +1236,10 @@ const AccountPage: React.FC = () => {
             </div>
 
             {/* Save Status Indicator */}
-            <SaveStatusIndicator status={saveStatus} error={error} />
+            <SaveStatusIndicator status={saveStatus} error={error} persistenceMode={persistenceMode} />
 
-            {/* Modals */}
-            {showLogoutAllModal && (
+            {/* Modals — account actions only when signed in */}
+            {isAuthenticated && showLogoutAllModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
                     <div className="auth-card rounded-2xl p-6 max-w-md w-full animate-scale-in">
                         <div className="flex items-center gap-4 mb-4">
@@ -1139,7 +1272,7 @@ const AccountPage: React.FC = () => {
                 </div>
             )}
 
-            {showDeleteAccountModal && (
+            {isAuthenticated && showDeleteAccountModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
                     <div className="auth-card rounded-2xl p-6 max-w-md w-full animate-scale-in">
                         <div className="flex items-center gap-4 mb-4">
@@ -1206,7 +1339,7 @@ const AccountPage: React.FC = () => {
             )}
 
             {/* Avatar Selection Modal */}
-            {showAvatarModal && (
+            {isAuthenticated && showAvatarModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
                     <div className="auth-card rounded-2xl p-6 max-w-lg w-full animate-scale-in">
                         <div className="flex items-center justify-between mb-6">
@@ -1222,22 +1355,22 @@ const AccountPage: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 sm:gap-4">
                             {AVATARS.map((avatar) => {
                                 const AvatarComponent = avatar.Component;
-                                const isSelected = user?.avatar === avatar.id;
+                                const isSelected = resolveAvatarId(user?.avatar || '') === avatar.id;
                                 return (
                                     <button
                                         key={avatar.id}
+                                        type="button"
                                         onClick={() => handleAvatarChange(avatar.id)}
                                         disabled={avatarLoading}
-                                        className={`relative group flex flex - col items - center p - 3 rounded - xl transition - all duration - 200 ${isSelected
+                                        className={`relative group flex flex-col items-center p-3 rounded-xl transition-all duration-200 ${isSelected
                                             ? 'bg-buttons-purple/20 ring-2 ring-buttons-purple'
                                             : 'bg-gray-800/50 hover:bg-gray-700/50'
-                                            } ${avatarLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} `}
+                                            } ${avatarLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                     >
-                                        <div className={`w - 16 h - 16 rounded - full overflow - hidden transition - transform ${!avatarLoading && 'group-hover:scale-110'
-                                            } `}>
+                                        <div className={`w-16 h-16 rounded-full overflow-hidden transition-transform ${!avatarLoading ? 'group-hover:scale-110' : ''}`}>
                                             <AvatarComponent className="w-full h-full" />
                                         </div>
                                         <span className="text-xs text-gray-400 mt-2 text-center">{avatar.name}</span>
@@ -1260,8 +1393,8 @@ const AccountPage: React.FC = () => {
                     </div>
                 </div>
             )}
-        </DynamicBackground>
+        </div>
     );
 };
 
-export default AccountPage;
+export default SettingsPage;

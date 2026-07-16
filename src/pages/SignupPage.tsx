@@ -137,11 +137,11 @@ const SignupPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Avatar Selection */}
+                {/* Avatar Selection — padded so selection ring + scale never clip */}
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-300">Choose your Avatar</label>
-                    <div className="w-full overflow-x-auto scrollbar-hide py-1">
-                        <div className="flex gap-3 sm:gap-4 px-2 min-w-max justify-start sm:justify-center">
+                    <div className="w-full overflow-x-auto scrollbar-hide">
+                        <div className="flex gap-3 sm:gap-4 px-3 py-3 min-w-max justify-start sm:justify-center">
                             {AVATARS.map((avatar) => {
                                 const AvatarComponent = avatar.Component;
                                 const isSelected = selectedAvatar === avatar.id;
@@ -150,13 +150,25 @@ const SignupPage: React.FC = () => {
                                         key={avatar.id}
                                         type="button"
                                         onClick={() => setSelectedAvatar(avatar.id)}
-                                        className={`relative group rounded-full overflow-hidden transition-all duration-200 w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 ${isSelected
-                                            ? 'ring-2 ring-buttons-purple ring-offset-2 ring-offset-black/50 scale-110 shadow-lg shadow-buttons-purple/30'
-                                            : 'ring-1 ring-white/20 hover:ring-white/40 hover:scale-105'
+                                        className={`relative flex-shrink-0 rounded-full transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-buttons-purple ${isSelected
+                                            ? 'scale-110 z-10'
+                                            : 'hover:scale-105'
                                             }`}
                                         title={avatar.name}
+                                        aria-pressed={isSelected}
+                                        aria-label={`Select ${avatar.name} avatar`}
                                     >
-                                        <AvatarComponent className="w-full h-full" />
+                                        {/* Selection ring sits outside the clipped image so it never cuts off */}
+                                        <span
+                                            className={`block rounded-full p-[2px] ${isSelected
+                                                ? 'bg-buttons-purple shadow-lg shadow-buttons-purple/30'
+                                                : 'bg-white/20 hover:bg-white/40'
+                                                }`}
+                                        >
+                                            <span className="block w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-black/40">
+                                                <AvatarComponent className="w-full h-full" />
+                                            </span>
+                                        </span>
                                     </button>
                                 );
                             })}

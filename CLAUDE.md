@@ -144,6 +144,8 @@ Express (:3001)
 | `/watch/movie/:id`, `/watch/tv/:id` | **`SmartPlayerPage`** (primary watch UX) |
 | `/search` | `SearchPage` |
 | `/login`, `/signup` | Auth pages |
+| `/settings` | `SettingsPage` (Profile / Notifications / Devices auth-only) |
+| `/account` | Redirect → `/settings` (legacy) |
 
 #### Protected routes (`ProtectedRoute` + `AuthContext`)
 
@@ -151,7 +153,6 @@ Express (:3001)
 |------|------|
 | `/my-list` | `MyListPage` |
 | `/continue-watching` | `ContinueWatchingPage` |
-| `/account` | `AccountPage` |
 
 Unknown paths fall through to `HomePage`.  
 `WatchPage.tsx` / `WatchRedirect.tsx` may still exist as legacy; **live watch routes use `SmartPlayerPage`**.

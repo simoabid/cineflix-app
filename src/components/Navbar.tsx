@@ -38,7 +38,8 @@ const NAVBAR_TRANSLATIONS = {
   myProfile: 'My Profile',
   myList: 'My List',
   continueWatching: 'Continue Watching',
-  accountSettings: 'Account Settings',
+  accountSettings: 'Settings',
+  settings: 'Settings',
   signOut: 'Sign Out',
   signUp: 'Sign Up',
   searchLabel: 'Search Movies & TV Shows'
@@ -272,6 +273,16 @@ const Navbar: React.FC = () => {
                 </button>
               </div>
 
+              {/* Settings — always available (guests get local prefs; signed-in get cloud) */}
+              <Link
+                to="/settings"
+                className="flex items-center justify-center w-9 h-9 xs:w-10 xs:h-10 sm:w-11 sm:h-11 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors backdrop-blur-sm"
+                title={NAVBAR_TRANSLATIONS.settings}
+                aria-label={NAVBAR_TRANSLATIONS.settings}
+              >
+                <Settings className="w-4 h-4 xs:w-5 xs:h-5" />
+              </Link>
+
               {/* User Profile / Sign In */}
               {isAuthenticated ? (
                 <div ref={userMenuRef} className="relative">
@@ -316,7 +327,7 @@ const Navbar: React.FC = () => {
                       {/* Menu Items */}
                       <div className="py-2 px-2 space-y-0.5">
                         <Link
-                          to="/account"
+                          to="/settings#profile"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
                         >
@@ -340,7 +351,7 @@ const Navbar: React.FC = () => {
                           <span className="font-medium">{NAVBAR_TRANSLATIONS.continueWatching}</span>
                         </Link>
                         <Link
-                          to="/account"
+                          to="/settings"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group"
                         >
@@ -348,7 +359,7 @@ const Navbar: React.FC = () => {
                           <span className="font-medium">{NAVBAR_TRANSLATIONS.accountSettings}</span>
                         </Link>
                         <Link
-                          to="/account#appearance"
+                          to="/settings#appearance"
                           onClick={() => setUserMenuOpen(false)}
                           className="flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 group text-left"
                         >
@@ -431,7 +442,15 @@ const Navbar: React.FC = () => {
                 {/* Mobile Auth Actions */}
                 <div className="pt-4 border-t border-gray-700/50 mt-4">
                   <Link
-                    to="/account#appearance"
+                    to="/settings"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-left mb-1"
+                  >
+                    <Settings className="w-5 h-5 text-gray-400" />
+                    <span>{NAVBAR_TRANSLATIONS.settings}</span>
+                  </Link>
+                  <Link
+                    to="/settings#appearance"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-left mb-1"
                   >
@@ -459,12 +478,12 @@ const Navbar: React.FC = () => {
                         <span>{NAVBAR_TRANSLATIONS.continueWatching}</span>
                       </Link>
                       <Link
-                        to="/account"
+                        to="/settings#profile"
                         onClick={() => setMobileMenuOpen(false)}
                         className="flex items-center space-x-3 w-full px-4 py-3 min-h-[48px] text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                       >
-                        <Settings className="w-5 h-5" />
-                        <span>{NAVBAR_TRANSLATIONS.accountSettings}</span>
+                        <User className="w-5 h-5" />
+                        <span>{NAVBAR_TRANSLATIONS.myProfile}</span>
                       </Link>
                       <button
                         onClick={() => {

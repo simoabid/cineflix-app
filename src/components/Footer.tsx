@@ -155,7 +155,7 @@ const Footer: React.FC = () => {
     {
       name: 'Profile',
       icon: User,
-      action: () => navigate('/account')
+      action: () => navigate('/settings')
     },
   ];
 
