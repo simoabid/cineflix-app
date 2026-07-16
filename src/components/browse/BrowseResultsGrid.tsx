@@ -109,7 +109,7 @@ const BrowseResultsGrid: React.FC<BrowseResultsGridProps> = ({ results, loading,
                                                     e.stopPropagation();
                                                     window.location.href = `/watch/${type}/${item.id}`;
                                                 }}
-                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-netflix-red text-white text-[10px] font-medium hover:bg-red-700 transition-colors duration-150"
+                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded bg-buttons-purple text-white text-[10px] font-medium hover:bg-buttons-purpleHover transition-colors duration-150"
                                             >
                                                 <Play className="w-2.5 h-2.5 fill-current" />
                                                 Play

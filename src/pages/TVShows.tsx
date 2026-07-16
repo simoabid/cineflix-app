@@ -202,7 +202,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F] flex items-center justify-center">
+      <div className="min-h-screen bg-background-main flex items-center justify-center">
         <div className="relative">
           {/* Main thick spinner */}
           <div className="h-32 w-32 netflix-spinner-thick" />
@@ -216,7 +216,7 @@ const TVShows: React.FC<TVShowsProps> = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] text-white">
+    <div className="min-h-screen bg-background-main text-white">
       <SEOHead
         title="TV Shows"
         description="Browse trending, popular, top-rated, and on-the-air TV shows on CINEFLIX."

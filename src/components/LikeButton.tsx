@@ -116,8 +116,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         onClick={handleLike}
         disabled={isLoading}
         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${isLiked
-          ? 'bg-red-600 hover:bg-red-700 text-white'
-          : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
+          ? 'bg-buttons-purple hover:bg-buttons-purpleHover text-white'
+          : 'bg-gray-800/90 hover:bg-buttons-purple text-white border border-white/30 hover:border-buttons-purple'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'} ${className}`}
       >
         <AnimatePresence mode="wait">
@@ -142,8 +142,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       onClick={handleLike}
       disabled={isLoading}
       className={`${getSizeClasses()} rounded-full flex items-center justify-center transition-all duration-300 ${isLiked
-        ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/25'
-        : 'bg-gray-800/90 hover:bg-red-600 text-white border border-white/30 hover:border-red-500'
+        ? 'bg-buttons-purple hover:bg-buttons-purpleHover text-white shadow-lg shadow-buttons-purple/25'
+        : 'bg-gray-800/90 hover:bg-buttons-purple text-white border border-white/30 hover:border-buttons-purple'
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 hover:shadow-lg'} ${className}`}
       title={isLiked ? 'Unlike' : 'Like'}
     >

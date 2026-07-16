@@ -52,8 +52,8 @@ export function CineProSettingsView() {
       {/* Configuration Card */}
       <div className="auth-card rounded-2xl p-6 mb-4 animate-scale-in">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-10 h-10 bg-netflix-red/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Server className="w-5 h-5 text-netflix-red" />
+          <div className="w-10 h-10 bg-buttons-purple/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Server className="w-5 h-5 text-type-logo" />
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white">CinePro Core Integration</h3>
@@ -78,7 +78,7 @@ export function CineProSettingsView() {
               className="text-gray-400 hover:text-white transition-colors focus:outline-none"
             >
               {isEnabled ? (
-                <ToggleRight className="w-10 h-10 text-netflix-red" />
+                <ToggleRight className="w-10 h-10 text-type-logo" />
               ) : (
                 <ToggleLeft className="w-10 h-10 text-gray-600" />
               )}
@@ -100,7 +100,7 @@ export function CineProSettingsView() {
               disabled={!isEnabled}
             >
               {preferCinePro && isEnabled ? (
-                <ToggleRight className="w-10 h-10 text-netflix-red" />
+                <ToggleRight className="w-10 h-10 text-type-logo" />
               ) : (
                 <ToggleLeft className="w-10 h-10 text-gray-600 opacity-50" />
               )}
@@ -117,12 +117,12 @@ export function CineProSettingsView() {
                 onChange={(e) => setInputUrl(e.target.value)}
                 disabled={!isEnabled}
                 placeholder="http://localhost:3000"
-                className="flex-1 bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-netflix-red transition-colors disabled:opacity-50"
+                className="flex-1 bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-buttons-purple transition-colors disabled:opacity-50"
               />
               <button
                 onClick={handleTestConnection}
                 disabled={!isEnabled || testing}
-                className="px-4 py-2 bg-netflix-red hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="px-4 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {testing ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />

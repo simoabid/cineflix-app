@@ -369,7 +369,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({ onClose, isExpanded = f
   if (!isExpanded) {
     return (
       <div className="relative">
-        <div className="flex items-center bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 hover:border-netflix-red/50 transition-all duration-300">
+        <div className="flex items-center bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 hover:border-buttons-purple/50 transition-all duration-300">
           <Search className="w-5 h-5 text-gray-400 ml-3" />
           <input
             ref={inputRef}
@@ -411,11 +411,11 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({ onClose, isExpanded = f
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch(query)}
                 placeholder="Search for movies, TV shows, collections, or people..."
-                className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-400 focus:border-netflix-red/50 focus:outline-none focus:ring-2 focus:ring-netflix-red/20 transition-all"
+                className="w-full bg-gray-800/50 border border-gray-600/50 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-400 focus:border-buttons-purple/50 focus:outline-none focus:ring-2 focus:ring-buttons-purple/20 transition-all"
               />
               {isLoading && (
                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-5 h-5 border-2 border-netflix-red border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-buttons-purple border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
             </div>
@@ -430,7 +430,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({ onClose, isExpanded = f
                     onClick={() => setSelectedFilter(filter.id)}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       selectedFilter === filter.id
-                        ? 'bg-netflix-red text-white'
+                        ? 'bg-buttons-purple text-white'
                         : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'
                     }`}
                   >
@@ -460,7 +460,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({ onClose, isExpanded = f
                         </div>
                       </div>
                       <div className="flex-1 text-left">
-                        <h4 className="text-white font-medium group-hover:text-netflix-red transition-colors">
+                        <h4 className="text-white font-medium group-hover:text-type-logo transition-colors">
                           {suggestion.title}
                         </h4>
                         <div className="flex items-center space-x-3 mt-1">

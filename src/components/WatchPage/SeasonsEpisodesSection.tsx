@@ -250,7 +250,7 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                     className={`flex-shrink-0 group relative overflow-hidden rounded-xl transition-all duration-300 flex flex-col border ${
                       selectedSeason?.id === season.id
                         ? 'border-[#ff0000] bg-[#ff0000]/[0.04] shadow-[0_6px_16px_rgba(255,0,0,0.3)] scale-[1.03]'
-                        : 'border-white/10 bg-white/[0.02] hover:border-red-500/40 hover:bg-white/[0.04] hover:scale-[1.03] hover:shadow-lg'
+                        : 'border-white/10 bg-white/[0.02] hover:border-buttons-purple/40 hover:bg-white/[0.04] hover:scale-[1.03] hover:shadow-lg'
                     }`}
                   >
                     <div className="w-20 h-24 relative overflow-hidden rounded-t-xl">
@@ -319,7 +319,7 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                         ? 'border-[#ff0000] bg-[#ff0000]/[0.02]'
                         : isWatched
                         ? 'border-green-500/20 bg-green-500/[0.02]'
-                        : 'border-white/5 hover:border-red-500/20 hover:bg-white/[0.03]'
+                        : 'border-white/5 hover:border-buttons-purple/20 hover:bg-white/[0.03]'
                     }`}
                   >
                     <div className="p-3">
@@ -372,7 +372,7 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                                 e.stopPropagation();
                                 handleEpisodeSelect(episode.episode_number);
                               }}
-                              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff0000] hover:bg-red-700 text-white font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-md shadow-[#ff0000]/20 hover:scale-105 active:scale-95 whitespace-nowrap"
+                              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ff0000] hover:bg-buttons-purpleHover text-white font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-md shadow-[#ff0000]/20 hover:scale-105 active:scale-95 whitespace-nowrap"
                               title={`Watch Episode ${episode.episode_number}`}
                             >
                               <Play className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />

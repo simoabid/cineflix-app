@@ -194,9 +194,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center justify-between gap-3 w-full px-4.5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none active:scale-98 shadow-md border ${
           isOpen
-            ? 'bg-red-500/10 border-red-500/60 text-white shadow-red-500/10'
+            ? 'bg-red-500/10 border-buttons-purple/60 text-white shadow-buttons-purple/10'
             : value
-              ? 'bg-white/5 border-red-500/30 text-white'
+              ? 'bg-white/5 border-buttons-purple/30 text-white'
               : 'bg-white/5 border-white/10 hover:border-white/20 text-gray-200 hover:text-white'
         }`}
       >
@@ -343,7 +343,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
   const hasActiveFilters = Boolean(searchQuery) || Boolean(selectedGenre) || Boolean(selectedYear) || safeSelectedRating > 0;
 
   return (
-    <div className="sticky top-[56px] sm:top-[64px] z-40 bg-gradient-to-b from-[#0A0A1F]/98 to-[#0A0A1F]/93 backdrop-blur-md border-b border-white/5 shadow-lg">
+    <div className="sticky top-[56px] sm:top-[64px] z-40 bg-gradient-to-b from-background-main/98 to-background-main/93 backdrop-blur-md border-b border-white/5 shadow-lg">
       {/* Self-contained styling for WebKit range input and custom dropdown scrollbar */}
       <style>{`
         .custom-slider::-webkit-slider-runnable-track {
@@ -414,7 +414,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 placeholder={type === 'movie' ? 'Search movies...' : 'Search TV shows...'}
                 value={debouncedSearch}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 hover:border-white/20 focus:bg-white/10 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10 rounded-full text-sm text-white placeholder-gray-400 transition-all duration-300 focus:outline-none shadow-inner"
+                className="w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 hover:border-white/20 focus:bg-white/10 focus:border-buttons-purple/50 focus:ring-2 focus:ring-red-500/10 rounded-full text-sm text-white placeholder-gray-400 transition-all duration-300 focus:outline-none shadow-inner"
                 aria-label={type === 'movie' ? 'Search movies' : 'Search TV shows'}
               />
               {debouncedSearch && (
@@ -435,9 +435,9 @@ const FilterBar: React.FC<FilterBarProps> = ({
               onClick={onToggleFilters}
               className={`md:hidden flex items-center gap-2 px-4.5 py-2.5 rounded-full transition-all duration-300 active:scale-95 shadow-md font-medium text-sm border ${
                 showFilters
-                  ? 'bg-red-500/10 border-red-500/50 text-white'
+                  ? 'bg-red-500/10 border-buttons-purple/50 text-white'
                   : hasActiveFilters
-                    ? 'bg-white/5 border-red-500/30 text-white'
+                    ? 'bg-white/5 border-buttons-purple/30 text-white'
                     : 'bg-white/5 border-white/10 text-gray-200'
               }`}
               aria-label="Toggle filters"
@@ -471,7 +471,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             />
 
             <div className={`flex items-center gap-3 bg-white/5 border px-4.5 py-2 rounded-full transition-all duration-300 shadow-md ${
-              safeSelectedRating > 0 ? 'border-red-500/30' : 'border-white/10 hover:border-white/20'
+              safeSelectedRating > 0 ? 'border-buttons-purple/30' : 'border-white/10 hover:border-white/20'
             }`}>
               <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider">
                 <Star className={`w-3.5 h-3.5 transition-all duration-300 ${
@@ -506,7 +506,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
-                className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm"
+                className="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-buttons-purple/25 px-4 py-2 rounded-full text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm"
               >
                 Clear all
               </button>
@@ -577,7 +577,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
-                className="w-full py-2.5 text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-full font-semibold transition-all duration-300 active:scale-95 shadow-sm"
+                className="w-full py-2.5 text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-buttons-purple/20 rounded-full font-semibold transition-all duration-300 active:scale-95 shadow-sm"
               >
                 Clear all filters
               </button>

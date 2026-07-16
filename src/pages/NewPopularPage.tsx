@@ -254,7 +254,7 @@ const NewPopularPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F]">
+      <div className="min-h-screen bg-background-main">
         <div className="flex items-center justify-center h-screen">
           <div className="flex flex-col items-center gap-6">
             <div className="relative">
@@ -283,14 +283,14 @@ const NewPopularPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F]">
+      <div className="min-h-screen bg-background-main">
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white mb-4">Error</h2>
-            <p className="text-netflix-lightgray mb-4">{error}</p>
+            <p className="text-type-secondary mb-4">{error}</p>
             <button
               onClick={fetchAllData}
-              className="bg-netflix-red text-white px-6 py-2 rounded hover:bg-red-600 transition"
+              className="bg-buttons-purple text-white px-6 py-2 rounded hover:bg-buttons-purple transition"
             >
               Try Again
             </button>
@@ -301,7 +301,7 @@ const NewPopularPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] text-white">
+    <div className="min-h-screen bg-background-main text-white">
       <SEOHead
         title="New & Popular"
         description="Discover the latest releases, trending now, and coming soon movies and TV shows on CINEFLIX."
@@ -319,8 +319,8 @@ const NewPopularPage: React.FC = () => {
               className="w-full h-full object-cover transition-transform duration-1000 ease-in-out"
               onError={handleImageError}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A1F] via-[#0A0A1F]/60 to-transparent"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-background-main via-background-main/60 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-background-main via-transparent to-transparent"></div>
           </div>
 
           {/* Navigation arrows */}
@@ -352,7 +352,7 @@ const NewPopularPage: React.FC = () => {
                   enableOnDemandFetch={true}
                 />
               </div>
-              <p className="text-lg md:text-xl text-netflix-lightgray mb-6 line-clamp-3 animate-slide-up animation-delay-200">
+              <p className="text-lg md:text-xl text-type-secondary mb-6 line-clamp-3 animate-slide-up animation-delay-200">
                 {heroContent[heroIndex]?.overview}
               </p>
               <div className="flex gap-4 animate-slide-up animation-delay-400">
@@ -391,15 +391,15 @@ const NewPopularPage: React.FC = () => {
       )}
 
       {/* Filter Bar */}
-      <div className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-[#0A0A1F]/95 backdrop-blur-md shadow-lg' : 'bg-[#0A0A1F]/90 backdrop-blur-sm'
+      <div className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-background-main/95 backdrop-blur-md shadow-lg' : 'bg-background-main/90 backdrop-blur-sm'
         } border-b border-gray-800`}>
         <div className="px-4 md:px-16 py-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-netflix-lightgray bg-clip-text text-transparent">
+              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-type-secondary bg-clip-text text-transparent">
                 New & Popular
               </h2>
-              <p className="text-sm text-netflix-lightgray mt-1">Discover trending content</p>
+              <p className="text-sm text-type-secondary mt-1">Discover trending content</p>
             </div>
 
             <div className="flex gap-3 items-center">
@@ -407,7 +407,7 @@ const NewPopularPage: React.FC = () => {
                 <button
                   onClick={() => setViewMode('carousel')}
                   className={`p-2 rounded transition ${viewMode === 'carousel'
-                    ? 'bg-netflix-red text-white'
+                    ? 'bg-buttons-purple text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                     }`}
                   title="Carousel view"
@@ -417,7 +417,7 @@ const NewPopularPage: React.FC = () => {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded transition ${viewMode === 'grid'
-                    ? 'bg-netflix-red text-white'
+                    ? 'bg-buttons-purple text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                     }`}
                   title="Grid view"
@@ -444,7 +444,7 @@ const NewPopularPage: React.FC = () => {
                   <select
                     value={contentType}
                     onChange={(e) => setContentType(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-netflix-red focus:outline-none transition"
+                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-buttons-purple focus:outline-none transition"
                   >
                     <option value="all">All Content</option>
                     <option value="movies">Movies Only</option>
@@ -457,7 +457,7 @@ const NewPopularPage: React.FC = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-netflix-red focus:outline-none transition"
+                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-buttons-purple focus:outline-none transition"
                   >
                     <option value="popularity">Popularity</option>
                     <option value="release_date">Release Date</option>
@@ -471,7 +471,7 @@ const NewPopularPage: React.FC = () => {
                   <select
                     value={timePeriod}
                     onChange={(e) => setTimePeriod(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-netflix-red focus:outline-none transition"
+                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-buttons-purple focus:outline-none transition"
                   >
                     <option value="week">This Week</option>
                     <option value="month">This Month</option>
@@ -484,7 +484,7 @@ const NewPopularPage: React.FC = () => {
                   <select
                     value={viewMode}
                     onChange={(e) => setViewMode(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-netflix-red focus:outline-none transition"
+                    className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-buttons-purple focus:outline-none transition"
                   >
                     <option value="carousel">Carousel</option>
                     <option value="grid">Grid</option>
@@ -512,7 +512,7 @@ const NewPopularPage: React.FC = () => {
       {/* Back to top button */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-8 right-8 bg-netflix-red text-white p-3 rounded-full hover:bg-red-600 transition shadow-lg"
+        className="fixed bottom-8 right-8 bg-buttons-purple text-white p-3 rounded-full hover:bg-buttons-purple transition shadow-lg"
       >
         <ChevronLeft className="w-6 h-6 rotate-90" />
       </button>
@@ -571,10 +571,10 @@ const ContentSection: React.FC<ContentSectionProps> = ({ id, title, items, type 
   const SectionHeader = () => (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-netflix-lightgray bg-clip-text text-transparent">
+        <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-type-secondary bg-clip-text text-transparent">
           {title}
         </h3>
-        <p className="text-sm text-netflix-lightgray mt-1">
+        <p className="text-sm text-type-secondary mt-1">
           {items.length} {items.length === 1 ? 'item' : 'items'}
         </p>
       </div>
@@ -770,7 +770,7 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
           {/* Badges */}
           <div className="absolute top-2 left-2 flex gap-2">
             {isNew() && (
-              <div className="bg-netflix-red text-white text-xs font-bold px-2 py-1 rounded animate-pulse">
+              <div className="bg-buttons-purple text-white text-xs font-bold px-2 py-1 rounded animate-pulse">
                 NEW
               </div>
             )}
@@ -799,17 +799,17 @@ const ContentCard: React.FC<ContentCardPropsInline> = ({
 
       {/* Title below card */}
       <div className="mt-2 px-1">
-        <h4 className="text-sm font-semibold line-clamp-2 hover:text-netflix-red transition-colors">
+        <h4 className="text-sm font-semibold line-clamp-2 hover:text-type-logo transition-colors">
           {item.title || item.name}
         </h4>
-        <div className="flex items-center gap-2 text-xs text-netflix-lightgray mt-1">
+        <div className="flex items-center gap-2 text-xs text-type-secondary mt-1">
           <span>{new Date(item.release_date || '').getFullYear()}</span>
           <span>•</span>
           <span>{(item.vote_average || 0).toFixed(1)} ★</span>
           {getGenreNames(item.genre_ids)[0] && (
             <>
               <span>•</span>
-              <span className="text-netflix-red">{getGenreNames(item.genre_ids)[0]}</span>
+              <span className="text-type-logo">{getGenreNames(item.genre_ids)[0]}</span>
             </>
           )}
         </div>

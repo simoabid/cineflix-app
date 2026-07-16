@@ -11,7 +11,7 @@ interface InfoCardProps {
 }
 
 const ACCENT_MAP = {
-  red: { bg: 'bg-red-500/15', text: 'text-red-400', glow: 'group-hover:shadow-red-500/20' },
+  red: { bg: 'bg-red-500/15', text: 'text-red-400', glow: 'group-hover:shadow-buttons-purple/20' },
   blue: { bg: 'bg-blue-500/15', text: 'text-blue-400', glow: 'group-hover:shadow-blue-500/20' },
   green: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', glow: 'group-hover:shadow-emerald-500/20' },
   yellow: { bg: 'bg-yellow-500/15', text: 'text-yellow-400', glow: 'group-hover:shadow-yellow-500/20' },

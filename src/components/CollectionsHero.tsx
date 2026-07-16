@@ -250,7 +250,7 @@ const CollectionsHero: React.FC<CollectionsHeroProps> = ({ collection, onStartMa
             {/* Title and Badges */}
             <div className="mb-4">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-buttons-purple text-white px-3 py-1 rounded-full text-sm font-medium">
                   {getTypeDisplayName(collection.type)}
                 </span>
                 <span className="bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-sm">
@@ -306,7 +306,7 @@ const CollectionsHero: React.FC<CollectionsHeroProps> = ({ collection, onStartMa
             <div className="flex flex-wrap gap-4 mb-8">
               <button
                 onClick={onStartMarathon}
-                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center space-x-3 group"
+                className="bg-buttons-purple hover:bg-buttons-purpleHover text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center space-x-3 group"
               >
                 <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
                 <span>{progress > 0 ? 'Continue Marathon' : 'Start Marathon'}</span>
@@ -355,7 +355,7 @@ const CollectionsHero: React.FC<CollectionsHeroProps> = ({ collection, onStartMa
                         {nextFilm.release_date ? new Date(nextFilm.release_date).getFullYear() : 'N/A'}
                       </p>
                     </div>
-                    <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                    <button className="bg-buttons-purple hover:bg-buttons-purpleHover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
                       <Play className="w-4 h-4" />
                       <span>Watch Now</span>
                     </button>

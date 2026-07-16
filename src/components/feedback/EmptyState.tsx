@@ -88,7 +88,7 @@ const FeedbackEmptyState: React.FC<EmptyStateProps> = ({
       {actionLabel && actionHref && (
         <Link
           to={actionHref}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-netflix-red hover:bg-red-700 text-white font-semibold rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-netflix-red outline-none"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-buttons-purple hover:bg-buttons-purpleHover text-white font-semibold rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-buttons-purple outline-none"
         >
           {actionLabel}
         </Link>
@@ -97,7 +97,7 @@ const FeedbackEmptyState: React.FC<EmptyStateProps> = ({
       {actionLabel && onAction && !actionHref && (
         <button
           onClick={onAction}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-netflix-red hover:bg-red-700 text-white font-semibold rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-netflix-red outline-none"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-buttons-purple hover:bg-buttons-purpleHover text-white font-semibold rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-buttons-purple outline-none"
         >
           {actionLabel}
         </button>

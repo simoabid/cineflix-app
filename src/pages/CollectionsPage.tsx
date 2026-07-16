@@ -608,7 +608,7 @@ const CollectionsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] text-white">
+    <div className="min-h-screen bg-background-main text-white">
       <SEOHead
         title="Collections"
         description="Discover custom collections and film franchises on CINEFLIX."
@@ -637,13 +637,13 @@ const CollectionsPage: React.FC = () => {
               className="bg-black/50 backdrop-blur-sm rounded-full p-2 hover:bg-black/70 transition-colors group"
               title="Next Collection"
             >
-              <ChevronRight className="w-5 h-5 text-white group-hover:text-netflix-red transition-colors" />
+              <ChevronRight className="w-5 h-5 text-white group-hover:text-type-logo transition-colors" />
             </button>
 
             {/* Rotation Indicator */}
             {isHeroRotating && (
               <div className="bg-black/50 backdrop-blur-sm rounded-full px-3 py-2 flex items-center space-x-2">
-                <div className="w-2 h-2 bg-netflix-red rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-buttons-purple rounded-full animate-pulse"></div>
                 <span className="text-white text-sm font-medium">Auto-rotating</span>
               </div>
             )}
@@ -716,7 +716,7 @@ const CollectionsPage: React.FC = () => {
                 placeholder="Search collections, movies, characters, genres, keywords..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-12 py-3 text-white placeholder-gray-400 focus:border-red-500 focus:outline-none transition-all"
+                className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-12 py-3 text-white placeholder-gray-400 focus:border-buttons-purple focus:outline-none transition-all"
               />
               {/* Search activity indicator */}
               {isSearching && (
@@ -760,7 +760,7 @@ const CollectionsPage: React.FC = () => {
           <button
             onClick={() => fetchCollections(true)}
             disabled={isRefreshing || initialLoading}
-            className={`px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 border border-red-500 rounded-lg text-white hover:from-red-700 hover:to-red-800 transition-all flex items-center space-x-2 ${isRefreshing || initialLoading ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-red-500/25'
+            className={`px-4 py-3 bg-gradient-to-r from-buttons-purple to-buttons-purpleHover border border-buttons-purple rounded-lg text-white hover:from-buttons-purpleHover hover:to-buttons-purple transition-all flex items-center space-x-2 ${isRefreshing || initialLoading ? 'opacity-50 cursor-not-allowed' : 'shadow-lg hover:shadow-buttons-purple/25'
               }`}
             title="Clear cache and discover fresh collections from TMDB"
           >
@@ -774,14 +774,14 @@ const CollectionsPage: React.FC = () => {
           <div className="flex bg-gray-900 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'
+              className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-buttons-purple text-white' : 'text-gray-400 hover:text-white'
                 }`}
             >
               <Grid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'
+              className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-buttons-purple text-white' : 'text-gray-400 hover:text-white'
                 }`}
             >
               <List className="w-5 h-5" />
@@ -803,7 +803,7 @@ const CollectionsPage: React.FC = () => {
               exitAllCollectionsView();
             }}
             className={`px-4 py-2 rounded-full text-sm transition-colors ${selectedCategory === 'all' && !isAllCollectionsView
-                ? 'bg-red-600 text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
           >
@@ -812,7 +812,7 @@ const CollectionsPage: React.FC = () => {
           <button
             onClick={initializeAllCollectionsView}
             className={`px-4 py-2 rounded-full text-sm transition-colors flex items-center space-x-2 ${isAllCollectionsView
-                ? 'bg-red-600 text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
           >
@@ -829,7 +829,7 @@ const CollectionsPage: React.FC = () => {
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-full text-sm transition-colors flex items-center space-x-2 ${selectedCategory === category.id
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-buttons-purple text-white'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
             >
@@ -902,7 +902,7 @@ const CollectionsPage: React.FC = () => {
                 </p>
                 <button
                   onClick={loadMoreCollections}
-                  className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  className="mt-4 px-4 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg transition-colors"
                 >
                   Load More Collections
                 </button>
@@ -1022,7 +1022,7 @@ const CollectionsPage: React.FC = () => {
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
                         className={`w-10 h-10 rounded-lg transition-colors ${currentPage === pageNum
-                            ? 'bg-red-600 text-white'
+                            ? 'bg-buttons-purple text-white'
                             : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                           }`}
                       >
@@ -1068,7 +1068,7 @@ const CollectionsPage: React.FC = () => {
                   setCurrentPage(1);
                   setCollections(allCollections);
                 }}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-6 py-2 bg-buttons-purple text-white rounded-lg hover:bg-buttons-purpleHover transition-colors"
               >
                 Clear All Filters
               </button>
@@ -1099,7 +1099,7 @@ const CollectionsPage: React.FC = () => {
                 <div className="h-20 w-20 netflix-ripple" style={{ animationDelay: '0.5s' }} />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-netflix-red font-bold text-lg z-10">{discoveryProgress.found}</span>
+                <span className="text-type-logo font-bold text-lg z-10">{discoveryProgress.found}</span>
               </div>
             </div>
 
@@ -1148,7 +1148,7 @@ const CollectionsPage: React.FC = () => {
               <button
                 onClick={() => fetchCollections(true)}
                 disabled={isRefreshing}
-                className={`px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2 ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
+                className={`px-6 py-3 bg-buttons-purple text-white rounded-lg hover:bg-buttons-purpleHover transition-colors flex items-center space-x-2 ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />

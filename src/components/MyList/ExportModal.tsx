@@ -337,7 +337,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            <Download className="w-6 h-6 text-netflix-red" />
+            <Download className="w-6 h-6 text-type-logo" />
             <h2 className="text-2xl font-bold text-white">Export My List</h2>
           </div>
           <button
@@ -352,7 +352,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
           {/* Export Info */}
           <div className="bg-gray-800 rounded-lg p-4">
             <p className="text-white mb-2">
-              Exporting <span className="font-semibold text-netflix-red">{items.length}</span> items from your list
+              Exporting <span className="font-semibold text-type-logo">{items.length}</span> items from your list
             </p>
             <p className="text-gray-400 text-sm">
               Choose your preferred format and customize what information to include.
@@ -367,11 +367,11 @@ const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setExportFormat('pdf')}
                 className={`p-4 rounded-lg border-2 transition-colors ${
                   exportFormat === 'pdf'
-                    ? 'border-netflix-red bg-netflix-red/10'
+                    ? 'border-buttons-purple bg-buttons-purple/10'
                     : 'border-gray-700 hover:border-gray-600'
                 }`}
               >
-                <FileText className="w-6 h-6 text-netflix-red mx-auto mb-2" />
+                <FileText className="w-6 h-6 text-type-logo mx-auto mb-2" />
                 <div className="text-white font-medium">PDF</div>
                 <div className="text-gray-400 text-xs">Formatted document</div>
               </button>
@@ -380,7 +380,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setExportFormat('csv')}
                 className={`p-4 rounded-lg border-2 transition-colors ${
                   exportFormat === 'csv'
-                    ? 'border-netflix-red bg-netflix-red/10'
+                    ? 'border-buttons-purple bg-buttons-purple/10'
                     : 'border-gray-700 hover:border-gray-600'
                 }`}
               >
@@ -393,7 +393,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setExportFormat('json')}
                 className={`p-4 rounded-lg border-2 transition-colors ${
                   exportFormat === 'json'
-                    ? 'border-netflix-red bg-netflix-red/10'
+                    ? 'border-buttons-purple bg-buttons-purple/10'
                     : 'border-gray-700 hover:border-gray-600'
                 }`}
               >
@@ -406,7 +406,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setExportFormat('text')}
                 className={`p-4 rounded-lg border-2 transition-colors ${
                   exportFormat === 'text'
-                    ? 'border-netflix-red bg-netflix-red/10'
+                    ? 'border-buttons-purple bg-buttons-purple/10'
                     : 'border-gray-700 hover:border-gray-600'
                 }`}
               >
@@ -426,7 +426,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                   type="checkbox"
                   checked={includeProgress}
                   onChange={(e) => setIncludeProgress(e.target.checked)}
-                  className="w-4 h-4 text-netflix-red bg-gray-800 border-gray-600 rounded focus:ring-netflix-red"
+                  className="w-4 h-4 text-type-logo bg-gray-800 border-gray-600 rounded focus:ring-buttons-purple"
                 />
                 <span className="text-white">Watch progress</span>
               </label>
@@ -436,7 +436,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                   type="checkbox"
                   checked={includeNotes}
                   onChange={(e) => setIncludeNotes(e.target.checked)}
-                  className="w-4 h-4 text-netflix-red bg-gray-800 border-gray-600 rounded focus:ring-netflix-red"
+                  className="w-4 h-4 text-type-logo bg-gray-800 border-gray-600 rounded focus:ring-buttons-purple"
                 />
                 <span className="text-white">Personal notes</span>
               </label>
@@ -446,7 +446,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                   type="checkbox"
                   checked={includeTags}
                   onChange={(e) => setIncludeTags(e.target.checked)}
-                  className="w-4 h-4 text-netflix-red bg-gray-800 border-gray-600 rounded focus:ring-netflix-red"
+                  className="w-4 h-4 text-type-logo bg-gray-800 border-gray-600 rounded focus:ring-buttons-purple"
                 />
                 <span className="text-white">Custom tags</span>
               </label>
@@ -476,7 +476,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                     />
                     <button
                       onClick={copyToClipboard}
-                      className="px-3 py-2 bg-netflix-red hover:bg-red-700 text-white rounded transition-colors"
+                      className="px-3 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded transition-colors"
                     >
                       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </button>
@@ -493,7 +493,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
           <div className="flex gap-3 pt-4">
             <button
               onClick={handleExport}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-netflix-red hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg transition-colors"
             >
               <Download className="w-5 h-5" />
               Export {exportFormat.toUpperCase()}

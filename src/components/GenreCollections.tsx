@@ -167,7 +167,7 @@ const GenreCollections: React.FC<GenreCollectionsProps> = ({
         <div className="flex justify-center py-8">
           <button
             onClick={() => setVisibleCount(prev => prev + 6)}
-            className="group relative px-8 py-4 bg-gradient-to-r from-netflix-red to-red-700 hover:from-red-700 hover:to-netflix-red text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group relative px-8 py-4 bg-gradient-to-r from-buttons-purple to-red-700 hover:from-red-700 hover:to-buttons-purple text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <span className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -86,7 +86,7 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
     switch (type) {
       case 'alert':
         return (
-          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-buttons-purple/20 flex items-center justify-center text-red-500 flex-shrink-0">
             <AlertTriangle className="w-5 h-5" />
           </div>
         );
@@ -146,10 +146,10 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="relative w-full max-w-2xl bg-netflix-dark/95 border border-white/10 rounded-3xl overflow-hidden shadow-2xl z-10 max-h-[85vh] flex flex-col"
+            className="relative w-full max-w-2xl bg-modal-background/95 border border-white/10 rounded-3xl overflow-hidden shadow-2xl z-10 max-h-[85vh] flex flex-col"
           >
             {/* Top Red Ambient Flare Background */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-36 bg-gradient-to-b from-netflix-red/10 to-transparent blur-2xl pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-36 bg-gradient-to-b from-buttons-purple/10 to-transparent blur-2xl pointer-events-none" />
 
             {/* Close Button */}
             <button
@@ -162,7 +162,7 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
 
             {/* Header Content */}
             <div className="pt-10 pb-4 px-6 sm:px-8 text-center flex flex-col items-center border-b border-white/5 relative z-10">
-              <div className="w-16 h-16 rounded-full bg-netflix-red/10 border border-netflix-red/30 flex items-center justify-center text-netflix-red mb-4 shadow-lg shadow-netflix-red/10">
+              <div className="w-16 h-16 rounded-full bg-buttons-purple/10 border border-buttons-purple/30 flex items-center justify-center text-type-logo mb-4 shadow-lg shadow-buttons-purple/10">
                 <Bell className="w-8 h-8 animate-pulse" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -177,7 +177,7 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
                 <button
                   onClick={() => setActiveTab('changelog')}
                   className={`flex-1 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all ${activeTab === 'changelog'
-                    ? 'bg-netflix-red text-white shadow-md'
+                    ? 'bg-buttons-purple text-white shadow-md'
                     : 'text-gray-400 hover:text-white'
                     }`}
                 >
@@ -186,7 +186,7 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
                 <button
                   onClick={() => setActiveTab('commits')}
                   className={`flex-1 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all ${activeTab === 'commits'
-                    ? 'bg-netflix-red text-white shadow-md'
+                    ? 'bg-buttons-purple text-white shadow-md'
                     : 'text-gray-400 hover:text-white'
                     }`}
                 >
@@ -221,11 +221,11 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
                               {item.title}
                             </h3>
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="px-2.5 py-0.5 bg-netflix-red/10 border border-netflix-red/20 text-netflix-red rounded-md text-xs font-semibold">
+                              <span className="px-2.5 py-0.5 bg-buttons-purple/10 border border-buttons-purple/20 text-type-logo rounded-md text-xs font-semibold">
                                 {item.version}
                               </span>
                               {item.isLatest && (
-                                <span className="px-2 py-0.5 bg-netflix-red text-white rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                                <span className="px-2 py-0.5 bg-buttons-purple text-white rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                                   Latest
                                 </span>
                               )}
@@ -269,11 +269,11 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
                   >
                     {isLoadingCommits ? (
                       <div className="flex flex-col items-center justify-center py-12">
-                        <div className="w-8 h-8 border-2 border-netflix-red border-t-transparent rounded-full animate-spin mb-4" />
+                        <div className="w-8 h-8 border-2 border-buttons-purple border-t-transparent rounded-full animate-spin mb-4" />
                         <p className="text-gray-400 text-sm">Fetching commits from GitHub...</p>
                       </div>
                     ) : commitError ? (
-                      <div className="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl text-center">
+                      <div className="bg-red-500/10 border border-buttons-purple/20 p-5 rounded-2xl text-center">
                         <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-3" />
                         <p className="text-white font-medium mb-1">Failed to fetch commits</p>
                         <p className="text-red-400 text-xs">{commitError}</p>
@@ -330,7 +330,7 @@ const UpdatesModal: React.FC<UpdatesModalProps> = ({ isOpen, onClose }) => {
                                     href={commitItem.html_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-1 text-netflix-red hover:underline ml-auto font-medium"
+                                    className="flex items-center gap-1 text-type-logo hover:underline ml-auto font-medium"
                                   >
                                     <span>GitHub</span>
                                     <ExternalLink className="w-3 h-3" />

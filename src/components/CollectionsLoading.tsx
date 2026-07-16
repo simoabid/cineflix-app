@@ -131,7 +131,7 @@ export function generateCardSkeleton(cardIndex: number): React.ReactElement {
       className="group relative animate-pulse"
       style={{ animationDelay: `${cardIndex * 0.1}s` }}
     >
-      <div className="relative bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/50 hover:border-red-500/30 transition-all duration-300">
+      <div className="relative bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/50 hover:border-buttons-purple/30 transition-all duration-300">
         <PosterCollageSkeleton posterIndexOffset={cardIndex} keyBase={`card-${cardIndex}`} />
 
         <div className="p-4 space-y-3">
@@ -213,9 +213,9 @@ const CollectionsLoading: React.FC<CollectionsLoadingProps> = ({
   const categorySkeletons = generateCategorySkeletons(categoriesCount, cardsPerCategory);
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] text-white">
+    <div className="min-h-screen bg-background-main text-white">
       {/* Hero Section Skeleton */}
-      <div className="relative h-[70vh] bg-[#0A0A1F] overflow-hidden">
+      <div className="relative h-[70vh] bg-background-main overflow-hidden">
         {/* Animated background particles */}
         <div className="absolute inset-0">
           {particles.map((p, i) => (
@@ -235,7 +235,7 @@ const CollectionsLoading: React.FC<CollectionsLoadingProps> = ({
         </div>
 
         {/* Hero content skeleton */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-[#0A0A1F]/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background-main via-background-main/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16">
           <div className="space-y-4">
             {/* Title skeleton with shimmer */}
@@ -263,7 +263,7 @@ const CollectionsLoading: React.FC<CollectionsLoadingProps> = ({
 
             {/* Buttons skeleton */}
             <div className="flex gap-4 mt-8">
-              <div className="h-12 bg-red-600/30 rounded w-40 animate-pulse" />
+              <div className="h-12 bg-buttons-purple/30 rounded w-40 animate-pulse" />
               <div className="h-12 bg-gray-700/30 rounded w-36 animate-pulse" />
             </div>
           </div>

@@ -37,7 +37,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
                 <button
                     key={genreId}
                     onClick={() => onRemoveGenre(genreId)}
-                    className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-netflix-red/20 text-netflix-red text-sm font-medium border border-netflix-red/30 hover:bg-netflix-red/30 transition-colors"
+                    className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-buttons-purple/20 text-type-logo text-sm font-medium border border-buttons-purple/30 hover:bg-buttons-purple/30 transition-colors"
                 >
                     <span>{getGenreName(genreId)}</span>
                     <X className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />

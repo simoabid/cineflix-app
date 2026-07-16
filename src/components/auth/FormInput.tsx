@@ -42,7 +42,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 className="block text-sm font-medium text-gray-300"
             >
                 {label}
-                {required && <span className="text-netflix-red ml-1">*</span>}
+                {required && <span className="text-type-logo ml-1">*</span>}
             </label>
 
             {/* Input */}
@@ -61,8 +61,8 @@ const FormInput: React.FC<FormInputProps> = ({
                 aria-invalid={!!error}
                 aria-describedby={error ? `${id}-error` : undefined}
                 className={`auth-input ${error
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-600/50 focus:ring-netflix-red'
+                        ? 'border-buttons-purple focus:ring-red-500'
+                        : 'border-gray-600/50 focus:ring-buttons-purple'
                     } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
 

@@ -73,7 +73,7 @@ const WhereToWatchSection: React.FC<WhereToWatchSectionProps> = ({ contentId, ty
             disabled={!provider.primary}
             className={`group relative w-full text-left overflow-hidden rounded-2xl p-4 border transition-all duration-300 ${
               provider.primary
-                ? 'bg-gradient-to-r from-netflix-red/20 via-netflix-red/10 to-transparent border-netflix-red/40 hover:border-netflix-red/70 hover:shadow-[0_8px_24px_rgba(229,9,20,0.25)] cursor-pointer'
+                ? 'bg-gradient-to-r from-buttons-purple/20 via-buttons-purple/10 to-transparent border-buttons-purple/40 hover:border-buttons-purple/70 hover:shadow-[0_8px_24px_rgba(229,9,20,0.25)] cursor-pointer'
                 : 'bg-white/[0.03] border-white/10 opacity-60 cursor-default'
             }`}
           >
@@ -81,7 +81,7 @@ const WhereToWatchSection: React.FC<WhereToWatchSectionProps> = ({ contentId, ty
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${
                   provider.primary
-                    ? 'bg-netflix-red shadow-lg shadow-netflix-red/40 group-hover:scale-110'
+                    ? 'bg-buttons-purple shadow-lg shadow-buttons-purple/40 group-hover:scale-110'
                     : 'bg-white/10'
                 }`}
               >

@@ -379,7 +379,7 @@ const Movies: React.FC<MoviesProps> = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F] flex items-center justify-center">
+      <div className="min-h-screen bg-background-main flex items-center justify-center">
         <div className="relative">
           {/* Main thick spinner */}
           <div className="h-32 w-32 netflix-spinner-thick" />
@@ -394,12 +394,12 @@ const Movies: React.FC<MoviesProps> = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-background-main flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-red-400 text-lg mb-4">{error}</p>
           <button
             onClick={handleRetry}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="px-4 py-2 bg-buttons-purple text-white rounded hover:bg-buttons-purpleHover"
           >
             Retry
           </button>
@@ -409,7 +409,7 @@ const Movies: React.FC<MoviesProps> = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] text-white">
+    <div className="min-h-screen bg-background-main text-white">
       <SEOHead
         title="Movies"
         description="Browse trending, popular, top-rated, now-playing, and upcoming movies on CINEFLIX."

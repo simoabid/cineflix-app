@@ -132,7 +132,7 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
           </span>
           <button
             onClick={() => switchToNative()}
-            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-[#e50914] hover:bg-red-700 text-white transition-all shadow-lg active:scale-95 border border-red-500/10"
+            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-buttons-purple hover:bg-buttons-purpleHover text-white transition-all shadow-lg active:scale-95 border border-buttons-purple/10"
           >
             <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
             <span>Smart Scraper</span>
@@ -240,7 +240,7 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
                 </span>
                 <button
                   onClick={() => switchToNative()}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#e50914] hover:bg-red-700 text-white transition-all shadow-lg hover:shadow-red-500/20 active:scale-95"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-buttons-purple hover:bg-buttons-purpleHover text-white transition-all shadow-lg hover:shadow-buttons-purple/20 active:scale-95"
                 >
                   <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   <span>Smart Scraper</span>
@@ -300,7 +300,7 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
             {displayMode === "iframe" && (
               <button
                 onClick={() => switchToNative()}
-                className="flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-[#e50914] text-white hover:bg-red-700 active:scale-95 transition-all"
+                className="flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-buttons-purple text-white hover:bg-buttons-purpleHover active:scale-95 transition-all"
               >
                 <span>Scraper</span>
               </button>

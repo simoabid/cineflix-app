@@ -35,7 +35,8 @@ import {
     MousePointerClick,
     Loader2,
     CheckCircle2,
-    AlertCircle
+    AlertCircle,
+    Palette
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { PasswordInput } from '../components/auth';
@@ -46,9 +47,10 @@ import { AVATARS, renderAvatarById } from '../constants/avatars';
 import DynamicBackground from '../components/DynamicBackground';
 import { CineProSettingsView } from '../components/CineProSettingsView';
 import { SEOHead } from '../components/layout/SEOHead';
+import { ThemePicker } from '../components/settings/ThemePicker';
 
 // Settings tabs
-type SettingsTab = 'profile' | 'playback' | 'notifications' | 'privacy' | 'devices' | 'subscription' | 'accessibility' | 'language' | 'cinepro';
+type SettingsTab = 'profile' | 'playback' | 'appearance' | 'notifications' | 'privacy' | 'devices' | 'subscription' | 'accessibility' | 'language' | 'cinepro';
 
 interface TabItem {
     id: SettingsTab;
@@ -59,6 +61,7 @@ interface TabItem {
 const tabs: TabItem[] = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'playback', label: 'Playback', icon: Play },
+    { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'privacy', label: 'Privacy', icon: Shield },
     { id: 'devices', label: 'Devices', icon: Monitor },
@@ -73,7 +76,7 @@ const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; disabled?
     <button
         onClick={onChange}
         disabled={disabled}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-netflix-red focus:ring-offset-2 focus:ring-offset-gray-900 ${enabled ? 'bg-netflix-red' : 'bg-gray-600'
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-buttons-purple focus:ring-offset-2 focus:ring-offset-gray-900 ${enabled ? 'bg-buttons-purple' : 'bg-gray-600'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
         <span
@@ -93,8 +96,8 @@ const SettingsCard: React.FC<{ title: string; description?: string; children: Re
     <div className="auth-card rounded-2xl p-6 mb-4 animate-scale-in">
         <div className="flex items-start gap-4 mb-4">
             {Icon && (
-                <div className="w-10 h-10 bg-netflix-red/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-netflix-red" />
+                <div className="w-10 h-10 bg-buttons-purple/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 text-type-logo" />
                 </div>
             )}
             <div className="flex-1">
@@ -132,7 +135,7 @@ const SelectDropdown: React.FC<{
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-netflix-red transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-buttons-purple transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
     >
         {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -150,7 +153,7 @@ const SaveStatusIndicator: React.FC<{ status: SaveStatus; error: string | null }
         <div className="fixed bottom-6 right-6 z-50 animate-scale-in">
             {status === 'saving' && (
                 <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg">
-                    <Loader2 className="w-4 h-4 text-netflix-red animate-spin" />
+                    <Loader2 className="w-4 h-4 text-type-logo animate-spin" />
                     <span className="text-sm text-gray-300">Saving...</span>
                 </div>
             )}
@@ -203,8 +206,12 @@ const AccountPage: React.FC = () => {
     const { user, logout, updateProfile, changePassword } = useAuth();
     const { settings, isLoading, saveStatus, error, updateSetting } = useAccountSettings();
 
-    // Active tab
-    const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+    // Active tab (support #appearance deep-link from Navbar)
+    const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
+        typeof window !== 'undefined' && window.location.hash === '#appearance'
+            ? 'appearance'
+            : 'profile'
+    );
 
     // Profile editing state
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -351,7 +358,7 @@ const AccountPage: React.FC = () => {
                                 </div>
                             )}
                             {profileError && (
-                                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm" role="alert">
+                                <div className="mb-4 p-3 bg-red-500/10 border border-buttons-purple/50 rounded-lg text-red-400 text-sm" role="alert">
                                     {profileError}
                                 </div>
                             )}
@@ -378,7 +385,7 @@ const AccountPage: React.FC = () => {
                                     </div>
                                     <button
                                         onClick={() => setShowAvatarModal(true)}
-                                        className="mt-3 text-sm text-netflix-red hover:text-red-400 transition-colors"
+                                        className="mt-3 text-sm text-type-logo hover:text-red-400 transition-colors"
                                     >
                                         Change Avatar
                                     </button>
@@ -452,7 +459,7 @@ const AccountPage: React.FC = () => {
                                             <button
                                                 onClick={handleProfileUpdate}
                                                 disabled={profileLoading}
-                                                className="flex items-center gap-2 px-4 py-2 bg-netflix-red hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-2 px-4 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                                             >
                                                 {profileLoading ? <span className="auth-spinner" /> : <Save className="w-4 h-4" />}
                                                 Save Changes
@@ -483,7 +490,7 @@ const AccountPage: React.FC = () => {
                                 </div>
                             )}
                             {passwordError && (
-                                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm" role="alert">
+                                <div className="mb-4 p-3 bg-red-500/10 border border-buttons-purple/50 rounded-lg text-red-400 text-sm" role="alert">
                                     {passwordError}
                                 </div>
                             )}
@@ -527,7 +534,7 @@ const AccountPage: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={passwordLoading || !currentPassword || !newPassword || !confirmNewPassword}
-                                        className="flex items-center gap-2 px-4 py-2 bg-netflix-red hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-2 px-4 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {passwordLoading ? <span className="auth-spinner" /> : <Lock className="w-4 h-4" />}
                                         {AUTH_STRINGS.buttons.changePassword}
@@ -549,7 +556,7 @@ const AccountPage: React.FC = () => {
 
                                 <button
                                     onClick={() => setShowDeleteAccountModal(true)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg font-medium transition-colors border border-red-500/30"
+                                    className="flex items-center gap-2 px-6 py-3 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg font-medium transition-colors border border-buttons-purple/30"
                                 >
                                     <Trash2 className="w-5 h-5" />
                                     Delete Account
@@ -769,7 +776,7 @@ const AccountPage: React.FC = () => {
                             <div className="mt-6 pt-4 border-t border-gray-700/50">
                                 <button
                                     onClick={() => setShowLogoutAllModal(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg font-medium transition-colors border border-red-500/30"
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-lg font-medium transition-colors border border-buttons-purple/30"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     Sign Out of All Devices
@@ -783,10 +790,10 @@ const AccountPage: React.FC = () => {
                 return (
                     <div className="space-y-6">
                         <SettingsCard title="Current Plan" icon={Crown}>
-                            <div className="p-6 bg-gradient-to-r from-netflix-red/20 via-red-600/10 to-transparent rounded-xl border border-netflix-red/30">
+                            <div className="p-6 bg-gradient-to-r from-buttons-purple/20 via-red-600/10 to-transparent rounded-xl border border-buttons-purple/30">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-netflix-red rounded-xl flex items-center justify-center">
+                                        <div className="w-12 h-12 bg-buttons-purple rounded-xl flex items-center justify-center">
                                             <Crown className="w-6 h-6 text-white" />
                                         </div>
                                         <div>
@@ -801,19 +808,19 @@ const AccountPage: React.FC = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                                     <div className="flex items-center gap-2 text-gray-300">
-                                        <Zap className="w-4 h-4 text-netflix-red" />
+                                        <Zap className="w-4 h-4 text-type-logo" />
                                         <span>4K Ultra HD streaming</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-gray-300">
-                                        <Monitor className="w-4 h-4 text-netflix-red" />
+                                        <Monitor className="w-4 h-4 text-type-logo" />
                                         <span>Watch on 4 devices</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-gray-300">
-                                        <Download className="w-4 h-4 text-netflix-red" />
+                                        <Download className="w-4 h-4 text-type-logo" />
                                         <span>Unlimited downloads</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-gray-300">
-                                        <Volume2 className="w-4 h-4 text-netflix-red" />
+                                        <Volume2 className="w-4 h-4 text-type-logo" />
                                         <span>Spatial Audio</span>
                                     </div>
                                 </div>
@@ -835,7 +842,7 @@ const AccountPage: React.FC = () => {
                                         <p className="text-sm text-gray-400">Expires 12/26</p>
                                     </div>
                                 </div>
-                                <button className="text-netflix-red hover:text-red-400 transition-colors">
+                                <button className="text-type-logo hover:text-red-400 transition-colors">
                                     <Edit3 className="w-5 h-5" />
                                 </button>
                             </div>
@@ -862,12 +869,12 @@ const AccountPage: React.FC = () => {
                                     <div
                                         key={plan.name}
                                         className={`p - 4 rounded - xl border transition - all ${plan.current
-                                            ? 'bg-netflix-red/10 border-netflix-red'
+                                            ? 'bg-buttons-purple/10 border-buttons-purple'
                                             : 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
                                             } `}
                                     >
                                         <h4 className="text-lg font-bold text-white mb-1">{plan.name}</h4>
-                                        <p className="text-2xl font-bold text-netflix-red mb-3">{plan.price}<span className="text-sm text-gray-400">/mo</span></p>
+                                        <p className="text-2xl font-bold text-type-logo mb-3">{plan.price}<span className="text-sm text-gray-400">/mo</span></p>
                                         <ul className="space-y-2">
                                             {plan.features.map((feature, i) => (
                                                 <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
@@ -880,7 +887,7 @@ const AccountPage: React.FC = () => {
                                             disabled={plan.current}
                                             className={`w - full mt - 4 py - 2 rounded - lg font - medium transition - colors ${plan.current
                                                 ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                                : 'bg-netflix-red hover:bg-red-700 text-white'
+                                                : 'bg-buttons-purple hover:bg-buttons-purpleHover text-white'
                                                 } `}
                                         >
                                             {plan.current ? 'Current Plan' : 'Switch'}
@@ -998,6 +1005,19 @@ const AccountPage: React.FC = () => {
                     </div>
                 );
 
+            case 'appearance':
+                return (
+                    <div className="space-y-6">
+                        <SettingsCard
+                            title="Theme"
+                            description="Choose a color scheme for the entire app. Hover to preview, click to apply."
+                            icon={Palette}
+                        >
+                            <ThemePicker />
+                        </SettingsCard>
+                    </div>
+                );
+
             case 'cinepro':
                 return (
                     <CineProSettingsView />
@@ -1033,7 +1053,7 @@ const AccountPage: React.FC = () => {
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
-                                                ? 'bg-netflix-red text-white shadow-lg shadow-netflix-red/25'
+                                                ? 'bg-buttons-purple text-white shadow-lg shadow-buttons-purple/25'
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                                 }`}
                                         >
@@ -1081,7 +1101,7 @@ const AccountPage: React.FC = () => {
                                     setShowLogoutAllModal(false);
                                     // Handle logout all - will be implemented with session tracking
                                 }}
-                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                                className="flex-1 px-4 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg font-medium transition-colors"
                             >
                                 Sign Out All
                             </button>
@@ -1114,7 +1134,7 @@ const AccountPage: React.FC = () => {
                                     setShowDeleteAccountModal(false);
                                     alert('Account deletion is not available in this demo.');
                                 }}
-                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                                className="flex-1 px-4 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg font-medium transition-colors"
                             >
                                 Delete Account
                             </button>
@@ -1183,7 +1203,7 @@ const AccountPage: React.FC = () => {
                                         onClick={() => handleAvatarChange(avatar.id)}
                                         disabled={avatarLoading}
                                         className={`relative group flex flex - col items - center p - 3 rounded - xl transition - all duration - 200 ${isSelected
-                                            ? 'bg-netflix-red/20 ring-2 ring-netflix-red'
+                                            ? 'bg-buttons-purple/20 ring-2 ring-buttons-purple'
                                             : 'bg-gray-800/50 hover:bg-gray-700/50'
                                             } ${avatarLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} `}
                                     >
@@ -1193,7 +1213,7 @@ const AccountPage: React.FC = () => {
                                         </div>
                                         <span className="text-xs text-gray-400 mt-2 text-center">{avatar.name}</span>
                                         {isSelected && (
-                                            <div className="absolute top-1 right-1 w-5 h-5 bg-netflix-red rounded-full flex items-center justify-center">
+                                            <div className="absolute top-1 right-1 w-5 h-5 bg-buttons-purple rounded-full flex items-center justify-center">
                                                 <Check className="w-3 h-3 text-white" />
                                             </div>
                                         )}

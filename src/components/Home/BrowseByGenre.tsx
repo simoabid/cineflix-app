@@ -30,7 +30,7 @@ const GenreLandscapeCard: React.FC<GenreLandscapeCardProps> = ({ item, type }) =
     return (
         <Link
             to={`/${type}/${item.id}`}
-            className="flex-shrink-0 w-64 sm:w-72 md:w-80 lg:w-[340px] group block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-netflix-red focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl p-1 bg-white/[0.02] border border-white/5 hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-2xl"
+            className="flex-shrink-0 w-64 sm:w-72 md:w-80 lg:w-[340px] group block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-buttons-purple focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl p-1 bg-white/[0.02] border border-white/5 hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-2xl"
         >
             {/* Card Media Container */}
             <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-gray-900 border border-white/5 shadow-md">
@@ -53,7 +53,7 @@ const GenreLandscapeCard: React.FC<GenreLandscapeCardProps> = ({ item, type }) =
 
                 {/* Hover Play Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/40 transition-all duration-300">
-                    <div className="w-10 h-10 bg-netflix-red text-white rounded-full flex items-center justify-center shadow-lg opacity-0 transform scale-90 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 transition-all duration-300 ease-out group-hover:shadow-[0_0_16px_rgba(229,9,20,0.5)]">
+                    <div className="w-10 h-10 bg-buttons-purple text-white rounded-full flex items-center justify-center shadow-lg opacity-0 transform scale-90 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 transition-all duration-300 ease-out group-hover:shadow-[0_0_16px_rgba(229,9,20,0.5)]">
                         <Play className="w-4 h-4 text-white fill-current ml-0.5" />
                     </div>
                 </div>
@@ -62,7 +62,7 @@ const GenreLandscapeCard: React.FC<GenreLandscapeCardProps> = ({ item, type }) =
             {/* Details Information */}
             <div className="mt-2.5 px-2 pb-2 flex flex-col gap-1 w-full text-left">
                 {/* Title */}
-                <h4 className="text-white font-bold text-xs sm:text-sm line-clamp-1 leading-tight tracking-wide group-hover:text-netflix-red transition-colors duration-300">
+                <h4 className="text-white font-bold text-xs sm:text-sm line-clamp-1 leading-tight tracking-wide group-hover:text-type-logo transition-colors duration-300">
                     {title}
                 </h4>
 
@@ -281,7 +281,7 @@ const BrowseByGenre: React.FC = () => {
                     {/* Row 1: Header title and Browse all button */}
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-2">
-                            <span className="w-1 h-5 bg-[#E50914] rounded-full inline-block" />
+                            <span className="w-1 h-5 bg-buttons-purple rounded-full inline-block" />
                             <h2 className="text-sm font-semibold tracking-[0.2em] text-gray-400 uppercase">
                                 Browse by Genre
                             </h2>
@@ -301,7 +301,7 @@ const BrowseByGenre: React.FC = () => {
                             onClick={() => handleTypeChange('movie')}
                             className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider transition-all duration-300 ${
                                 selectedType === 'movie'
-                                    ? 'bg-[#18181F] text-white shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-white/5'
+                                    ? 'bg-modal-background text-white shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-white/5'
                                     : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
                             }`}
                         >
@@ -312,7 +312,7 @@ const BrowseByGenre: React.FC = () => {
                             onClick={() => handleTypeChange('tv')}
                             className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider transition-all duration-300 ${
                                 selectedType === 'tv'
-                                    ? 'bg-[#18181F] text-white shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-white/5'
+                                    ? 'bg-modal-background text-white shadow-[0_4px_12px_rgba(0,0,0,0.5)] border border-white/5'
                                     : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
                             }`}
                         >
@@ -332,7 +332,7 @@ const BrowseByGenre: React.FC = () => {
                                         onClick={() => handleGenreChange(genre.id)}
                                         className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 border ${
                                             isActive
-                                                ? 'border-white bg-[#18181F] text-white shadow-[0_4px_12px_rgba(255,255,255,0.05)] font-bold'
+                                                ? 'border-white bg-modal-background text-white shadow-[0_4px_12px_rgba(255,255,255,0.05)] font-bold'
                                                 : 'border-white/10 bg-black/20 text-gray-400 hover:text-white hover:border-white/30'
                                         }`}
                                     >

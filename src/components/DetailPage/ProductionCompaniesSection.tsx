@@ -46,11 +46,11 @@ const ProductionCompaniesSection: React.FC<ProductionCompaniesSectionProps> = ({
                   loading="lazy"
                 />
               ) : (
-                <Award className="w-5 h-5 text-netflix-red" />
+                <Award className="w-5 h-5 text-type-logo" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-white text-sm group-hover:text-netflix-red transition-colors truncate">
+              <h3 className="font-semibold text-white text-sm group-hover:text-type-logo transition-colors truncate">
                 {company.name}
               </h3>
               {company.origin_country && (

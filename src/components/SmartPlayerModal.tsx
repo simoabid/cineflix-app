@@ -397,7 +397,7 @@ export function SmartPlayerModal(): React.ReactElement | null {
             className="w-full min-h-screen"
           >
             <PStreamPlayer onBack={handleClose} onMetaChange={handleMetaChange}>
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#050515]">
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-background-main">
                 <div className="text-center max-w-md px-6 py-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl">
                   <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-6 border border-yellow-500/20">
                     <AlertCircle className="h-8 w-8 text-yellow-500" />
@@ -442,9 +442,9 @@ export function SmartPlayerModal(): React.ReactElement | null {
             className="w-full min-h-screen"
           >
             <PStreamPlayer onBack={handleClose} onMetaChange={handleMetaChange}>
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#050515]">
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-background-main">
                 <div className="text-center max-w-md px-6 py-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl">
-                  <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+                  <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6 border border-buttons-purple/20">
                     <AlertCircle className="h-8 w-8 text-red-500" />
                   </div>
                   <h3 className="text-white text-xl font-bold mb-3">

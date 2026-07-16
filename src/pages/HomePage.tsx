@@ -311,7 +311,7 @@ const HomePage = (): JSX.Element => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#020205] bg-gradient-to-b from-black/80 via-[#050510] to-[#0A0A1F] flex items-center justify-center">
+      <div className="min-h-screen bg-background-main bg-gradient-to-b from-black/80 via-black/60 to-background-main flex items-center justify-center">
         <div className="relative">
           {/* Main thick spinner */}
           <div className="h-32 w-32 netflix-spinner-thick" />
@@ -325,7 +325,7 @@ const HomePage = (): JSX.Element => {
   }
 
   return (
-    <div className="min-h-screen bg-[#020205] bg-gradient-to-b from-black/80 via-[#050510] to-[#0A0A1F]" style={{ overflowX: 'clip' }}>
+    <div className="min-h-screen bg-background-main bg-gradient-to-b from-black/80 via-black/60 to-background-main" style={{ overflowX: 'clip' }}>
       <SEOHead
         title="Home"
         description="Discover and stream movies and TV shows with a premium cinema experience on CINEFLIX."
@@ -581,7 +581,7 @@ const HomePage = (): JSX.Element => {
                     {index === currentHeroIndex && (
                       <div 
                         key={currentHeroIndex}
-                        className="absolute top-0 left-0 h-full w-full bg-[#E50914] rounded-full origin-left animate-dot-fill"
+                        className="absolute top-0 left-0 h-full w-full bg-buttons-purple rounded-full origin-left animate-dot-fill"
                         style={{
                           animationPlayState: isHeroAutoPlaying ? 'running' : 'paused'
                         }}
@@ -664,7 +664,7 @@ const HomePage = (): JSX.Element => {
                   {heroMovie.genres?.slice(0, 4).map((genre) => (
                     <span
                       key={genre.id}
-                      className="bg-netflix-red/20 border border-netflix-red/30 text-netflix-red px-3 py-1.5 rounded-full text-sm font-medium hover:bg-netflix-red/30 transition-colors"
+                      className="bg-buttons-purple/20 border border-buttons-purple/30 text-type-logo px-3 py-1.5 rounded-full text-sm font-medium hover:bg-buttons-purple/30 transition-colors"
                     >
                       {genre.name}
                     </span>
@@ -677,7 +677,7 @@ const HomePage = (): JSX.Element => {
                   <div className="flex flex-row justify-start gap-4">
                     <button
                       onClick={() => openPlayer({ tmdbId: heroMovie.id, type: 'movie' })}
-                      className="flex items-center justify-center gap-3 bg-netflix-red hover:bg-netflix-red/80 px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 shadow-xl hover:scale-105"
+                      className="flex items-center justify-center gap-3 bg-buttons-purple hover:bg-buttons-purple/80 px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 shadow-xl hover:scale-105"
                     >
                       <Play className="w-6 h-6 fill-current" />
                       <span>Watch Now</span>
@@ -740,7 +740,7 @@ const HomePage = (): JSX.Element => {
                     {index === currentHeroIndex && (
                       <div 
                         key={currentHeroIndex}
-                        className="absolute top-0 left-0 h-full w-full bg-[#E50914] rounded-full origin-left animate-dot-fill"
+                        className="absolute top-0 left-0 h-full w-full bg-buttons-purple rounded-full origin-left animate-dot-fill"
                         style={{
                           animationPlayState: isHeroAutoPlaying ? 'running' : 'paused'
                         }}

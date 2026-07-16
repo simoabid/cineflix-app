@@ -14,7 +14,7 @@ const NoResults: React.FC<NoResultsProps> = ({ hasFilters, onClearFilters }) => 
                 <div className="w-32 h-32 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
                     <Search className="w-16 h-16 text-gray-600" />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-netflix-red/20 flex items-center justify-center">
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-buttons-purple/20 flex items-center justify-center">
                     <span className="text-2xl">😕</span>
                 </div>
             </div>
@@ -34,7 +34,7 @@ const NoResults: React.FC<NoResultsProps> = ({ hasFilters, onClearFilters }) => 
                 {hasFilters && (
                     <button
                         onClick={onClearFilters}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-netflix-red text-white font-medium hover:bg-red-700 transition-colors"
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-buttons-purple text-white font-medium hover:bg-buttons-purpleHover transition-colors"
                     >
                         <RefreshCw className="w-5 h-5" />
                         Clear All Filters

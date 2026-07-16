@@ -109,7 +109,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
       <div className="fixed top-24 left-6 sm:left-10 z-[100]">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center justify-center gap-1 sm:gap-2 bg-black/60 backdrop-blur-xl w-10 h-10 sm:w-auto sm:px-6 sm:py-3.5 rounded-full hover:bg-black/90 transition-all duration-300 border border-white/10 hover:border-netflix-red/50 shadow-[0_8px_32px_rgba(0,0,0,0.5)] group hover:scale-105 active:scale-95"
+          className="flex items-center justify-center gap-1 sm:gap-2 bg-black/60 backdrop-blur-xl w-10 h-10 sm:w-auto sm:px-6 sm:py-3.5 rounded-full hover:bg-black/90 transition-all duration-300 border border-white/10 hover:border-buttons-purple/50 shadow-[0_8px_32px_rgba(0,0,0,0.5)] group hover:scale-105 active:scale-95"
         >
           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:-translate-x-1 transition-transform flex-shrink-0" />
           <span className="text-white font-bold text-sm sm:text-base tracking-wide uppercase hidden sm:inline">Back</span>
@@ -120,7 +120,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
           MOBILE / TABLET HERO LAYOUT (< lg)
           Widescreen Banner + Floating Overlapping Poster + Natural Scroll
           ============================================ */}
-      <div className="lg:hidden relative w-full bg-[#0A0A1F] pb-6 flex flex-col">
+      <div className="lg:hidden relative w-full bg-background-main pb-6 flex flex-col">
         {/* Cinematic Widescreen Backdrop Banner */}
         <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] overflow-hidden">
           <img
@@ -132,7 +132,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
             }}
           />
           {/* Gradient transitions for dark theme integration */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-background-main via-transparent to-transparent"></div>
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
@@ -295,8 +295,8 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
               (e.target as HTMLImageElement).src = '/fallback-backdrop.jpg';
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A1F] via-[#0A0A1F]/80 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-background-main via-background-main/80 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-background-main via-transparent to-transparent"></div>
         </div>
 
         {/* Hero Content */}
@@ -404,7 +404,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
                 {content.genres?.map((genre) => (
                   <span
                     key={genre.id}
-                    className="bg-netflix-red/20 border border-netflix-red/30 text-netflix-red px-4 py-2 rounded-full text-sm font-medium"
+                    className="bg-buttons-purple/20 border border-buttons-purple/30 text-type-logo px-4 py-2 rounded-full text-sm font-medium"
                   >
                     {genre.name}
                   </span>
@@ -415,7 +415,7 @@ const DetailHero: React.FC<DetailHeroProps> = ({ content, type, credits, imdbRat
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                 <button
                   onClick={() => openPlayer({ tmdbId: id, type })}
-                  className="flex items-center justify-center gap-2 sm:gap-3 bg-netflix-red hover:bg-netflix-red/80 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 shadow-xl hover:scale-105 w-full sm:w-auto"
+                  className="flex items-center justify-center gap-2 sm:gap-3 bg-buttons-purple hover:bg-buttons-purple/80 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 shadow-xl hover:scale-105 w-full sm:w-auto"
                 >
                   <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                   <span>Watch Now</span>

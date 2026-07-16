@@ -55,7 +55,7 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                             <div>
                                 <Link to={`/${type}/${item.id}`} onClick={() => handleClick(item, type, title)}>
-                                    <h3 className="text-lg md:text-xl font-semibold text-white hover:text-netflix-red transition-colors line-clamp-1">
+                                    <h3 className="text-lg md:text-xl font-semibold text-white hover:text-type-logo transition-colors line-clamp-1">
                                         {title}
                                     </h3>
                                 </Link>
@@ -83,7 +83,7 @@ const BrowseResultsList: React.FC<BrowseResultsListProps> = ({ results }) => {
                             <div className="flex items-center gap-2 mt-4">
                                 <button
                                     onClick={() => openPlayer({ tmdbId: item.id, type })}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-netflix-red text-white text-sm font-medium hover:bg-red-700 transition-colors duration-150"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-buttons-purple text-white text-sm font-medium hover:bg-buttons-purpleHover transition-colors duration-150"
                                 >
                                     <Play className="w-4 h-4 fill-current" />
                                     <span className="hidden sm:inline">Watch Now</span>

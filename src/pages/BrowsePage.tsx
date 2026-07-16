@@ -267,7 +267,7 @@ const BrowsePage = (): JSX.Element => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#0A0A1F]">
+        <div className="min-h-screen bg-background-main">
             <SEOHead
                 title="Browse"
                 description="Browse trending and popular movies and TV shows on CINEFLIX."
@@ -343,7 +343,7 @@ const BrowsePage = (): JSX.Element => {
                         <button
                             onClick={() => updateFilters({ contentType: 'all' })}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${filters.contentType === 'all'
-                                ? 'bg-netflix-red text-white'
+                                ? 'bg-buttons-purple text-white'
                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
                                 }`}
                         >
@@ -353,7 +353,7 @@ const BrowsePage = (): JSX.Element => {
                         <button
                             onClick={() => updateFilters({ contentType: 'movie' })}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${filters.contentType === 'movie'
-                                ? 'bg-netflix-red text-white'
+                                ? 'bg-buttons-purple text-white'
                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
                                 }`}
                         >
@@ -363,7 +363,7 @@ const BrowsePage = (): JSX.Element => {
                         <button
                             onClick={() => updateFilters({ contentType: 'tv' })}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${filters.contentType === 'tv'
-                                ? 'bg-netflix-red text-white'
+                                ? 'bg-buttons-purple text-white'
                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
                                 }`}
                         >
@@ -410,8 +410,8 @@ const BrowsePage = (): JSX.Element => {
                         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                         onClick={() => setShowMobileFilters(false)}
                     />
-                    <div className="absolute inset-x-0 bottom-0 max-h-[80vh] bg-[#1a1a1a] rounded-t-3xl overflow-hidden animate-slide-in-up">
-                        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-white/10 bg-[#1a1a1a]">
+                    <div className="absolute inset-x-0 bottom-0 max-h-[80vh] bg-modal-background rounded-t-3xl overflow-hidden animate-slide-in-up">
+                        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-white/10 bg-modal-background">
                             <h3 className="text-lg font-semibold text-white">Filters</h3>
                             <button
                                 onClick={() => setShowMobileFilters(false)}
@@ -437,7 +437,7 @@ const BrowsePage = (): JSX.Element => {
                                                     updateFilters({ genres: newGenres });
                                                 }}
                                                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filters.genres.includes(genre.id)
-                                                    ? 'bg-netflix-red text-white'
+                                                    ? 'bg-buttons-purple text-white'
                                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                                     }`}
                                             >
@@ -459,7 +459,7 @@ const BrowsePage = (): JSX.Element => {
                                         step="0.5"
                                         value={filters.minRating}
                                         onChange={(e) => updateFilters({ minRating: parseFloat(e.target.value) })}
-                                        className="w-full accent-netflix-red"
+                                        className="w-full accent-buttons-purple"
                                     />
                                 </div>
 
@@ -489,7 +489,7 @@ const BrowsePage = (): JSX.Element => {
                                 </div>
                             </div>
                         </div>
-                        <div className="sticky bottom-0 p-4 border-t border-white/10 bg-[#1a1a1a] flex gap-3">
+                        <div className="sticky bottom-0 p-4 border-t border-white/10 bg-modal-background flex gap-3">
                             <button
                                 onClick={clearFilters}
                                 className="flex-1 py-3 rounded-lg border border-white/20 text-white font-medium hover:bg-white/10 transition-colors"
@@ -498,7 +498,7 @@ const BrowsePage = (): JSX.Element => {
                             </button>
                             <button
                                 onClick={() => setShowMobileFilters(false)}
-                                className="flex-1 py-3 rounded-lg bg-netflix-red text-white font-medium hover:bg-red-700 transition-colors"
+                                className="flex-1 py-3 rounded-lg bg-buttons-purple text-white font-medium hover:bg-buttons-purpleHover transition-colors"
                             >
                                 Apply Filters
                             </button>

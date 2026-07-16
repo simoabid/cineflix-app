@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { BrandLogo } from '../BrandLogo';
 
 
 interface AuthCardProps {
@@ -20,14 +21,10 @@ const AuthCard: React.FC<AuthCardProps> = ({ children, title, subtitle }) => {
 
             {/* Card Container */}
             <div className="relative z-10 w-full max-w-xl animate-fade-in my-auto">
-                {/* Logo */}
+                {/* Logo — themeable */}
                 <div className="flex justify-center mb-6 relative z-20">
-                    <Link to="/" className="transition-transform hover:scale-105">
-                        <img
-                            src={`${import.meta.env.BASE_URL}cineflix-logo.png`}
-                            alt="CINEFLIX - Your Streaming Destination"
-                            className="h-8 sm:h-10 w-auto logo-glow"
-                        />
+                    <Link to="/" className="transition-transform hover:scale-105 logo-glow" aria-label="CINEFLIX Home">
+                        <BrandLogo className="h-8 sm:h-10" title="CINEFLIX - Your Streaming Destination" />
                     </Link>
                 </div>
 

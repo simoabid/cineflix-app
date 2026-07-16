@@ -181,7 +181,7 @@ const StatsModal: React.FC<StatsModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-6 h-6 text-netflix-red" />
+            <BarChart3 className="w-6 h-6 text-type-logo" />
             <h2 className="text-2xl font-bold text-white">My List Statistics</h2>
           </div>
           <button
@@ -196,19 +196,19 @@ const StatsModal: React.FC<StatsModalProps> = ({
           {/* Overview Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-800 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-netflix-red mb-1">{safeStats.totalItems}</div>
+              <div className="text-3xl font-bold text-type-logo mb-1">{safeStats.totalItems}</div>
               <div className="text-gray-400 text-sm">Total Items</div>
             </div>
             <div className="bg-gray-800 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-netflix-red mb-1">{safeStats.completionRate}%</div>
+              <div className="text-3xl font-bold text-type-logo mb-1">{safeStats.completionRate}%</div>
               <div className="text-gray-400 text-sm">Completion Rate</div>
             </div>
             <div className="bg-gray-800 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-netflix-red mb-1">{formatHours(safeStats.totalHours)}</div>
+              <div className="text-3xl font-bold text-type-logo mb-1">{formatHours(safeStats.totalHours)}</div>
               <div className="text-gray-400 text-sm">Total Runtime</div>
             </div>
             <div className="bg-gray-800 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-netflix-red mb-1">{safeStats.averageRating || 'N/A'}</div>
+              <div className="text-3xl font-bold text-type-logo mb-1">{safeStats.averageRating || 'N/A'}</div>
               <div className="text-gray-400 text-sm">Avg Rating</div>
             </div>
           </div>
@@ -324,7 +324,7 @@ const StatsModal: React.FC<StatsModalProps> = ({
               {topGenres.map(([genre, count], index) => (
                 <div key={genre} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-netflix-red rounded text-white text-xs flex items-center justify-center">
+                    <div className="w-6 h-6 bg-buttons-purple rounded text-white text-xs flex items-center justify-center">
                       {index + 1}
                     </div>
                     <span className="text-white">{genre}</span>
@@ -332,7 +332,7 @@ const StatsModal: React.FC<StatsModalProps> = ({
                   <div className="flex items-center gap-2">
                     <div className="w-24 bg-gray-700 rounded-full h-2">
                       <div 
-                        className="bg-netflix-red h-2 rounded-full"
+                        className="bg-buttons-purple h-2 rounded-full"
                         style={{ width: `${computePercent(count, totalItemsSafe)}%` }}
                       />
                     </div>
@@ -353,7 +353,7 @@ const StatsModal: React.FC<StatsModalProps> = ({
               {monthlyData.map(({ month, count }) => (
                 <div key={month} className="flex-1 flex flex-col items-center">
                   <div 
-                    className="w-full bg-netflix-red rounded-t"
+                    className="w-full bg-buttons-purple rounded-t"
                     style={{ 
                       height: `${Math.max((maxMonthlyCount > 0 ? (count / maxMonthlyCount) * 100 : 0), 5)}%`,
                       minHeight: '4px'

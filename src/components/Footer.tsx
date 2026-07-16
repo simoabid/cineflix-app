@@ -27,6 +27,7 @@ import {
 import { FaDiscord, FaReddit } from 'react-icons/fa6';
 
 import { Container } from './layout';
+import { BrandLogo } from './BrandLogo';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -170,8 +171,8 @@ const Footer: React.FC = () => {
             onClick={() => toggleSection(sectionKey)}
             className="flex items-center justify-between w-full text-left group md:pointer-events-none"
           >
-            <h3 className="text-lg font-semibold text-white mb-6 group-hover:text-netflix-red transition-colors duration-300 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-netflix-red" />
+            <h3 className="text-lg font-semibold text-white mb-6 group-hover:text-type-logo transition-colors duration-300 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-type-logo" />
               {title}
             </h3>
             <ChevronDown 
@@ -201,10 +202,10 @@ const Footer: React.FC = () => {
                       href={link.href}
                       className="group flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300 hover:translate-x-2"
                     >
-                      <link.icon className="w-4 h-4 text-netflix-red group-hover:scale-110 transition-transform duration-300" />
+                      <link.icon className="w-4 h-4 text-type-logo group-hover:scale-110 transition-transform duration-300" />
                       <span className="flex-1">{link.name}</span>
                       {showCounts && link.count && (
-                        <span className="bg-netflix-red text-white text-xs px-2 py-1 rounded-full font-medium">
+                        <span className="bg-buttons-purple text-white text-xs px-2 py-1 rounded-full font-medium">
                           {link.count}
                         </span>
                       )}
@@ -236,12 +237,12 @@ const Footer: React.FC = () => {
     <footer
       ref={footerRef}
       id="cineflix-footer"
-      className="relative bg-[#020205] overflow-hidden"
+      className="relative bg-background-main overflow-hidden"
     >
       {/* Premium Background Effects */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
-        {/* Deep gradient wash - Starts with Home Page's bottom color (#0A0A1F) for seamless blend */}
-        <div className="absolute top-0 w-full h-full bg-gradient-to-b from-[#0A0A1F] via-[#050510] to-[#0A0A1F]" />
+        {/* Deep gradient wash - blends into page background-main for seamless transition */}
+        <div className="absolute top-0 w-full h-full bg-gradient-to-b from-background-main via-black/60 to-background-main" />
 
         {/* Vibrant Glow Spot at bottom center */}
         <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[80%] h-[60%] bg-blue-900/30 blur-[120px] rounded-full" />
@@ -258,7 +259,7 @@ const Footer: React.FC = () => {
             return (
               <span
                 key={i}
-                className="text-[#E50914] text-[15vw] leading-none origin-top block"
+                className="text-type-logo text-[15vw] leading-none origin-top block"
                 style={{ transform: `scaleY(${scales[i]})` }}
               >
                 {letter}
@@ -279,30 +280,17 @@ const Footer: React.FC = () => {
           className="py-12 border-b border-gray-800/50 relative z-20"
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            {/* Enhanced Logo */}
+            {/* Enhanced Logo — themeable via type-logo / BrandLogo mask */}
             <div className="flex items-center gap-4">
               <div className="relative group cursor-pointer">
                 <motion.div
-                  className="flex items-start gap-px"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 300 }}
-                  style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}
                 >
-                  {['C', 'I', 'N', 'E', 'F', 'L', 'I', 'X'].map((letter, i) => {
-                    const scales = [1, 0.92, 0.87, 0.85, 0.85, 0.87, 0.92, 1];
-                    return (
-                      <span
-                        key={i}
-                        className="text-[#E50914] text-5xl leading-none origin-top block tracking-tighter"
-                        style={{ transform: `scaleY(${scales[i]})` }}
-                      >
-                        {letter}
-                      </span>
-                    );
-                  })}
+                  <BrandLogo className="h-12 sm:h-14" />
                 </motion.div>
                 {/* Glow effect under the logo */}
-                <div className="absolute -bottom-4 left-0 w-full h-8 bg-red-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-full" />
+                <div className="absolute -bottom-4 left-0 w-full h-8 bg-buttons-purple/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-full" />
               </div>
               <div className="hidden lg:block text-sm text-gray-400">
                 <p className="font-medium">Premium Streaming Experience</p>
@@ -317,12 +305,12 @@ const Footer: React.FC = () => {
                   key={action.name}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative p-3 bg-gray-800/50 hover:bg-netflix-red/20 rounded-full transition-colors duration-300 group"
+                  className="relative p-3 bg-gray-800/50 hover:bg-buttons-purple/20 rounded-full transition-colors duration-300 group"
                   onClick={action.action}
                 >
-                  <action.icon className="w-5 h-5 text-gray-400 group-hover:text-netflix-red transition-colors duration-300" />
+                  <action.icon className="w-5 h-5 text-gray-400 group-hover:text-type-logo transition-colors duration-300" />
                   {action.badge && (
-                    <span className="absolute -top-1 -right-1 bg-netflix-red text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    <span className="absolute -top-1 -right-1 bg-buttons-purple text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                       {action.badge}
                     </span>
                   )}
@@ -378,7 +366,7 @@ const Footer: React.FC = () => {
             {/* Support Links */}
             <div>
               <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-netflix-red" />
+                <HelpCircle className="w-5 h-5 text-type-logo" />
                 Support & Resources
               </h3>
               <ul className="space-y-4">
@@ -388,7 +376,7 @@ const Footer: React.FC = () => {
                       href={link.href}
                       className="group flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300"
                     >
-                      <link.icon className="w-4 h-4 text-netflix-red group-hover:scale-110 transition-transform duration-300" />
+                      <link.icon className="w-4 h-4 text-type-logo group-hover:scale-110 transition-transform duration-300" />
                       {link.name}
                     </a>
                   </li>
@@ -399,14 +387,14 @@ const Footer: React.FC = () => {
             {/* Language & Accessibility */}
             <div>
               <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-netflix-red" />
+                <Globe className="w-5 h-5 text-type-logo" />
                 Language & Accessibility
               </h3>
               <div className="space-y-4">
                 <div className="relative">
                   <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`w-full bg-surface-background text-gray-300 px-4 py-3 flex items-center justify-between rounded-lg border transition-all duration-300 group shadow-lg ${isOpen ? 'border-brand-red ring-2 ring-brand-red/20' : 'border-gray-800 hover:border-gray-700'
+                    className={`w-full bg-background-main text-gray-300 px-4 py-3 flex items-center justify-between rounded-lg border transition-all duration-300 group shadow-lg ${isOpen ? 'border-buttons-purple ring-2 ring-buttons-purple/20' : 'border-gray-800 hover:border-gray-700'
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -417,7 +405,7 @@ const Footer: React.FC = () => {
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ChevronUp className="w-4 h-4 text-gray-500 group-hover:text-netflix-red rotate-180" />
+                      <ChevronUp className="w-4 h-4 text-gray-500 group-hover:text-type-logo rotate-180" />
                     </motion.div>
                   </button>
 
@@ -434,7 +422,7 @@ const Footer: React.FC = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 10, scale: 0.95 }}
                           transition={{ duration: 0.2, ease: "easeOut" }}
-                          className="absolute top-full left-0 w-full mt-2 bg-surface-accent border border-glass-border rounded-xl overflow-hidden shadow-2xl z-[70] backdrop-blur-xl"
+                          className="absolute top-full left-0 w-full mt-2 bg-background-secondaryHover border border-utils-divider rounded-xl overflow-hidden shadow-2xl z-[70] backdrop-blur-xl"
                         >
                           <div className="p-1">
                             {languages.map((lang) => (
@@ -445,7 +433,7 @@ const Footer: React.FC = () => {
                                   setIsOpen(false);
                                 }}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${selectedLang.code === lang.code
-                                  ? 'bg-netflix-red text-white'
+                                  ? 'bg-buttons-purple text-white'
                                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                                   }`}
                               >
@@ -476,7 +464,7 @@ const Footer: React.FC = () => {
             {/* Social Media Enhanced */}
             <div>
               <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-netflix-red" />
+                <Share2 className="w-5 h-5 text-type-logo" />
                 Connect With Us
               </h3>
               <div className="grid grid-cols-3 gap-4">
@@ -552,13 +540,13 @@ const Footer: React.FC = () => {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="fixed bottom-6 right-6 z-50 group"
         >
-          <div className="relative p-4 bg-gradient-to-br from-netflix-red via-red-500 to-red-600 hover:from-red-500 hover:via-red-600 hover:to-red-700 rounded-2xl shadow-2xl backdrop-blur-sm border border-red-400/20 transition-all duration-500 overflow-hidden">
+          <div className="relative p-4 bg-gradient-to-br from-buttons-purple via-red-500 to-red-600 hover:from-red-500 hover:via-red-600 hover:to-red-700 rounded-2xl shadow-2xl backdrop-blur-sm border border-red-400/20 transition-all duration-500 overflow-hidden">
             {/* Animated background glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -skew-x-12 translate-x-full group-hover:translate-x-0"></div>
 
             {/* Pulsing ring effect */}
             <div className="absolute inset-0 rounded-2xl">
-              <div className="absolute inset-0 rounded-2xl bg-netflix-red animate-ping opacity-20"></div>
+              <div className="absolute inset-0 rounded-2xl bg-buttons-purple animate-ping opacity-20"></div>
             </div>
 
             {/* Icon with enhanced animations */}

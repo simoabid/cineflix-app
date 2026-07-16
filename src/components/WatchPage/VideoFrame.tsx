@@ -101,7 +101,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
       <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black">
         {/* Loading State — full spinner */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A1F] z-20" role="status" aria-live="polite">
+          <div className="absolute inset-0 flex items-center justify-center bg-background-main z-20" role="status" aria-live="polite">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <div className="h-16 w-16 netflix-spinner-thick" />
@@ -120,7 +120,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
 
         {/* Iframe Skeleton — shimmer overlay while iframe loads behind the scenes */}
         {!isLoading && !hasError && selectedSource && !isIframeReady && (
-          <div className="absolute inset-0 z-10 bg-[#0A0A1F]" aria-hidden="true">
+          <div className="absolute inset-0 z-10 bg-background-main" aria-hidden="true">
             {/* Shimmer skeleton mimicking player controls */}
             <div className="w-full h-full flex flex-col">
               {/* Main area shimmer */}
@@ -145,7 +145,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
 
         {/* Error State */}
         {hasError && !isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A1F]">
+          <div className="absolute inset-0 flex items-center justify-center bg-background-main">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <p className="text-white text-lg mb-2">Failed to load video</p>
@@ -154,7 +154,7 @@ const VideoFrame: React.FC<VideoFrameProps> = ({
               </p>
               <button
                 onClick={handleReload}
-                className="flex items-center px-4 py-2 bg-[#ff0000] text-white rounded-lg hover:bg-red-700 transition-colors mx-auto"
+                className="flex items-center px-4 py-2 bg-[#ff0000] text-white rounded-lg hover:bg-buttons-purpleHover transition-colors mx-auto"
                 aria-label="Retry loading video"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />

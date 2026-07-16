@@ -46,7 +46,7 @@ const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
 
   const renderHeroSkeleton = () => (
     <div className="relative h-[70vh] bg-gray-800 animate-pulse">
-      <div className="absolute inset-0 bg-gradient-to-t from-netflix-black via-netflix-black/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background-main via-netflix-black/50 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16">
         <div className="h-12 bg-gray-700 rounded w-96 mb-4" />
         <div className="h-4 bg-gray-700 rounded w-full max-w-2xl mb-2" />
@@ -60,7 +60,7 @@ const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   );
 
   const renderPageSkeleton = () => (
-    <div className="min-h-screen bg-[#0A0A1F]">
+    <div className="min-h-screen bg-background-main">
       {/* Hero Skeleton */}
       {renderHeroSkeleton()}
 

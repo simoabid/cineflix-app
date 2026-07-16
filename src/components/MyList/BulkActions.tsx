@@ -78,13 +78,13 @@ const BulkActions: React.FC<BulkActionsProps> = ({
 
 
   return (
-    <div className="bg-netflix-red/10 border border-netflix-red/20 rounded-lg p-4 mb-6">
+    <div className="bg-buttons-purple/10 border border-buttons-purple/20 rounded-lg p-4 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         {/* Selection Info */}
         <div className="flex items-center gap-4">
           <button
             onClick={onSelectAll}
-            className="flex items-center gap-2 text-netflix-red hover:text-red-400 transition-colors"
+            className="flex items-center gap-2 text-type-logo hover:text-red-400 transition-colors"
             aria-label={isAllSelected ? 'Deselect all items' : 'Select all items'}
           >
             {isAllSelected ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
@@ -184,12 +184,12 @@ const BulkActions: React.FC<BulkActionsProps> = ({
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-                    className="flex-1 bg-gray-700 text-white px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-netflix-red"
+                    className="flex-1 bg-gray-700 text-white px-2 py-1 rounded text-sm focus:outline-none focus:ring-1 focus:ring-buttons-purple"
                     aria-label="Tag name"
                   />
                   <button
                     onClick={handleAddTag}
-                    className="px-3 py-1 bg-netflix-red hover:bg-red-700 text-white rounded text-sm"
+                    className="px-3 py-1 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded text-sm"
                     aria-label="Add tag"
                   >
                     Add
@@ -202,7 +202,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           {/* Remove */}
           <button
             onClick={handleRemove}
-            className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+            className="flex items-center gap-2 px-3 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg transition-colors text-sm"
             aria-label={`Remove ${selectedItems.length} selected items`}
           >
             <Trash2 className="w-4 h-4" />

@@ -117,7 +117,7 @@ const ExternalLinksSection: React.FC<ExternalLinksSectionProps> = ({
                 {link.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white text-sm group-hover:text-netflix-red transition-colors truncate">
+                <p className="font-semibold text-white text-sm group-hover:text-type-logo transition-colors truncate">
                   {link.name}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5 truncate">{link.description}</p>

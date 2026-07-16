@@ -67,13 +67,13 @@ const ScrollSlider = React.memo<ScrollSliderProps>(({ scrollProgress, onChange, 
             [&::-webkit-slider-thumb]:h-2
             [&::-webkit-slider-thumb]:w-10
             [&::-webkit-slider-thumb]:rounded-full
-            [&::-webkit-slider-thumb]:bg-[#E50914]
+            [&::-webkit-slider-thumb]:bg-buttons-purple
             [&::-webkit-slider-thumb]:transition-all
             [&::-webkit-slider-thumb]:duration-200
             [&::-moz-range-thumb]:h-2
             [&::-moz-range-thumb]:w-10
             [&::-moz-range-thumb]:rounded-full
-            [&::-moz-range-thumb]:bg-[#E50914]
+            [&::-moz-range-thumb]:bg-buttons-purple
             [&::-moz-range-thumb]:border-none
             [&::-moz-range-thumb]:transition-all
             [&::-moz-range-thumb]:duration-200
@@ -226,7 +226,7 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 transition-all duration-700 delay-100">
         <div className="flex items-center gap-2.5">
-          <span className="w-1.5 h-6 bg-[#E50914] rounded-full inline-block" />
+          <span className="w-1.5 h-6 bg-buttons-purple rounded-full inline-block" />
           <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
             }`}>
             {title}

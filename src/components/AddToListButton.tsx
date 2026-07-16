@@ -103,19 +103,19 @@ const AddToListButton: React.FC<AddToListButtonProps> = ({
       case 'icon':
         return `${baseClasses} p-2 rounded-full ${inList
             ? 'bg-green-600 hover:bg-green-700 text-white'
-            : 'bg-gray-800/80 hover:bg-gray-700 text-white hover:text-netflix-red'
+            : 'bg-gray-800/80 hover:bg-gray-700 text-white hover:text-type-logo'
           } ${className}`;
 
       case 'button':
         return `${baseClasses} px-4 py-2 rounded-lg font-medium ${inList
             ? 'bg-green-600 hover:bg-green-700 text-white'
-            : 'bg-netflix-red hover:bg-red-700 text-white'
+            : 'bg-buttons-purple hover:bg-buttons-purpleHover text-white'
           } ${className}`;
 
       case 'card':
         return `${baseClasses} px-3 py-2 rounded-md text-sm ${inList
             ? 'bg-green-600/20 text-green-400 border border-green-600/30'
-            : 'bg-gray-800/80 text-white hover:bg-netflix-red/20 hover:text-netflix-red border border-gray-600'
+            : 'bg-gray-800/80 text-white hover:bg-buttons-purple/20 hover:text-type-logo border border-gray-600'
           } ${className}`;
 
       default:

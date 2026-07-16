@@ -21,7 +21,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
 }) => {
   const wrapperClasses = inline
     ? 'flex items-center justify-center py-16'
-    : 'min-h-screen bg-[#0A0A1F] text-white flex items-center justify-center';
+    : 'min-h-screen bg-background-main text-white flex items-center justify-center';
 
   return (
     <div className={wrapperClasses} role="status" aria-live="polite">

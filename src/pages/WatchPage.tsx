@@ -424,9 +424,9 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
   const runtime = type === 'movie' ? (content as Movie).runtime : (content as TVShow).episode_run_time?.[0];
 
   return (
-    <div className="h-screen flex flex-col bg-[#0b0b1e] text-white font-sans lg:overflow-hidden overflow-x-hidden">
+    <div className="h-screen flex flex-col bg-background-main text-white font-sans lg:overflow-hidden overflow-x-hidden">
       {/* Header bar */}
-      <header className="h-12 lg:h-14 border-b border-white/5 bg-[#0b0b1e]/80 backdrop-blur-md px-3 sm:px-4 lg:px-6 flex items-center justify-between z-50 flex-none">
+      <header className="h-12 lg:h-14 border-b border-white/5 bg-background-main/80 backdrop-blur-md px-3 sm:px-4 lg:px-6 flex items-center justify-between z-50 flex-none">
         <motion.button
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 group shadow-lg shrink-0"
@@ -438,7 +438,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
           <span className="text-xs font-semibold tracking-wide hidden sm:inline">Back to Browse</span>
         </motion.button>
         {type === 'tv' && selectedSeason && selectedEpisode && (
-          <div className="text-[10px] sm:text-xs font-bold text-red-500 bg-red-500/10 border border-red-500/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider shrink-0">
+          <div className="text-[10px] sm:text-xs font-bold text-red-500 bg-red-500/10 border border-buttons-purple/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full uppercase tracking-wider shrink-0">
             S{selectedSeason} • E{selectedEpisode}
           </div>
         )}
@@ -448,7 +448,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
           MOBILE (< lg): Single scrollable column
           DESKTOP (lg+): Two-column fixed layout
           ═══════════════════════════════════════════════════ */}
-      <main className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden bg-[#0b0b1e]">
+      <main className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-y-auto lg:overflow-hidden bg-background-main">
 
         {/* ═══ LEFT COLUMN: Player + Streaming Controls ═══ */}
         <section className="flex-none lg:flex-1 flex flex-col lg:min-h-0 min-w-0">
@@ -506,7 +506,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                   {content.genres.map((g: any) => (
                     <span
                       key={g.id}
-                      className="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded-full font-bold"
+                      className="text-[10px] bg-red-500/10 text-red-400 border border-buttons-purple/20 px-2 py-0.5 rounded-full font-bold"
                     >
                       {g.name}
                     </span>
@@ -522,7 +522,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
                   isInList(content.id, type)
                     ? 'bg-white/10 border-white/20 text-white'
-                    : 'bg-red-600 border-red-700 text-white'
+                    : 'bg-buttons-purple border-red-700 text-white'
                 }`}
                 whileTap={{ scale: 0.97 }}
               >
@@ -536,7 +536,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                 onClick={handleLike}
                 className={`p-2 rounded-xl border transition-all shrink-0 ${
                   isLiked
-                    ? 'bg-red-500/10 border-red-500/30 text-red-500'
+                    ? 'bg-red-500/10 border-buttons-purple/30 text-red-500'
                     : 'bg-white/5 border-white/10 text-gray-300'
                 }`}
                 whileTap={{ scale: 0.95 }}
@@ -565,7 +565,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                   onClick={handleFallbackToIframe}
                   className={`flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
                     playerMode === 'iframe'
-                      ? 'bg-red-600 text-white shadow-md'
+                      ? 'bg-buttons-purple text-white shadow-md'
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
@@ -643,7 +643,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
         </section>
 
         {/* ═══ RIGHT COLUMN (Desktop Only): Details + Seasons & Episodes ═══ */}
-        <aside className="hidden lg:flex w-[380px] xl:w-[420px] 2xl:w-[460px] border-l border-white/5 bg-[#0b0b1e] flex-col h-full min-h-0 overflow-hidden flex-none">
+        <aside className="hidden lg:flex w-[380px] xl:w-[420px] 2xl:w-[460px] border-l border-white/5 bg-background-main flex-col h-full min-h-0 overflow-hidden flex-none">
           <div className="flex flex-col h-full overflow-hidden">
 
             {/* Content Details — compact top section */}
@@ -674,7 +674,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                   {content.genres.map((g: any) => (
                     <span
                       key={g.id}
-                      className="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded-full font-bold"
+                      className="text-[10px] bg-red-500/10 text-red-400 border border-buttons-purple/20 px-2 py-0.5 rounded-full font-bold"
                     >
                       {g.name}
                     </span>
@@ -691,7 +691,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl border text-xs font-bold transition-all duration-300 ${
                     isInList(content.id, type)
                       ? 'bg-white/10 border-white/20 text-white hover:bg-white/15'
-                      : 'bg-red-600 border-red-700 text-white hover:bg-red-700'
+                      : 'bg-buttons-purple border-red-700 text-white hover:bg-buttons-purpleHover'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -712,7 +712,7 @@ const WatchPage: React.FC<WatchPageProps> = ({ type }) => {
                   onClick={handleLike}
                   className={`p-2 rounded-xl border transition-all duration-300 shrink-0 ${
                     isLiked
-                      ? 'bg-red-500/10 border-red-500/30 text-red-500 hover:bg-red-500/20'
+                      ? 'bg-red-500/10 border-buttons-purple/30 text-red-500 hover:bg-red-500/20'
                       : 'bg-white/5 border-white/10 text-gray-300 hover:text-white hover:bg-white/10'
                   }`}
                   whileHover={{ scale: 1.05 }}

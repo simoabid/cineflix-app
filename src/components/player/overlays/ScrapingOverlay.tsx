@@ -61,7 +61,7 @@ export function ScrapingOverlay({
   const successCount = orderedSources.filter((s) => s.status === 'success').length;
   const overallProgress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A1F] overflow-hidden p-4 md:p-6 select-none">
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-background-main overflow-hidden p-4 md:p-6 select-none">
       {backdropUrl ? (
         <div
           className="absolute inset-0 bg-cover bg-center filter blur-[40px] opacity-20 scale-105 pointer-events-none transition-all duration-1000"
@@ -70,7 +70,7 @@ export function ScrapingOverlay({
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(229,9,20,0.12),transparent_60%),radial-gradient(circle_at_bottom,rgba(10,10,31,0.8),transparent_80%)] pointer-events-none" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-[#0A0A1F]/70 to-[#0A0A1F]/90 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background-main via-background-main/70 to-background-main/90 pointer-events-none" />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -100,7 +100,7 @@ export function ScrapingOverlay({
             </h3>
             <p className="text-white/50 text-xs mt-0.5 font-medium flex items-center gap-2">
               {mediaType === 'tv' && seasonNumber && episodeNumber ? (
-                <span className="text-red-400 font-bold bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full text-[10px]">
+                <span className="text-red-400 font-bold bg-red-500/10 border border-buttons-purple/20 px-2.5 py-0.5 rounded-full text-[10px]">
                   S{seasonNumber} • E{episodeNumber}
                 </span>
               ) : mediaType === 'movie' ? (
@@ -193,7 +193,7 @@ export function ScrapingOverlay({
                   transition={{ duration: 0.25 }}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all duration-300 ${
                     isActive
-                      ? 'bg-red-500/10 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.08)]'
+                      ? 'bg-red-500/10 border-buttons-purple/30 shadow-[0_0_15px_rgba(239,68,68,0.08)]'
                       : 'bg-white/[0.01] border-white/[0.04] hover:bg-white/[0.03]'
                   } ${isEmbed ? 'ml-6 border-l-2' : ''}`}
                 >

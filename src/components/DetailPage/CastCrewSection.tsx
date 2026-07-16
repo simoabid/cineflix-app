@@ -110,7 +110,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                             <button
                                 onClick={() => setActiveTab('cast')}
                                 className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${activeTab === 'cast'
-                                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                                    ? 'bg-buttons-purple text-white shadow-lg shadow-red-600/20'
                                     : 'text-gray-400 hover:text-white'
                                     }`}
                             >
@@ -119,7 +119,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                             <button
                                 onClick={() => setActiveTab('crew')}
                                 className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${activeTab === 'crew'
-                                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                                    ? 'bg-buttons-purple text-white shadow-lg shadow-red-600/20'
                                     : 'text-gray-400 hover:text-white'
                                     }`}
                             >
@@ -151,8 +151,8 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                 {/* Carousel Container */}
                 <div className="relative -mx-6 sm:-mx-8 lg:-mx-12">
                     {/* Edge Gradients */}
-                    <div className={`absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#0A0A1F] to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showLeftArrow ? 'opacity-100' : 'opacity-0'}`} />
-                    <div className={`absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#0A0A1F] to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showRightArrow ? 'opacity-100' : 'opacity-0'}`} />
+                    <div className={`absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background-main to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showLeftArrow ? 'opacity-100' : 'opacity-0'}`} />
+                    <div className={`absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background-main to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showRightArrow ? 'opacity-100' : 'opacity-0'}`} />
 
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -187,7 +187,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                                             }}
                                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                             onClick={() => !isDragging && isCast && onActorClick(member as CastMember)}
-                                            className="relative rounded-2xl overflow-hidden bg-gray-900 aspect-[3/4.5] border border-white/5 cursor-pointer group-hover:border-red-500/50 transition-colors shadow-xl"
+                                            className="relative rounded-2xl overflow-hidden bg-gray-900 aspect-[3/4.5] border border-white/5 cursor-pointer group-hover:border-buttons-purple/50 transition-colors shadow-xl"
                                         >
                                             {member.profile_path ? (
                                                 <img
@@ -204,7 +204,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
 
                                             {/* Rank Badge for Main Cast */}
                                             {isCast && (member as CastMember).order < 5 && (
-                                                <div className="absolute top-2 left-2 w-7 h-7 bg-red-600 text-white rounded-lg flex items-center justify-center text-[10px] font-black shadow-lg shadow-red-600/40">
+                                                <div className="absolute top-2 left-2 w-7 h-7 bg-buttons-purple text-white rounded-lg flex items-center justify-center text-[10px] font-black shadow-lg shadow-red-600/40">
                                                     #{(member as CastMember).order + 1}
                                                 </div>
                                             )}
@@ -215,7 +215,7 @@ const CastCrewSection: React.FC<CastCrewSectionProps> = ({ credits, onActorClick
                                             <div className={`absolute inset-0 flex flex-col justify-end p-4 transition-all duration-300 ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        className="flex-1 h-9 bg-red-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-red-700 transition-colors"
+                                                        className="flex-1 h-9 bg-buttons-purple text-white rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-buttons-purpleHover transition-colors"
                                                     >
                                                         <Info className="w-3 h-3" />
                                                         Details

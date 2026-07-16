@@ -263,7 +263,7 @@ const GridView: React.FC<GridViewProps> = ({
               onItemSelect(item.id, !isSelected);
             }}
             className={`p-1 rounded transition-colors ${isSelected
-                ? 'bg-netflix-red text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-black/60 text-white hover:bg-black/80'
               }`}
           >
@@ -277,7 +277,7 @@ const GridView: React.FC<GridViewProps> = ({
         {/* Liked Indicator */}
         {item.isLiked && (
           <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10">
-            <div className="bg-red-600/80 backdrop-blur-sm rounded-full px-2 py-1 shadow-lg flex items-center gap-1">
+            <div className="bg-buttons-purple/80 backdrop-blur-sm rounded-full px-2 py-1 shadow-lg flex items-center gap-1">
               <Heart className="w-3 h-3 text-white fill-current" />
               <span className="text-white text-xs font-medium">Liked</span>
             </div>
@@ -385,7 +385,7 @@ const GridView: React.FC<GridViewProps> = ({
               <div className="absolute bottom-0 left-0 right-0 bg-black/80 p-2">
                 <div className="w-full bg-gray-600 rounded-full h-1 mb-1">
                   <div
-                    className="bg-netflix-red h-1 rounded-full transition-all duration-300"
+                    className="bg-buttons-purple h-1 rounded-full transition-all duration-300"
                     style={{ width: `${progressValue}%` }}
                   />
                 </div>

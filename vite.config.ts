@@ -79,6 +79,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@providers': path.resolve(__dirname, './src/lib/providers'),
       '@p-stream/providers': path.resolve(__dirname, './src/lib/providers'),
+      '@themes': path.resolve(__dirname, './themes'),
     },
   },
   server: {

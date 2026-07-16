@@ -169,7 +169,7 @@ export function ContinueWatching(): React.ReactElement | null {
         <section className="py-8 border-b border-gray-800/40">
             <div className="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
                 <h2 className="text-xl font-semibold text-white/90 mb-5 tracking-tight flex items-center gap-2">
-                    <span className="w-1 h-5 bg-[#E50914] rounded-full inline-block" />
+                    <span className="w-1 h-5 bg-buttons-purple rounded-full inline-block" />
                     Continue Watching
                 </h2>
 
@@ -177,7 +177,7 @@ export function ContinueWatching(): React.ReactElement | null {
                     {items.map((item) => (
                         <div
                             key={`${item.contentType}-${item.contentId}`}
-                            className="relative group flex flex-col cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#E50914] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl p-1 bg-white/[0.02] border border-white/5 hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl"
+                            className="relative group flex flex-col cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-buttons-purple focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl p-1 bg-white/[0.02] border border-white/5 hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl"
                             tabIndex={0}
                             onClick={() => handleItemClick(item)}
                             onKeyDown={(e) => {
@@ -210,12 +210,12 @@ export function ContinueWatching(): React.ReactElement | null {
                                 <div className="absolute top-2 left-2 flex items-center gap-1 z-10">
                                     {item.contentType === 'tv' ? (
                                         <span className="flex items-center gap-1 text-[8px] ssm:text-[9px] font-black px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-white border border-white/10 uppercase tracking-wider">
-                                            <Tv className="w-2 h-2 text-[#E50914]" />
+                                            <Tv className="w-2 h-2 text-type-logo" />
                                             <span>TV</span>
                                         </span>
                                     ) : (
                                         <span className="flex items-center gap-1 text-[8px] ssm:text-[9px] font-black px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-white border border-white/10 uppercase tracking-wider">
-                                            <Film className="w-2 h-2 text-[#E50914]" />
+                                            <Film className="w-2 h-2 text-type-logo" />
                                             <span className="hidden ssm:inline">Movie</span>
                                         </span>
                                     )}
@@ -247,7 +247,7 @@ export function ContinueWatching(): React.ReactElement | null {
 
                                 {/* Hover Play Overlay */}
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/40 transition-all duration-300">
-                                    <div className="w-10 h-10 bg-[#E50914] text-white rounded-full flex items-center justify-center shadow-lg opacity-0 transform scale-90 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 transition-all duration-300 ease-out group-hover:shadow-[0_0_16px_rgba(229,9,20,0.5)]">
+                                    <div className="w-10 h-10 bg-buttons-purple text-white rounded-full flex items-center justify-center shadow-lg opacity-0 transform scale-90 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 transition-all duration-300 ease-out group-hover:shadow-[0_0_16px_rgba(229,9,20,0.5)]">
                                         <Play className="w-4.5 h-4.5 text-white fill-current ml-0.5" />
                                     </div>
                                 </div>
@@ -256,7 +256,7 @@ export function ContinueWatching(): React.ReactElement | null {
                             {/* Details Information */}
                             <div className="mt-2.5 px-2 pb-2 flex flex-col gap-1 w-full text-left">
                                 {/* Title */}
-                                <h3 className="text-white font-bold text-xs sm:text-sm line-clamp-1 leading-tight tracking-wide group-hover:text-[#E50914] transition-colors">
+                                <h3 className="text-white font-bold text-xs sm:text-sm line-clamp-1 leading-tight tracking-wide group-hover:text-type-logo transition-colors">
                                     {item.content.title || item.content.name}
                                 </h3>
 
@@ -270,7 +270,7 @@ export function ContinueWatching(): React.ReactElement | null {
                                 {/* Progress Bar (thin red) */}
                                 <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-1 relative">
                                     <div
-                                        className="h-full bg-[#E50914] rounded-full transition-all duration-300"
+                                        className="h-full bg-buttons-purple rounded-full transition-all duration-300"
                                         style={{ width: `${item.progress}%` }}
                                     />
                                 </div>

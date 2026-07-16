@@ -27,7 +27,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={onClearFilters}
-            className="px-6 py-3 bg-netflix-red hover:bg-red-700 text-white rounded-lg transition-colors"
+            className="px-6 py-3 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg transition-colors"
           >
             Clear Search & Filters
           </button>
@@ -56,7 +56,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={onClearFilters}
-            className="px-6 py-3 bg-netflix-red hover:bg-red-700 text-white rounded-lg transition-colors"
+            className="px-6 py-3 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg transition-colors"
           >
             Clear All Filters
           </button>
@@ -101,7 +101,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           to="/movies"
           className="group bg-gray-900 hover:bg-gray-800 rounded-lg p-6 transition-colors"
         >
-          <Film className="w-12 h-12 text-netflix-red mx-auto mb-4 group-hover:scale-110 transition-transform" />
+          <Film className="w-12 h-12 text-type-logo mx-auto mb-4 group-hover:scale-110 transition-transform" />
           <h3 className="text-xl font-semibold text-white mb-2">Browse Movies</h3>
           <p className="text-gray-400">
             Discover trending movies, classics, and new releases to add to your list.
@@ -112,7 +112,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           to="/tv-shows"
           className="group bg-gray-900 hover:bg-gray-800 rounded-lg p-6 transition-colors"
         >
-          <Tv className="w-12 h-12 text-netflix-red mx-auto mb-4 group-hover:scale-110 transition-transform" />
+          <Tv className="w-12 h-12 text-type-logo mx-auto mb-4 group-hover:scale-110 transition-transform" />
           <h3 className="text-xl font-semibold text-white mb-2">Browse TV Shows</h3>
           <p className="text-gray-400">
             Find your next binge-worthy series from our extensive TV show collection.
@@ -123,7 +123,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           to="/new-popular"
           className="group bg-gray-900 hover:bg-gray-800 rounded-lg p-6 transition-colors"
         >
-          <Plus className="w-12 h-12 text-netflix-red mx-auto mb-4 group-hover:scale-110 transition-transform" />
+          <Plus className="w-12 h-12 text-type-logo mx-auto mb-4 group-hover:scale-110 transition-transform" />
           <h3 className="text-xl font-semibold text-white mb-2">What's Popular</h3>
           <p className="text-gray-400">
             Check out what's trending and popular right now across all categories.
@@ -138,32 +138,32 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
           <div>
-            <div className="w-12 h-12 bg-netflix-red/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Plus className="w-6 h-6 text-netflix-red" />
+            <div className="w-12 h-12 bg-buttons-purple/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Plus className="w-6 h-6 text-type-logo" />
             </div>
             <h4 className="text-white font-medium mb-1">Add & Organize</h4>
             <p className="text-gray-400 text-sm">Save movies and shows with custom tags and priorities</p>
           </div>
           
           <div>
-            <div className="w-12 h-12 bg-netflix-red/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Search className="w-6 h-6 text-netflix-red" />
+            <div className="w-12 h-12 bg-buttons-purple/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Search className="w-6 h-6 text-type-logo" />
             </div>
             <h4 className="text-white font-medium mb-1">Search & Filter</h4>
             <p className="text-gray-400 text-sm">Quickly find content with powerful search and filters</p>
           </div>
           
           <div>
-            <div className="w-12 h-12 bg-netflix-red/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Heart className="w-6 h-6 text-netflix-red" />
+            <div className="w-12 h-12 bg-buttons-purple/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Heart className="w-6 h-6 text-type-logo" />
             </div>
             <h4 className="text-white font-medium mb-1">Track Progress</h4>
             <p className="text-gray-400 text-sm">Monitor your watching progress and completion status</p>
           </div>
           
           <div>
-            <div className="w-12 h-12 bg-netflix-red/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Filter className="w-6 h-6 text-netflix-red" />
+            <div className="w-12 h-12 bg-buttons-purple/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Filter className="w-6 h-6 text-type-logo" />
             </div>
             <h4 className="text-white font-medium mb-1">Multiple Views</h4>
             <p className="text-gray-400 text-sm">Switch between grid, list, and compact viewing modes</p>
@@ -175,7 +175,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <div className="mt-8">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-netflix-red hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-8 py-4 bg-buttons-purple hover:bg-buttons-purpleHover text-white font-semibold rounded-lg transition-colors"
         >
           <Plus className="w-5 h-5" />
           Start Building Your List

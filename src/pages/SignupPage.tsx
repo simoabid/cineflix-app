@@ -109,7 +109,7 @@ const SignupPage: React.FC = () => {
     // Show loading if checking auth
     if (authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-netflix-black">
+            <div className="min-h-screen flex items-center justify-center bg-background-main">
                 <div className="auth-spinner" />
             </div>
         );
@@ -129,7 +129,7 @@ const SignupPage: React.FC = () => {
                 {/* Server Error */}
                 {errors.server && (
                     <div
-                        className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm"
+                        className="p-4 bg-red-500/10 border border-buttons-purple/50 rounded-lg text-red-400 text-sm"
                         role="alert"
                         aria-live="polite"
                     >
@@ -151,7 +151,7 @@ const SignupPage: React.FC = () => {
                                         type="button"
                                         onClick={() => setSelectedAvatar(avatar.id)}
                                         className={`relative group rounded-full overflow-hidden transition-all duration-200 w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 ${isSelected
-                                            ? 'ring-2 ring-netflix-red ring-offset-2 ring-offset-black/50 scale-110 shadow-lg shadow-netflix-red/30'
+                                            ? 'ring-2 ring-buttons-purple ring-offset-2 ring-offset-black/50 scale-110 shadow-lg shadow-buttons-purple/30'
                                             : 'ring-1 ring-white/20 hover:ring-white/40 hover:scale-105'
                                             }`}
                                         title={avatar.name}

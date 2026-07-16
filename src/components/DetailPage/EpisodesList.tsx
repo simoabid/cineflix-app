@@ -73,7 +73,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
             className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${
               isWatched
                 ? 'border-emerald-500/30 bg-emerald-500/[0.04]'
-                : 'border-white/10 bg-gradient-to-r from-white/[0.04] to-white/[0.01] hover:border-netflix-red/40'
+                : 'border-white/10 bg-gradient-to-r from-white/[0.04] to-white/[0.01] hover:border-buttons-purple/40'
             }`}
           >
             <div className="p-4 sm:p-5">
@@ -104,7 +104,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full bg-netflix-red flex items-center justify-center shadow-lg shadow-netflix-red/40">
+                      <div className="w-10 h-10 rounded-full bg-buttons-purple flex items-center justify-center shadow-lg shadow-buttons-purple/40">
                         <Play className="w-5 h-5 text-white fill-current ml-0.5" />
                       </div>
                     </div>
@@ -116,7 +116,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                     {hasProgress && progressPercent > 0 && progressPercent < 90 && (
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-10">
                         <div
-                          className="h-full bg-netflix-red"
+                          className="h-full bg-buttons-purple"
                           style={{ width: `${progressPercent}%` }}
                         />
                       </div>
@@ -129,7 +129,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                        <span className="bg-netflix-red/20 text-netflix-red border border-netflix-red/30 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                        <span className="bg-buttons-purple/20 text-type-logo border border-buttons-purple/30 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider">
                           EP {episode.episode_number}
                         </span>
                         <button
@@ -139,7 +139,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                               navigate(`/watch/tv/${seriesId}?season=${selectedSeason.season_number}&episode=${episode.episode_number}`);
                             }
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-netflix-red hover:bg-red-700 text-white font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-md shadow-netflix-red/20 hover:scale-105 active:scale-95 whitespace-nowrap"
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-buttons-purple hover:bg-buttons-purpleHover text-white font-bold text-[10px] sm:text-[11px] uppercase tracking-wider transition-all duration-300 shadow-md shadow-buttons-purple/20 hover:scale-105 active:scale-95 whitespace-nowrap"
                           title={`Watch Episode ${episode.episode_number}`}
                         >
                           <Play className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
@@ -152,7 +152,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({
                           </span>
                         )}
                       </div>
-                      <h3 className="text-base sm:text-lg font-bold text-white leading-tight mb-1.5 line-clamp-1 group-hover:text-netflix-red transition-colors">
+                      <h3 className="text-base sm:text-lg font-bold text-white leading-tight mb-1.5 line-clamp-1 group-hover:text-type-logo transition-colors">
                         {episode.name}
                       </h3>
                       {!isExpanded && (

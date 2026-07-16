@@ -48,7 +48,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
             <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-2">
               <div className="w-full bg-gray-600 rounded-full h-1 mb-1">
                 <div 
-                  className="bg-netflix-red h-1 rounded-full transition-all duration-300"
+                  className="bg-buttons-purple h-1 rounded-full transition-all duration-300"
                   style={{ width: `${item.progress}%` }}
                 />
               </div>
@@ -63,7 +63,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
 
           {/* Priority Indicator */}
           {item.priority === 'high' && (
-            <div className="absolute top-2 right-2 w-3 h-3 bg-netflix-red rounded-full"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 bg-buttons-purple rounded-full"></div>
           )}
         </div>
       </Link>
@@ -92,12 +92,12 @@ const QuickActions: React.FC<QuickActionsProps> = ({
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-              <Play className="w-5 h-5 text-netflix-red" />
+              <Play className="w-5 h-5 text-type-logo" />
               Continue Watching
             </h2>
             <Link 
               to="/my-list?filter=inProgress"
-              className="text-netflix-red hover:text-red-400 text-sm flex items-center gap-1"
+              className="text-type-logo hover:text-red-400 text-sm flex items-center gap-1"
             >
               View All
               <ArrowRight className="w-4 h-4" />
@@ -117,12 +117,12 @@ const QuickActions: React.FC<QuickActionsProps> = ({
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-netflix-red" />
+              <Plus className="w-5 h-5 text-type-logo" />
               Recently Added
             </h2>
             <Link 
               to="/my-list?sort=dateAdded"
-              className="text-netflix-red hover:text-red-400 text-sm flex items-center gap-1"
+              className="text-type-logo hover:text-red-400 text-sm flex items-center gap-1"
             >
               View All
               <ArrowRight className="w-4 h-4" />
@@ -141,21 +141,21 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       <div className="bg-gray-900/50 rounded-lg p-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold text-netflix-red">{continueWatching.length}</div>
+            <div className="text-2xl font-bold text-type-logo">{continueWatching.length}</div>
             <div className="text-sm text-gray-400">In Progress</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-netflix-red">{recentlyAdded.length}</div>
+            <div className="text-2xl font-bold text-type-logo">{recentlyAdded.length}</div>
             <div className="text-sm text-gray-400">Recently Added</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-netflix-red">
+            <div className="text-2xl font-bold text-type-logo">
               {continueWatching.filter(item => item.priority === 'high').length}
             </div>
             <div className="text-sm text-gray-400">High Priority</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-netflix-red">
+            <div className="text-2xl font-bold text-type-logo">
               {Math.round(continueWatching.reduce((sum, item) => sum + item.progress, 0) / Math.max(continueWatching.length, 1))}%
             </div>
             <div className="text-sm text-gray-400">Avg Progress</div>

@@ -59,7 +59,7 @@ const MyListHeader: React.FC<MyListHeaderProps> = ({
                 placeholder="Search your list..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full bg-gray-800/50 text-white pl-9 pr-4 py-2 rounded-full border border-gray-700/50 focus:border-netflix-red focus:outline-none focus:ring-1 focus:ring-netflix-red text-sm transition-all"
+                className="w-full bg-gray-800/50 text-white pl-9 pr-4 py-2 rounded-full border border-gray-700/50 focus:border-buttons-purple focus:outline-none focus:ring-1 focus:ring-buttons-purple text-sm transition-all"
               />
             </div>
           </div>
@@ -89,7 +89,7 @@ const MyListHeader: React.FC<MyListHeaderProps> = ({
               <button
                 onClick={() => onViewModeChange('grid')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${viewMode === 'grid'
-                  ? 'bg-netflix-red text-white'
+                  ? 'bg-buttons-purple text-white'
                   : 'text-gray-400 hover:text-white'
                   }`}
               >
@@ -100,7 +100,7 @@ const MyListHeader: React.FC<MyListHeaderProps> = ({
               <button
                 onClick={() => onViewModeChange('list')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${viewMode === 'list'
-                  ? 'bg-netflix-red text-white'
+                  ? 'bg-buttons-purple text-white'
                   : 'text-gray-400 hover:text-white'
                   }`}
               >
@@ -111,7 +111,7 @@ const MyListHeader: React.FC<MyListHeaderProps> = ({
               <button
                 onClick={() => onViewModeChange('compact')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${viewMode === 'compact'
-                  ? 'bg-netflix-red text-white'
+                  ? 'bg-buttons-purple text-white'
                   : 'text-gray-400 hover:text-white'
                   }`}
               >
@@ -141,8 +141,8 @@ const MyListHeader: React.FC<MyListHeaderProps> = ({
 
       {/* Selection Info */}
       {selectedCount > 0 && (
-        <div className="bg-netflix-red/10 border border-netflix-red/20 rounded-lg p-4 mb-6">
-          <p className="text-netflix-red">
+        <div className="bg-buttons-purple/10 border border-buttons-purple/20 rounded-lg p-4 mb-6">
+          <p className="text-type-logo">
             {selectedCount} of {totalCount} items selected
           </p>
         </div>

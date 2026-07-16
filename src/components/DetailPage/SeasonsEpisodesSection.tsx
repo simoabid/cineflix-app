@@ -133,9 +133,9 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
   const visibleSeasons = seasons.filter(s => s.season_number >= 0);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-netflix-red/[0.08] via-white/[0.02] to-transparent border border-netflix-red/20 p-5 sm:p-7 md:p-8">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-buttons-purple/[0.08] via-white/[0.02] to-transparent border border-buttons-purple/20 p-5 sm:p-7 md:p-8">
       {/* Decorative glow */}
-      <div className="absolute -top-32 -right-32 w-72 h-72 bg-netflix-red/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute -top-32 -right-32 w-72 h-72 bg-buttons-purple/10 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative z-10">
         <SectionHeader
@@ -146,7 +146,7 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
           action={
             selectedSeason && (
               <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-xs font-medium border border-white/10">
-                <Film className="w-3.5 h-3.5 text-netflix-red" />
+                <Film className="w-3.5 h-3.5 text-type-logo" />
                 <span className="text-white">Season {selectedSeason.season_number}</span>
                 <span className="text-gray-400">•</span>
                 <span className="text-gray-300">
@@ -172,8 +172,8 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     className={`flex-shrink-0 group relative overflow-hidden rounded-2xl transition-all duration-300 flex flex-col ${
                       isSelected
-                        ? 'border border-netflix-red/60 bg-netflix-red/[0.04] shadow-[0_12px_30px_rgba(229,9,20,0.4)] ring-2 ring-netflix-red/35'
-                        : 'border border-white/10 bg-white/[0.02] hover:border-netflix-red/40 hover:bg-white/[0.05] hover:shadow-[0_10px_25px_rgba(0,0,0,0.5)]'
+                        ? 'border border-buttons-purple/60 bg-buttons-purple/[0.04] shadow-[0_12px_30px_rgba(229,9,20,0.4)] ring-2 ring-buttons-purple/35'
+                        : 'border border-white/10 bg-white/[0.02] hover:border-buttons-purple/40 hover:bg-white/[0.05] hover:shadow-[0_10px_25px_rgba(0,0,0,0.5)]'
                     }`}
                     aria-label={`Select Season ${season.season_number}`}
                     aria-pressed={isSelected}
@@ -196,7 +196,7 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                       
                       {/* Selection checkmark badge */}
                       {isSelected && (
-                        <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-netflix-red rounded-full flex items-center justify-center shadow-lg shadow-netflix-red/50 z-10">
+                        <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-buttons-purple rounded-full flex items-center justify-center shadow-lg shadow-buttons-purple/50 z-10">
                           <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                         </div>
                       )}
@@ -204,7 +204,7 @@ const SeasonsEpisodesSection: React.FC<SeasonsEpisodesSectionProps> = ({
                     {/* Bottom Info Bar */}
                     <div className="p-3 bg-gradient-to-b from-white/[0.02] to-black/40 border-t border-white/5 w-full text-center">
                       <p className={`font-bold text-xs sm:text-sm tracking-wide transition-colors duration-300 ${
-                        isSelected ? 'text-netflix-red' : 'text-white group-hover:text-netflix-red'
+                        isSelected ? 'text-type-logo' : 'text-white group-hover:text-type-logo'
                       }`}>
                         {season.season_number === 0 ? 'Specials' : `Season ${season.season_number}`}
                       </p>

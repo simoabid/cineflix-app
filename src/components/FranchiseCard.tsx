@@ -113,13 +113,13 @@ const FranchiseCard: React.FC<FranchiseCardProps> = ({ collection, onClick }) =>
           </div>
           
           {/* Type Badge */}
-          <div className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <div className="absolute top-3 right-3 bg-buttons-purple text-white px-2 py-1 rounded-full text-xs font-medium">
             {getTypeDisplayName(collection.type)}
           </div>
           
           {/* Play Button Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="bg-red-600 rounded-full p-4 transform scale-75 group-hover:scale-100 transition-transform">
+            <div className="bg-buttons-purple rounded-full p-4 transform scale-75 group-hover:scale-100 transition-transform">
               <Play className="w-8 h-8 text-white ml-1" />
             </div>
           </div>
@@ -157,7 +157,7 @@ const FranchiseCard: React.FC<FranchiseCardProps> = ({ collection, onClick }) =>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-2">
                 <div 
-                  className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-buttons-purple h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -221,7 +221,7 @@ const FranchiseCard: React.FC<FranchiseCardProps> = ({ collection, onClick }) =>
                 e.stopPropagation(); // Prevent card click
                 handleClick(); // Navigate to detail page
               }}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
+              className="flex-1 bg-buttons-purple hover:bg-buttons-purpleHover text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
             >
               <Play className="w-4 h-4" />
               <span>Start Marathon</span>

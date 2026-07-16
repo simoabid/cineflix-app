@@ -77,12 +77,12 @@ const CollectionsFilter: React.FC<CollectionsFilterProps> = ({ onFilterChange, c
       {/* Filter Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white hover:border-red-500 transition-colors flex items-center space-x-2"
+        className="bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white hover:border-buttons-purple transition-colors flex items-center space-x-2"
       >
         <Filter className="w-5 h-5" />
         <span>Filters</span>
         {activeFilterCount > 0 && (
-          <span className="bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="bg-buttons-purple text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {activeFilterCount}
           </span>
         )}
@@ -214,7 +214,7 @@ const CollectionsFilter: React.FC<CollectionsFilterProps> = ({ onFilterChange, c
             <div className="border-t border-gray-700 p-4">
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors"
+                className="w-full bg-buttons-purple hover:bg-buttons-purpleHover text-white py-2 px-4 rounded-lg transition-colors"
               >
                 Apply Filters
               </button>

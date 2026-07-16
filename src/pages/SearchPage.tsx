@@ -73,7 +73,7 @@ const SearchPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-netflix-black pt-24">
+    <div className="min-h-screen bg-background-main pt-24">
       <SEOHead
         title="Search"
         description="Search for movies, TV shows, and cast members on CINEFLIX."
@@ -90,7 +90,7 @@ const SearchPage: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search movies and TV shows..."
-                className="w-full bg-gray-800 text-white px-4 py-3 pl-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-netflix-red"
+                className="w-full bg-gray-800 text-white px-4 py-3 pl-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-buttons-purple"
               />
               <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>

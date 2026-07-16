@@ -328,7 +328,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F]">
+      <div className="min-h-screen bg-background-main">
         <LoadingSkeleton />
       </div>
     );
@@ -336,10 +336,10 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
 
   if (error || !collection) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F] flex items-center justify-center">
+      <div className="min-h-screen bg-background-main flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl text-white mb-4">{error || 'Collection not found'}</h1>
-          <Link to="/collections" className="text-netflix-red hover:underline">
+          <Link to="/collections" className="text-type-logo hover:underline">
             Back to Collections
           </Link>
         </div>
@@ -354,7 +354,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
   const safePoster = getPosterUrl(collection.poster_path || '', 'w500');
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F]">
+    <div className="min-h-screen bg-background-main">
       <SEOHead
         title={collection.name}
         description={collection.overview || `Discover the film franchise collection of ${collection.name} on CINEFLIX.`}
@@ -369,8 +369,8 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
             alt={collection.name || 'Collection backdrop'}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A1F] via-[#0A0A1F]/80 to-[#0A0A1F]/40"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A1F] via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-background-main via-background-main/80 to-background-main/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-background-main via-transparent to-transparent"></div>
         </div>
 
         {/* Navigation */}
@@ -398,7 +398,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                   />
                   {/* Progress Ring Overlay */}
                   {progress > 0 && (
-                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-netflix-black rounded-full flex items-center justify-center border-4 border-netflix-red">
+                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-background-main rounded-full flex items-center justify-center border-4 border-buttons-purple">
                       <span className="text-white text-sm font-bold">{Math.round(progress)}%</span>
                     </div>
                   )}
@@ -414,7 +414,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                   </h1>
 
                   <div className="flex flex-wrap items-center gap-4 mb-6">
-                    <span className="bg-netflix-red text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <span className="bg-buttons-purple text-white px-3 py-1 rounded-full text-sm font-semibold">
                       {collection.film_count} {collection.film_count === 1 ? 'Movie' : 'Movies'}
                     </span>
                     <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
@@ -491,7 +491,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-netflix-red h-2 rounded-full animate-progress-fill"
+                        className="bg-buttons-purple h-2 rounded-full animate-progress-fill"
                         style={{ '--progress-width': `${progress}%` } as any}
                       ></div>
                     </div>
@@ -504,7 +504,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
       </div>
 
       {/* Navigation Tabs */}
-      <div className="sticky top-20 z-40 bg-[#0A0A1F]/95 backdrop-blur-sm border-b border-gray-800">
+      <div className="sticky top-20 z-40 bg-background-main/95 backdrop-blur-sm border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-8">
           <nav className="flex space-x-8 overflow-x-auto">
             {[
@@ -521,7 +521,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
                   className={`flex items-center space-x-2 py-4 px-2 border-b-2 whitespace-nowrap transition-colors ${activeTab === tab.id
-                    ? 'border-netflix-red text-white'
+                    ? 'border-buttons-purple text-white'
                     : 'border-transparent text-gray-400 hover:text-white'
                     }`}
                 >
@@ -557,13 +557,13 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                     <div className="flex items-center bg-gray-800 rounded-lg p-1">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded ${viewMode === 'grid' ? 'bg-netflix-red text-white' : 'text-gray-400 hover:text-white'}`}
+                        className={`p-2 rounded ${viewMode === 'grid' ? 'bg-buttons-purple text-white' : 'text-gray-400 hover:text-white'}`}
                       >
                         <Grid className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded ${viewMode === 'list' ? 'bg-netflix-red text-white' : 'text-gray-400 hover:text-white'}`}
+                        className={`p-2 rounded ${viewMode === 'list' ? 'bg-buttons-purple text-white' : 'text-gray-400 hover:text-white'}`}
                       >
                         <List className="w-4 h-4" />
                       </button>
@@ -592,7 +592,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                       placeholder="Search movies in this collection..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg border border-gray-600 focus:border-netflix-red focus:outline-none"
+                      className="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg border border-gray-600 focus:border-buttons-purple focus:outline-none"
                     />
                   </div>
                 )}
@@ -742,7 +742,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                   <div className="space-y-3">
                     <button
                       onClick={handleStartWatching}
-                      className="w-full flex items-center justify-center bg-netflix-red hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors"
+                      className="w-full flex items-center justify-center bg-buttons-purple hover:bg-buttons-purpleHover text-white py-3 rounded-lg font-medium transition-colors"
                     >
                       <PlayCircle className="w-5 h-5 mr-2" />
                       {progress > 0 && progress < 100 ? 'Continue Watching' : 'Start from Beginning'}
@@ -777,7 +777,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                         value="release"
                         checked={viewingOrder === 'release'}
                         onChange={(e) => setViewingOrder(e.target.value as 'release' | 'chronological')}
-                        className="text-netflix-red mr-3"
+                        className="text-type-logo mr-3"
                       />
                       <span className="text-gray-300">Release Order</span>
                     </label>
@@ -788,7 +788,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                         value="chronological"
                         checked={viewingOrder === 'chronological'}
                         onChange={(e) => setViewingOrder(e.target.value as 'release' | 'chronological')}
-                        className="text-netflix-red mr-3"
+                        className="text-type-logo mr-3"
                       />
                       <span className="text-gray-300">Chronological Order</span>
                     </label>
@@ -836,7 +836,7 @@ const CollectionDetailPage: React.FC<CollectionDetailPageProps> = ({ initialColl
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2">
                         <div
-                          className="bg-netflix-red h-2 rounded-full transition-all duration-500"
+                          className="bg-buttons-purple h-2 rounded-full transition-all duration-500"
                           style={{ width: `${progress}%` }}
                         ></div>
                       </div>

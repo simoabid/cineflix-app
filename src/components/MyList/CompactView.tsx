@@ -102,7 +102,7 @@ const CompactView: React.FC<CompactViewProps> = ({
           }}
           className={`flex-shrink-0 ${
             isSelected 
-              ? 'text-netflix-red' 
+              ? 'text-type-logo' 
               : 'text-gray-400 hover:text-white'
           }`}
         >
@@ -120,7 +120,7 @@ const CompactView: React.FC<CompactViewProps> = ({
         {/* Title */}
         <Link 
           to={`/${item.contentType}/${item.contentId}`}
-          className="flex-1 min-w-0 text-white hover:text-netflix-red transition-colors truncate"
+          className="flex-1 min-w-0 text-white hover:text-type-logo transition-colors truncate"
         >
           {getTitle(item)}
         </Link>

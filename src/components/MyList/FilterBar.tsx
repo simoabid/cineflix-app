@@ -77,7 +77,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={filters.contentType}
             onChange={(e) => onFilterChange({ contentType: e.target.value as any })}
-            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
           >
             <option value="all">All Content</option>
             <option value="movie">Movies</option>
@@ -89,7 +89,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={filters.status}
             onChange={(e) => onFilterChange({ status: e.target.value as any })}
-            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
           >
             <option value="all">All Status</option>
             <option value="notStarted">Not Started</option>
@@ -102,7 +102,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={filters.priority}
             onChange={(e) => onFilterChange({ priority: e.target.value as any })}
-            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
           >
             <option value="all">All Priority</option>
             <option value="high">High Priority</option>
@@ -114,7 +114,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={filters.liked}
             onChange={(e) => onFilterChange({ liked: e.target.value as any })}
-            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+            className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
           >
             <option value="all">All Content</option>
             <option value="liked">❤️ Liked</option>
@@ -134,7 +134,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           {hasActiveFilters() && (
             <button
               onClick={clearAllFilters}
-              className="flex items-center gap-2 px-3 py-2 bg-netflix-red hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-buttons-purple hover:bg-buttons-purpleHover text-white rounded-lg transition-colors"
             >
               <X className="w-4 h-4" />
               Clear All
@@ -149,7 +149,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             <button
               onClick={() => onSortChange('dateAdded')}
               className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${sortBy === 'dateAdded'
-                ? 'bg-netflix-red text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
                 }`}
             >
@@ -160,7 +160,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             <button
               onClick={() => onSortChange('title')}
               className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${sortBy === 'title'
-                ? 'bg-netflix-red text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
                 }`}
             >
@@ -171,7 +171,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             <button
               onClick={() => onSortChange('rating')}
               className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${sortBy === 'rating'
-                ? 'bg-netflix-red text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
                 }`}
             >
@@ -182,7 +182,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             <button
               onClick={() => onSortChange('runtime')}
               className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${sortBy === 'runtime'
-                ? 'bg-netflix-red text-white'
+                ? 'bg-buttons-purple text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
                 }`}
             >
@@ -207,7 +207,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               <select
                 value={filters.dateAdded}
                 onChange={(e) => onFilterChange({ dateAdded: e.target.value as any })}
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
               >
                 <option value="all">All Time</option>
                 <option value="lastWeek">Last Week</option>
@@ -225,7 +225,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               <select
                 value={filters.rating}
                 onChange={(e) => onFilterChange({ rating: e.target.value as any })}
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
               >
                 <option value="all">All Ratings</option>
                 <option value="high">High (8.0+)</option>
@@ -243,7 +243,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               <select
                 value={filters.runtime}
                 onChange={(e) => onFilterChange({ runtime: e.target.value as any })}
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
               >
                 <option value="all">All Lengths</option>
                 <option value="short">Short (&lt;90 min)</option>
@@ -261,7 +261,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               <select
                 value={filters.releaseYear}
                 onChange={(e) => onFilterChange({ releaseYear: e.target.value as any })}
-                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-netflix-red focus:outline-none"
+                className="w-full bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-buttons-purple focus:outline-none"
               >
                 <option value="all">All Years</option>
                 <option value="recent">Recent (2020+)</option>
@@ -283,7 +283,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                     key={tag}
                     onClick={() => toggleTag(tag)}
                     className={`px-3 py-1 rounded-full text-sm transition-colors ${filters.customTags.includes(tag)
-                      ? 'bg-netflix-red text-white'
+                      ? 'bg-buttons-purple text-white'
                       : 'bg-gray-800 text-gray-400 hover:text-white'
                       }`}
                   >
@@ -300,7 +300,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
       {hasActiveFilters() && (
         <div className="flex flex-wrap gap-2 mt-4">
           {filters.contentType !== 'all' && (
-            <div className="flex items-center gap-2 bg-netflix-red/20 text-netflix-red px-3 py-1 rounded-full text-sm">
+            <div className="flex items-center gap-2 bg-buttons-purple/20 text-type-logo px-3 py-1 rounded-full text-sm">
               <Film className="w-3 h-3" />
               {filters.contentType === 'movie' ? 'Movies' :
                 filters.contentType === 'tv' ? 'TV Shows' :
@@ -315,7 +315,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.status !== 'all' && (
-            <div className="flex items-center gap-2 bg-netflix-red/20 text-netflix-red px-3 py-1 rounded-full text-sm">
+            <div className="flex items-center gap-2 bg-buttons-purple/20 text-type-logo px-3 py-1 rounded-full text-sm">
               <span className="capitalize">{filters.status.replace(/([A-Z])/g, ' $1').trim()}</span>
               <button
                 onClick={() => onFilterChange({ status: 'all' })}
@@ -327,7 +327,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.priority !== 'all' && (
-            <div className="flex items-center gap-2 bg-netflix-red/20 text-netflix-red px-3 py-1 rounded-full text-sm">
+            <div className="flex items-center gap-2 bg-buttons-purple/20 text-type-logo px-3 py-1 rounded-full text-sm">
               <span className="capitalize">{filters.priority} Priority</span>
               <button
                 onClick={() => onFilterChange({ priority: 'all' })}
@@ -339,7 +339,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.customTags.map(tag => (
-            <div key={tag} className="flex items-center gap-2 bg-netflix-red/20 text-netflix-red px-3 py-1 rounded-full text-sm">
+            <div key={tag} className="flex items-center gap-2 bg-buttons-purple/20 text-type-logo px-3 py-1 rounded-full text-sm">
               <Tag className="w-3 h-3" />
               {tag}
               <button

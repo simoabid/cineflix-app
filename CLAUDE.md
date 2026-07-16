@@ -288,9 +288,20 @@ Prefer `type` over `interface` on the backend except for public/shared API shape
 
 ## Tailwind / UI
 
-Tokens in `tailwind.config.js` (extends P-Stream default theme colors):
+Multi-theme system (p-stream–compatible) via `tailwindcss-themer`:
 
-- **Colors:** `netflix-*`, `brand-*`, `glass-*`, `surface-*`
+- **Theme definitions:** root `themes/` (`default.ts` = **CINEFLIX brand**, `list/*`, `all.ts`)
+- **Default theme:** CINEFLIX red (`#E50914`) accents + dark-blue surfaces (`#0A0A1F` / `#13132B`). Absolute default for all users (`theme: null` → `.theme-default`).
+- **Former p-stream default** lives as selectable **`dark-slate`** (`themes/list/dark-slate.ts`).
+- **Runtime:** `src/stores/theme` — `ThemeProvider` applies `.theme-{id}`; persists in localStorage (`__CINEFLIX::theme`)
+- **Settings:** Account → Appearance (`ThemePicker`)
+- **Brand logo:** `BrandLogo` component — CSS-mask on `public/cineflix-logo.png` so fill follows `text-type-logo` / theme accent. Do not use PNG-embedded “SVG converter” files for theming.
+- **Semantic color tokens (use these — never hardcode brand hex):**
+  - Surfaces: `bg-background-main`, `bg-background-secondary`, `bg-modal-background`
+  - Brand CTAs: `bg-buttons-purple`, `hover:bg-buttons-purpleHover`, `text-type-logo` (values are red under default theme)
+  - Text: `text-type-emphasis`, `text-type-secondary`, `text-type-dimmed`, `text-type-danger`
+  - Search: `bg-search-background`, `text-search-text`
+- **Legacy bridge (temporary):** `netflix-*` / `brand-*` / `surface-*` may still exist in Tailwind config — do not add new usages
 - **Animations:** `fade-in`, `slide-up`, `shimmer`, `fade-in-up`, `stagger-fade`
 - Prefer design tokens over raw hex
 

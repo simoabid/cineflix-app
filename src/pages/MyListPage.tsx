@@ -196,7 +196,7 @@ const MyListPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A1F] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-background-main text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div className="h-20 w-20 netflix-spinner-thick" />
@@ -217,7 +217,7 @@ const MyListPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A1F] text-white pt-20">
+    <div className="min-h-screen bg-background-main text-white pt-20">
       <SEOHead
         title="My List"
         description="Your personal CINEFLIX watchlist. Track and manage the movies and TV shows you want to watch."

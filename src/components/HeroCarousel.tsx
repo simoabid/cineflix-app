@@ -195,9 +195,9 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
         )}
 
         {/* Left-to-right gradient to cover the text block area */}
-        <div className="absolute inset-y-0 left-0 w-full md:w-2/3 bg-gradient-to-r from-[#0A0A1F] via-[#0A0A1F]/40 to-transparent z-[2]" />
+        <div className="absolute inset-y-0 left-0 w-full md:w-2/3 bg-gradient-to-r from-background-main via-background-main/40 to-transparent z-[2]" />
         {/* Bottom-to-top gradient to fade into the main page content */}
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#0A0A1F] via-[#0A0A1F]/20 to-transparent z-[2]" />
+        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-background-main via-background-main/20 to-transparent z-[2]" />
         {/* Top-to-bottom dark gradient for header overlay readability */}
         <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/50 to-transparent z-[2]" />
       </div>
@@ -348,7 +348,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ items, onTrailerClick, type
               {index === currentIndex && (
                 <div 
                   key={currentIndex}
-                  className="absolute top-0 left-0 h-full w-full bg-[#E50914] rounded-full origin-left animate-dot-fill"
+                  className="absolute top-0 left-0 h-full w-full bg-buttons-purple rounded-full origin-left animate-dot-fill"
                   style={{
                     animationPlayState: isAutoPlaying ? 'running' : 'paused'
                   }}

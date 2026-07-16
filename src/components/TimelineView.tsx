@@ -101,7 +101,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({ collection }) => {
               onClick={() => setTimelineMode('chronological')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 timelineMode === 'chronological'
-                  ? 'bg-netflix-red text-white'
+                  ? 'bg-buttons-purple text-white'
                   : 'text-gray-300 hover:text-white'
               }`}
             >
@@ -111,7 +111,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({ collection }) => {
               onClick={() => setTimelineMode('production')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 timelineMode === 'production'
-                  ? 'bg-netflix-red text-white'
+                  ? 'bg-buttons-purple text-white'
                   : 'text-gray-300 hover:text-white'
               }`}
             >
@@ -170,7 +170,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({ collection }) => {
 
             {/* Movies on timeline */}
             <div className="relative h-40 mb-8">
-              <div className="absolute top-0 left-0 right-0 h-px bg-netflix-red"></div>
+              <div className="absolute top-0 left-0 right-0 h-px bg-buttons-purple"></div>
               {sortedMovies.map((movie) => {
                 const year = new Date(movie.release_date).getFullYear();
                 const position = getTimelinePosition(year);
@@ -185,7 +185,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({ collection }) => {
                   >
                     {/* Movie marker */}
                     <div className={`w-4 h-4 rounded-full -mt-2 transition-all duration-200 ${
-                      isSelected ? 'bg-netflix-red scale-150' : 'bg-white group-hover:bg-netflix-red group-hover:scale-125'
+                      isSelected ? 'bg-buttons-purple scale-150' : 'bg-white group-hover:bg-buttons-purpleHover group-hover:scale-125'
                     }`}></div>
                     
                     {/* Movie poster and info */}
@@ -221,7 +221,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({ collection }) => {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                     milestone.type === 'start' ? 'bg-green-600' :
                     milestone.type === 'peak' ? 'bg-yellow-600' :
-                    milestone.type === 'end' ? 'bg-red-600' :
+                    milestone.type === 'end' ? 'bg-buttons-purple' :
                     'bg-blue-600'
                   }`}>
                     {milestone.type === 'start' ? <Film className="w-6 h-6" /> :

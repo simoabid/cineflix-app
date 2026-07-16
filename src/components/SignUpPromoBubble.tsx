@@ -31,12 +31,12 @@ const SignUpPromoBubble: React.FC = () => {
 
             <div className="bg-[#141414]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-5 relative overflow-hidden">
                 {/* Background Decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-netflix-red/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-buttons-purple/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
                 <div className="relative z-20">
                     <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center space-x-2">
-                            <span className="bg-gradient-to-r from-netflix-red to-red-600 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg">
+                            <span className="bg-gradient-to-r from-buttons-purple to-red-600 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg">
                                 <Sparkles className="w-4 h-4 text-white" />
                             </span>
                             <h3 className="text-white font-bold text-lg"></h3>
@@ -55,15 +55,15 @@ const SignUpPromoBubble: React.FC = () => {
 
                     <ul className="space-y-3 mb-5">
                         <li className="flex items-start space-x-3 text-sm text-gray-300">
-                            <Tv className="w-4 h-4 text-netflix-red mt-0.5 shrink-0" />
+                            <Tv className="w-4 h-4 text-type-logo mt-0.5 shrink-0" />
                             <span>Create <span className="text-white font-medium">unlimited</span> watchlists</span>
                         </li>
                         <li className="flex items-start space-x-3 text-sm text-gray-300">
-                            <Download className="w-4 h-4 text-netflix-red mt-0.5 shrink-0" />
+                            <Download className="w-4 h-4 text-type-logo mt-0.5 shrink-0" />
                             <span>Download to watch <span className="text-white font-medium">offline</span></span>
                         </li>
                         <li className="flex items-start space-x-3 text-sm text-gray-300">
-                            <Users className="w-4 h-4 text-netflix-red mt-0.5 shrink-0" />
+                            <Users className="w-4 h-4 text-type-logo mt-0.5 shrink-0" />
                             <span>Sync across <span className="text-white font-medium">all devices</span></span>
                         </li>
                     </ul>
@@ -71,7 +71,7 @@ const SignUpPromoBubble: React.FC = () => {
                     <Link
                         to="/signup"
                         onClick={handleDismiss}
-                        className="block w-full text-center bg-netflix-red hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-red-900/20"
+                        className="block w-full text-center bg-buttons-purple hover:bg-buttons-purpleHover text-white font-semibold py-2.5 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-red-900/20"
                     >
                         Sign Up Now - It's Free
                     </Link>

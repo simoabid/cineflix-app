@@ -34,9 +34,10 @@
       "@/lib/*": ["lib/*"],
       "@providers": ["lib/providers"],
       "@providers/*": ["lib/providers/*"],
-      "@p-stream/providers": ["lib/providers"]
+      "@p-stream/providers": ["lib/providers"],
+      "@themes/*": ["../themes/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "themes"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

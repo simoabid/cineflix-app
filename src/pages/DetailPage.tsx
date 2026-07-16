@@ -206,7 +206,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#0A0A1F] text-white flex items-center justify-center px-4">
+      <main className="min-h-screen bg-background-main text-white flex items-center justify-center px-4">
         <div className="max-w-md w-full">
           <ErrorState
             inline
@@ -221,7 +221,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
 
   if (!content) {
     return (
-      <main className="min-h-screen bg-[#0A0A1F] text-white flex items-center justify-center px-4">
+      <main className="min-h-screen bg-background-main text-white flex items-center justify-center px-4">
         <div className="max-w-md w-full">
           <ErrorState
             inline
@@ -233,7 +233,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
               to="/"
               key="return-home"
               id="return-to-home-link"
-              className="inline-block bg-netflix-red hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              className="inline-block bg-buttons-purple hover:bg-buttons-purpleHover text-white font-semibold px-6 py-3 rounded-xl transition-colors"
             >
               Return to Home
             </Link>
@@ -244,7 +244,7 @@ const DetailPage: React.FC<DetailPageProps> = ({ type }) => {
   }
 
   return (
-    <main className="min-h-screen bg-[#0A0A1F] text-white">
+    <main className="min-h-screen bg-background-main text-white">
       <SEOHead
         title={'title' in content ? content.title : content.name}
         description={content.overview || 'Watch on CINEFLIX'}

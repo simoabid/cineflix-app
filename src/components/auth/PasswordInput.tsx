@@ -49,7 +49,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
                 className="block text-sm font-medium text-gray-300"
             >
                 {label}
-                {required && <span className="text-netflix-red ml-1">*</span>}
+                {required && <span className="text-type-logo ml-1">*</span>}
             </label>
 
             {/* Input Container */}
@@ -68,7 +68,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
                     aria-invalid={!!error}
                     aria-describedby={error ? `${id}-error` : undefined}
                     className={`auth-input pr-12 ${error
-                        ? 'border-red-500/50'
+                        ? 'border-buttons-purple/50'
                         : passwordsMatch && value
                             ? 'border-green-500/50'
                             : 'border-white/15'

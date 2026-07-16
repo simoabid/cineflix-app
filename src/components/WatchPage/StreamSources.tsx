@@ -64,7 +64,7 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
       {/* Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
         <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 bg-red-600/10 rounded-lg flex items-center justify-center border border-red-500/10">
+          <div className="w-7 h-7 bg-buttons-purple/10 rounded-lg flex items-center justify-center border border-buttons-purple/10">
             <Play className="h-3.5 w-3.5 text-red-500 fill-current" />
           </div>
           <h2 className="text-sm font-semibold tracking-wide text-white uppercase">
@@ -92,7 +92,7 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs text-red-400"
+          className="flex items-center gap-2.5 bg-red-500/10 border border-buttons-purple/20 rounded-xl p-3 text-xs text-red-400"
         >
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span><strong>Failed:</strong> {loadingError}</span>
@@ -111,7 +111,7 @@ const StreamSources: React.FC<StreamSourcesProps> = ({ sources, onSourceSelect, 
               disabled={isLoading}
               className={`group relative px-3 py-2 rounded-lg border text-xs font-semibold tracking-wide flex items-center justify-between gap-2 transition-all duration-300 ${
                 isSelected
-                  ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/25'
+                  ? 'bg-buttons-purple border-buttons-purple text-white shadow-lg shadow-red-600/25'
                   : isLoading
                     ? 'bg-white/5 border-white/5 text-gray-400 cursor-not-allowed'
                     : 'bg-white/[0.02] border-white/5 text-gray-300 hover:text-white hover:bg-white/[0.06] hover:border-white/10'

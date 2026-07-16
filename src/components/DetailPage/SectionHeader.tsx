@@ -25,7 +25,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   tone = 'default',
   size = 'md',
 }) => {
-  const accentColor = tone === 'accent' ? 'bg-netflix-red' : 'bg-gradient-to-b from-netflix-red to-red-900';
+  const accentColor = tone === 'accent' ? 'bg-buttons-purple' : 'bg-gradient-to-b from-buttons-purple to-red-900';
 
   const titleSize = {
     sm: 'text-lg sm:text-xl',
@@ -38,7 +38,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       <div className="space-y-2 sm:space-y-3">
         {eyebrow && (
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-medium text-gray-400 uppercase tracking-[0.18em]">
-            {Icon && <Icon className="h-3 w-3 text-netflix-red" />}
+            {Icon && <Icon className="h-3 w-3 text-type-logo" />}
             {eyebrow}
           </div>
         )}

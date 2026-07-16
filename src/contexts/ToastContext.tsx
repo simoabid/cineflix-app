@@ -75,7 +75,7 @@ const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({ toast, onC
     const getBgColor = () => {
         switch (toast.type) {
             case 'success': return 'bg-green-500/10 border-green-500/20';
-            case 'error': return 'bg-red-500/10 border-red-500/20';
+            case 'error': return 'bg-red-500/10 border-buttons-purple/20';
             case 'warning': return 'bg-yellow-500/10 border-yellow-500/20';
             default: return 'bg-blue-500/10 border-blue-500/20';
         }

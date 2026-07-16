@@ -31,7 +31,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
   if (hasError || isSourceMissing) {
     return (
       <div
-        className={`w-full h-full bg-gradient-to-b from-surface-accent to-surface-background flex flex-col items-center justify-center p-4 ${className}`}
+        className={`w-full h-full bg-gradient-to-b from-background-secondaryHover to-background-main flex flex-col items-center justify-center p-4 ${className}`}
         role="img"
         aria-label={`Poster placeholder for ${title}`}
       >
@@ -53,8 +53,8 @@ const SafeImage: React.FC<SafeImageProps> = ({
   return (
     <div className={`relative w-full h-full overflow-hidden ${className}`}>
       {isLoading && (
-        <div className="absolute inset-0 bg-surface-card animate-pulse flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-brand-red border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-background-secondary animate-pulse flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-buttons-purple border-t-transparent rounded-full animate-spin" />
         </div>
       )}
       <img

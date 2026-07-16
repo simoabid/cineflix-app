@@ -177,8 +177,8 @@ const SimilarContent: React.FC<SimilarContentProps> = ({ similar, recommended, t
         {/* Improved Full-Bleed Carousel Container */}
         <div className="relative -mx-6 sm:-mx-8 lg:-mx-12 group/carousel">
           {/* High-Performance Edge Fades - Positioned outside the actual content padding */}
-          <div className={`absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0A0A1F] to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showLeftArrow ? 'opacity-100' : 'opacity-0'}`} />
-          <div className={`absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0A0A1F] to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showRightArrow ? 'opacity-100' : 'opacity-0'}`} />
+          <div className={`absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background-main to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showLeftArrow ? 'opacity-100' : 'opacity-0'}`} />
+          <div className={`absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background-main to-transparent z-20 pointer-events-none transition-opacity duration-500 ${showRightArrow ? 'opacity-100' : 'opacity-0'}`} />
 
           <AnimatePresence mode="wait">
             <motion.div

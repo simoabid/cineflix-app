@@ -68,7 +68,7 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
             transition={{ type: 'spring', stiffness: 280, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
             data-lenis-prevent
-            className="relative w-full max-w-6xl bg-gradient-to-b from-[#13132B] to-[#0A0A1F] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-h-[92vh] overflow-y-auto scrollbar-hide"
+            className="relative w-full max-w-6xl bg-gradient-to-b from-background-secondary to-background-main rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-h-[92vh] overflow-y-auto scrollbar-hide"
           >
             {/* Close button */}
             <button
@@ -80,8 +80,8 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
             </button>
 
             {/* Header */}
-            <div className="relative bg-gradient-to-r from-netflix-red/20 via-purple-500/5 to-transparent border-b border-white/10 p-5 sm:p-6 md:p-8">
-              <div className="absolute top-0 left-0 w-72 h-72 bg-netflix-red/15 blur-[100px] rounded-full pointer-events-none" />
+            <div className="relative bg-gradient-to-r from-buttons-purple/20 via-purple-500/5 to-transparent border-b border-white/10 p-5 sm:p-6 md:p-8">
+              <div className="absolute top-0 left-0 w-72 h-72 bg-buttons-purple/15 blur-[100px] rounded-full pointer-events-none" />
               <div className="relative flex flex-col md:flex-row gap-5 sm:gap-6">
                 {/* Profile image */}
                 <div className="w-32 sm:w-44 md:w-48 aspect-[3/4] rounded-2xl overflow-hidden bg-gray-900 flex-shrink-0 ring-1 ring-white/10 shadow-2xl mx-auto md:mx-0">
@@ -113,7 +113,7 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
                   </div>
 
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <span className="bg-netflix-red/20 text-netflix-red border border-netflix-red/30 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    <span className="bg-buttons-purple/20 text-type-logo border border-buttons-purple/30 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                       Main Cast
                     </span>
                     {member.order < 5 && (
@@ -210,7 +210,7 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
                           onClick={() => handleMovieClick(movie.id)}
                           className="group text-left"
                         >
-                          <div className="aspect-[2/3] mb-2 rounded-lg overflow-hidden bg-gray-900 ring-1 ring-white/5 group-hover:ring-netflix-red/40 transition-all">
+                          <div className="aspect-[2/3] mb-2 rounded-lg overflow-hidden bg-gray-900 ring-1 ring-white/5 group-hover:ring-buttons-purple/40 transition-all">
                             <img
                               src={getPosterUrl(movie.poster_path, 'w300')}
                               alt={movie.title}
@@ -221,7 +221,7 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
                               }}
                             />
                           </div>
-                          <h4 className="font-semibold text-white text-xs sm:text-sm leading-tight mb-1 group-hover:text-netflix-red transition-colors line-clamp-2">
+                          <h4 className="font-semibold text-white text-xs sm:text-sm leading-tight mb-1 group-hover:text-type-logo transition-colors line-clamp-2">
                             {movie.title}
                           </h4>
                           <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
@@ -244,7 +244,7 @@ const CastMemberModal: React.FC<CastMemberModalProps> = ({
                     <div className="text-center">
                       <button
                         onClick={onLoadMore}
-                        className="bg-netflix-red hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-netflix-red/30"
+                        className="bg-buttons-purple hover:bg-buttons-purpleHover text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-buttons-purple/30"
                       >
                         Load More ({filmography.cast.length - displayedMoviesCount} remaining)
                       </button>

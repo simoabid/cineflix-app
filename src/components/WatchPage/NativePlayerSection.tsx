@@ -286,7 +286,7 @@ export function NativePlayerSection({
             className="w-full min-h-screen"
           >
             <PStreamPlayer onBack={onFallbackToIframe}>
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#0A0A1F]">
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-background-main">
                 <div className="text-center max-w-sm px-6">
                   <div className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
                     <AlertCircle className="h-7 w-7 text-gray-400" />
@@ -309,7 +309,7 @@ export function NativePlayerSection({
                     </button>
                     <button
                       onClick={onFallbackToIframe}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-[#e50914] text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-buttons-purple text-white text-sm rounded-lg hover:bg-buttons-purpleHover transition-colors"
                       aria-label="Switch to classic player"
                     >
                       <ArrowLeft className="h-4 w-4" />
@@ -332,7 +332,7 @@ export function NativePlayerSection({
             className="w-full min-h-screen"
           >
             <PStreamPlayer onBack={onFallbackToIframe}>
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#0A0A1F]">
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-background-main">
                 <div className="text-center max-w-sm px-6">
                   <div className="w-14 h-14 rounded-full bg-red-900/30 flex items-center justify-center mx-auto mb-4">
                     <AlertCircle className="h-7 w-7 text-red-400" />
@@ -357,7 +357,7 @@ export function NativePlayerSection({
                     </button>
                     <button
                       onClick={onFallbackToIframe}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-[#e50914] text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-buttons-purple text-white text-sm rounded-lg hover:bg-buttons-purpleHover transition-colors"
                       aria-label="Switch to classic player"
                     >
                       <ArrowLeft className="h-4 w-4" />

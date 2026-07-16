@@ -98,7 +98,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
     >
       <Link
         to={`/${derivedType}/${item.id}`}
-        className="block outline-none focus-visible:ring-2 focus-visible:ring-netflix-red rounded-xl"
+        className="block outline-none focus-visible:ring-2 focus-visible:ring-buttons-purple rounded-xl"
         onClick={handleClick}
       >
         <div
@@ -134,7 +134,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
       {showTitleBelow && (
         <div className="mt-2 px-0.5">
-          <h5 className="text-white/90 text-sm font-semibold line-clamp-2 hover:text-netflix-red transition-colors">
+          <h5 className="text-white/90 text-sm font-semibold line-clamp-2 hover:text-type-logo transition-colors">
             {title}
           </h5>
           <div className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-2">

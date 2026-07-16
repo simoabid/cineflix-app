@@ -229,7 +229,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
             onItemSelect(item.id, !isSelected);
           }}
           className={`p-1 rounded transition-colors ${isSelected
-              ? 'bg-netflix-red text-white'
+              ? 'bg-buttons-purple text-white'
               : 'text-gray-400 hover:text-white'
             }`}
         >
@@ -254,7 +254,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
         {/* Content Info */}
         <div className="flex-1 min-w-0">
           <Link to={`/${item.contentType}/${item.contentId}`}>
-            <h3 className="text-white font-medium text-lg mb-1 hover:text-netflix-red transition-colors">
+            <h3 className="text-white font-medium text-lg mb-1 hover:text-type-logo transition-colors">
               {safeTitle}
             </h3>
           </Link>
@@ -301,7 +301,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
           <div className="flex items-center gap-2 mb-2">
             <div className={`w-3 h-3 rounded-full ${getPriorityColor(item.priority)}`}></div>
             {item.isLiked && (
-              <div className="bg-red-600/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+              <div className="bg-buttons-purple/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
                 <Heart className="w-3 h-3 text-white fill-current" />
                 <span className="text-white text-xs font-medium">Liked</span>
               </div>
@@ -315,7 +315,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
             <div className="w-24 mb-2">
               <div className="w-full bg-gray-600 rounded-full h-2">
                 <div
-                  className="bg-netflix-red h-2 rounded-full transition-all duration-300"
+                  className="bg-buttons-purple h-2 rounded-full transition-all duration-300"
                   style={{ width: `${item.progress}%` }}
                 />
               </div>

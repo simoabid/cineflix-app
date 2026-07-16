@@ -44,7 +44,7 @@ const ActorDetailsModal: React.FC<ActorDetailsModalProps> = ({
             exit={{ opacity: 0, scale: 0.96, y: 10 }}
             transition={{ type: 'spring', stiffness: 280, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl bg-gradient-to-b from-[#13132B] to-[#0A0A1F] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-h-[92vh] overflow-y-auto scrollbar-thin"
+            className="relative w-full max-w-4xl bg-gradient-to-b from-background-secondary to-background-main rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-h-[92vh] overflow-y-auto scrollbar-thin"
           >
             <button
               onClick={onClose}

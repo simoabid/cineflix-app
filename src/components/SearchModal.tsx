@@ -326,7 +326,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 <button
                   onClick={startVoiceSearch}
                   className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full transition-colors ${isVoiceSearch
-                    ? 'text-netflix-red bg-netflix-red/10 animate-pulse'
+                    ? 'text-type-logo bg-buttons-purple/10 animate-pulse'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}
                   aria-label={isVoiceSearch ? 'Listening...' : 'Voice search'}
@@ -365,7 +365,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         key={id}
                         onClick={() => setActiveTab(id as any)}
                         className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === id
-                          ? 'bg-netflix-red text-white shadow-lg shadow-netflix-red/20'
+                          ? 'bg-buttons-purple text-white shadow-lg shadow-buttons-purple/20'
                           : 'text-gray-400 hover:text-white hover:bg-white/5'
                           }`}
                       >
@@ -381,7 +381,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                   <select
                     value={filters.sortBy}
                     onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:border-netflix-red outline-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:border-buttons-purple outline-none"
                   >
                     <option value="relevance">Relevance</option>
                     <option value="rating">Top Rated</option>
@@ -425,7 +425,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     step="0.5"
                     value={filters.rating.min}
                     onChange={(e) => setFilters(prev => ({ ...prev, rating: { ...prev.rating, min: parseFloat(e.target.value) } }))}
-                    className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-netflix-red"
+                    className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-buttons-purple"
                   />
                 </div>
               </div>
@@ -447,7 +447,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                       onClick={() => setActiveTab(id as any)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                         activeTab === id
-                          ? 'bg-netflix-red text-white shadow-md shadow-netflix-red/20'
+                          ? 'bg-buttons-purple text-white shadow-md shadow-buttons-purple/20'
                           : 'bg-white/5 text-gray-400 hover:text-white'
                       }`}
                     >
@@ -515,7 +515,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     {/* Trending Searches */}
                     <div>
                       <h3 className="text-gray-500 uppercase text-[10px] sm:text-xs font-bold tracking-widest mb-3 flex items-center gap-1.5">
-                        <Flame className="w-3.5 h-3.5 text-netflix-red" /> Trending Now
+                        <Flame className="w-3.5 h-3.5 text-type-logo" /> Trending Now
                       </h3>
                       <div className="flex flex-wrap gap-1.5">
                         {trendingSearches.map((term, i) => (
@@ -547,7 +547,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           whileHover={{ scale: 1.02, y: -4 }}
-                          className={`group cursor-pointer relative ${viewMode === 'list' ? 'flex gap-4 bg-white/5 p-4 rounded-xl border border-white/5 hover:border-netflix-red/30 transition-colors' : ''
+                          className={`group cursor-pointer relative ${viewMode === 'list' ? 'flex gap-4 bg-white/5 p-4 rounded-xl border border-white/5 hover:border-buttons-purple/30 transition-colors' : ''
                             }`}
                           onClick={() => {
                             onClose();
@@ -570,14 +570,14 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 title="Like"
                               >
                                 <Heart className={`w-5 h-5 transition-colors ${isLiked(item.id, (item.media_type as 'movie' | 'tv') || 'movie')
-                                  ? 'fill-netflix-red text-netflix-red'
+                                  ? 'fill-buttons-purple text-type-logo'
                                   : 'text-white'
                                   }`} />
                               </button>
                               <button
                                 onClick={(e) => handleMyListClick(e, item as any)}
                                 className={`p-3 rounded-full border hover:scale-110 transition-all group/btn ${isInList(item.id, (item.media_type as 'movie' | 'tv') || 'movie')
-                                  ? 'bg-netflix-red border-netflix-red text-white'
+                                  ? 'bg-buttons-purple border-buttons-purple text-white'
                                   : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white text-white'
                                   }`}
                                 title={isInList(item.id, (item.media_type as 'movie' | 'tv') || 'movie') ? "Remove from List" : "Add to My List"}
@@ -589,12 +589,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
                           {viewMode === 'grid' && (
                             <div className="mt-3 space-y-1">
-                              <h4 className="text-white font-medium leading-tight line-clamp-1 text-sm group-hover:text-netflix-red transition-colors">
+                              <h4 className="text-white font-medium leading-tight line-clamp-1 text-sm group-hover:text-type-logo transition-colors">
                                 {item.title || item.name}
                               </h4>
                               <div className="flex items-center justify-between text-xs text-gray-400">
                                 <span className="flex items-center gap-1">
-                                  <Star className="w-3 h-3 text-netflix-red fill-current" />
+                                  <Star className="w-3 h-3 text-type-logo fill-current" />
                                   {(item.vote_average || 0).toFixed(1)}
                                 </span>
                                 <span>{new Date(item.release_date || item.first_air_date || '').getFullYear() || ''}</span>
@@ -605,12 +605,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           {viewMode === 'list' && (
                             <div className="flex-1 py-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
-                                <h4 className="text-sm sm:text-lg text-white font-bold mb-1.5 group-hover:text-netflix-red transition-colors truncate">{item.title || item.name}</h4>
+                                <h4 className="text-sm sm:text-lg text-white font-bold mb-1.5 group-hover:text-type-logo transition-colors truncate">{item.title || item.name}</h4>
                                 <span className="px-2 py-0.5 bg-white/10 rounded text-[9px] sm:text-xs uppercase text-gray-400 flex-shrink-0">{item.media_type}</span>
                               </div>
                               <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 mb-2 leading-relaxed">{item.overview}</p>
                               <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-gray-300">
-                                <span className="text-netflix-red flex items-center gap-1 bg-netflix-red/10 px-1.5 py-0.5 rounded"><Star className="w-3 h-3 fill-current" /> {(item.vote_average || 0).toFixed(1)}</span>
+                                <span className="text-type-logo flex items-center gap-1 bg-buttons-purple/10 px-1.5 py-0.5 rounded"><Star className="w-3 h-3 fill-current" /> {(item.vote_average || 0).toFixed(1)}</span>
                                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(item.release_date || item.first_air_date || '').getFullYear() || 'N/A'}</span>
                               </div>
                             </div>

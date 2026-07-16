@@ -16,21 +16,18 @@ const DynamicBackground: React.FC<DynamicBackgroundProps> = ({
     className = ''
 }) => {
     return (
-        <div className={`min-h-screen w-full relative ${className}`} style={{ isolation: 'isolate' }}>
+        <div className={`min-h-screen w-full relative bg-background-main ${className}`} style={{ isolation: 'isolate' }}>
             {/* Background Animation */}
             <div
-                className="fixed inset-0"
-                style={{
-                    backgroundColor: '#060606',
-                    zIndex: 0
-                }}
+                className="fixed inset-0 bg-background-main"
+                style={{ zIndex: 0 }}
             >
                 <Squares
                     direction="diagonal"
                     speed={0.5}
                     squareSize={40}
-                    borderColor="#333"
-                    hoverFillColor="#222"
+                    borderColor="rgba(255,255,255,0.08)"
+                    hoverFillColor="rgba(255,255,255,0.04)"
                 />
             </div>
 

@@ -60,7 +60,7 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
                 onClick={() => setSelectedVideo(video)}
                 whileHover={{ y: -6, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-shrink-0 w-72 sm:w-80 md:w-[22rem] group cursor-pointer text-left snap-start flex flex-col border border-white/10 bg-white/[0.02] rounded-2xl overflow-hidden hover:border-netflix-red/40 hover:bg-white/[0.05] hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)] transition-all duration-300"
+                className="flex-shrink-0 w-72 sm:w-80 md:w-[22rem] group cursor-pointer text-left snap-start flex flex-col border border-white/10 bg-white/[0.02] rounded-2xl overflow-hidden hover:border-buttons-purple/40 hover:bg-white/[0.05] hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)] transition-all duration-300"
                 aria-label={`Play ${video.name}`}
               >
                 <div className="relative aspect-video w-full overflow-hidden bg-black rounded-t-2xl">
@@ -76,7 +76,7 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/10 transition-opacity duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-netflix-red rounded-full flex items-center justify-center shadow-2xl shadow-netflix-red/40 transition-transform duration-300 group-hover:scale-110">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-buttons-purple rounded-full flex items-center justify-center shadow-2xl shadow-buttons-purple/40 transition-transform duration-300 group-hover:scale-110">
                       <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current ml-0.5" />
                     </div>
                   </div>
@@ -86,7 +86,7 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
                 </div>
                 {/* Bottom Info Footer */}
                 <div className="p-4 bg-gradient-to-b from-white/[0.02] to-black/40 border-t border-white/5 w-full flex-1 flex flex-col justify-between min-h-[5.5rem]">
-                  <h3 className="font-semibold text-white text-sm sm:text-base group-hover:text-netflix-red transition-colors duration-300 line-clamp-2 leading-tight">
+                  <h3 className="font-semibold text-white text-sm sm:text-base group-hover:text-type-logo transition-colors duration-300 line-clamp-2 leading-tight">
                     {video.name}
                   </h3>
                   <p className="text-xs text-gray-400 flex items-center gap-1.5 mt-2">
@@ -125,7 +125,7 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
               exit={{ opacity: 0, scale: 0.97, y: 8 }}
               transition={{ type: 'spring', stiffness: 280, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl bg-[#0A0A1F] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10"
+              className="relative w-full max-w-5xl bg-background-main rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10"
             >
               <button
                 onClick={() => setSelectedVideo(null)}
@@ -146,7 +146,7 @@ const VideoTrailersSection: React.FC<VideoTrailersSectionProps> = ({ videos }) =
                 />
               </div>
               <div className="p-4 sm:p-5">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-netflix-red/20 text-netflix-red border border-netflix-red/30 px-2.5 py-1 rounded-full mb-2">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-buttons-purple/20 text-type-logo border border-buttons-purple/30 px-2.5 py-1 rounded-full mb-2">
                   <Clapperboard className="w-3 h-3" />
                   {selectedVideo.type}
                 </span>

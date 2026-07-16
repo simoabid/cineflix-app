@@ -89,7 +89,7 @@ const LoginPage: React.FC = () => {
     // Show loading if checking auth
     if (authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-netflix-black">
+            <div className="min-h-screen flex items-center justify-center bg-background-main">
                 <div className="auth-spinner" />
             </div>
         );
@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
                 {/* Server Error */}
                 {errors.server && (
                     <div
-                        className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm"
+                        className="p-4 bg-red-500/10 border border-buttons-purple/50 rounded-lg text-red-400 text-sm"
                         role="alert"
                         aria-live="polite"
                     >
