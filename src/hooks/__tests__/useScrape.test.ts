@@ -5,6 +5,10 @@ import {
   filterEmbedOrder,
   getScrapeMediaKey,
 } from '../useScrape';
+import {
+  cineproPriorityOrder,
+  pstreamPriorityOrder,
+} from '@/config/scrapePriority';
 import type { ScrapeMedia } from '@/lib/providers';
 
 const movieMedia: ScrapeMedia = {
@@ -63,5 +67,26 @@ describe('useScrape ordering helpers', () => {
     });
 
     expect(order).toEqual(['upcloud']);
+  });
+});
+
+describe('scrapePriority ordering', () => {
+  it('orders CinePro providers best-first and skips disabled', () => {
+    const order = cineproPriorityOrder(
+      ['vixsrc', 'vidup', 'hexa', 'Peachify'],
+      ['hexa'],
+    );
+    expect(order[0]).toBe('vidup');
+    expect(order).not.toContain('hexa');
+    expect(order.indexOf('Peachify')).toBeLessThan(order.indexOf('vixsrc'));
+  });
+
+  it('puts preferred p-stream ids first then priority', () => {
+    const order = pstreamPriorityOrder(
+      ['zoechip', 'vidsrc', 'dopebox'],
+      ['dopebox'],
+    );
+    expect(order[0]).toBe('dopebox');
+    expect(order[1]).toBe('vidsrc');
   });
 });

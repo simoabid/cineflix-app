@@ -19,7 +19,14 @@ import {
   convertCaptions,
   convertStreamToSource,
 } from "@/lib/providers/stream-utils";
-import { mapQuality } from "@/services/cinepro-adapter";
+import {
+  fetchCineProProviderStreams,
+  mapQuality,
+  mapCineProResultToStreamsWithMeta,
+  mapScrapeMediaToRequest,
+} from "@/services/cinepro-adapter";
+import { cineproPriorityOrder } from "@/config/scrapePriority";
+import { metaToScrapeMedia } from "@/stores/player/slices/source";
 
 export interface SourceSelectionViewProps {
   id: string;
@@ -215,8 +222,22 @@ export function SourceSelectionView({
 
   const cineproStreams = useCineProStore((s) => s.scrapedStreams);
   const isCineProEnabled = useCineProStore((s) => s.isEnabled);
+  const cineproProviders = useCineProStore((s) => s.availableProviders);
+  const disabledCineProIds = useCineProStore((s) => s.disabledProviderIds);
+  const cineproServerUrl = useCineProStore((s) => s.serverUrl);
+  const setCineProStreams = useCineProStore((s) => s.setScrapedStreams);
+  const loadCineProProviders = useCineProStore((s) => s.loadProviders);
+  const meta = usePlayerStore((s) => s.meta);
   const { playMedia } = usePlayer();
   const currentTime = usePlayerStore((s) => s.progress.time);
+  const [cineproLoadingId, setCineproLoadingId] = useState<string | null>(null);
+
+  // Ensure provider catalog is loaded for on-demand progressive switch.
+  useEffect(() => {
+    if (isCineProEnabled && cineproProviders.length === 0) {
+      void loadCineProProviders();
+    }
+  }, [isCineProEnabled, cineproProviders.length, loadCineProProviders]);
 
   const sources = useMemo(() => {
     if (!metaType) return [];
@@ -274,16 +295,32 @@ export function SourceSelectionView({
     return sources.filter((s) => s.name.toLowerCase().includes(q));
   }, [sources, searchQuery]);
 
-  const filteredCineProStreams = useMemo(() => {
+  /** Catalog of CinePro providers (priority order) for on-demand scrape. */
+  const cineproCatalog = useMemo(() => {
     if (!isCineProEnabled) return [];
-    if (!searchQuery.trim()) return cineproStreams;
-    const q = searchQuery.toLowerCase();
-    return cineproStreams.filter((s) =>
-      s.providerName.toLowerCase().includes(q)
+    const enabled = cineproProviders.filter((p) => p.enabled);
+    const ids = cineproPriorityOrder(
+      enabled.map((p) => p.id),
+      disabledCineProIds,
     );
-  }, [cineproStreams, isCineProEnabled, searchQuery]);
+    return ids.map((id) => {
+      const info = enabled.find((p) => p.id === id);
+      const cached = cineproStreams.find((s) => s.sourceId === `cinepro-${id}`);
+      return {
+        id,
+        name: info?.name ?? cached?.providerName ?? id,
+        cached: cached ?? null,
+      };
+    });
+  }, [isCineProEnabled, cineproProviders, disabledCineProIds, cineproStreams]);
 
-  const showCinePro = isCineProEnabled && cineproStreams.length > 0;
+  const filteredCineProCatalog = useMemo(() => {
+    if (!searchQuery.trim()) return cineproCatalog;
+    const q = searchQuery.toLowerCase();
+    return cineproCatalog.filter((s) => s.name.toLowerCase().includes(q));
+  }, [cineproCatalog, searchQuery]);
+
+  const showCinePro = isCineProEnabled && cineproCatalog.length > 0;
   const noSourcesAvailable = sources.length === 0 && !showCinePro;
 
   const handleSelectCineProStream = (cached: CineProCachedStream) => {
@@ -298,6 +335,53 @@ export function SourceSelectionView({
       cached.providerName,
     );
     router.close();
+  };
+
+  /** On-demand: scrape one CinePro provider only if not already cached. */
+  const handleSelectCineProProvider = async (
+    providerId: string,
+    name: string,
+  ) => {
+    const existing = cineproStreams.find(
+      (s) => s.sourceId === `cinepro-${providerId}`,
+    );
+    if (existing) {
+      handleSelectCineProStream(existing);
+      return;
+    }
+    if (!meta) return;
+    setCineproLoadingId(providerId);
+    try {
+      const media = metaToScrapeMedia(meta);
+      const req = mapScrapeMediaToRequest(media);
+      const res = await fetchCineProProviderStreams(
+        req,
+        providerId,
+        cineproServerUrl,
+      );
+      if (!res.sources.length) {
+        return;
+      }
+      const mapped = mapCineProResultToStreamsWithMeta(
+        res.sources,
+        res.subtitles,
+      );
+      if (!mapped.length) return;
+      const best = mapped[0];
+      const cached: CineProCachedStream = {
+        sourceId: `cinepro-${best.providerId}`,
+        providerName: best.providerName || name,
+        stream: best.stream,
+        quality: best.quality,
+      };
+      setCineProStreams([
+        cached,
+        ...cineproStreams.filter((s) => s.sourceId !== cached.sourceId),
+      ]);
+      handleSelectCineProStream(cached);
+    } finally {
+      setCineproLoadingId(null);
+    }
   };
 
   const handleFindNextSource = () => {
@@ -331,7 +415,7 @@ export function SourceSelectionView({
       {/* Scrollable body — must be exactly the 2nd direct child of CardWithScrollable */}
       <div className="overflow-y-auto overflow-x-hidden scrollbar-hide pb-4">
         {/* Search/filter input */}
-        {(sources.length + (showCinePro ? cineproStreams.length : 0)) > 4 && (
+        {sources.length + (showCinePro ? cineproCatalog.length : 0) > 4 && (
           <div className="px-1 pt-3 pb-1">
             <input
               type="text"
@@ -347,14 +431,17 @@ export function SourceSelectionView({
           <Menu.Section>
             <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
               <p className="text-video-context-type-main text-sm font-medium opacity-70">
-                {t("player.menus.sources.noSources.title") ?? "No sources available"}
+                {t("player.menus.sources.noSources.title") ??
+                  "No sources available"}
               </p>
               <p className="text-video-context-type-main text-xs opacity-40">
-                {t("player.menus.sources.noSources.text") ?? "Sources will appear here once the player is ready"}
+                {t("player.menus.sources.noSources.text") ??
+                  "Sources will appear here once the player is ready"}
               </p>
             </div>
           </Menu.Section>
-        ) : filteredSources.length === 0 && filteredCineProStreams.length === 0 ? (
+        ) : filteredSources.length === 0 &&
+          filteredCineProCatalog.length === 0 ? (
           <Menu.Section>
             <div className="flex items-center justify-center py-6">
               <p className="text-video-context-type-main text-sm opacity-50">
@@ -371,30 +458,42 @@ export function SourceSelectionView({
                     "Server Streams (CinePro)"}
                 </Menu.SectionTitle>
                 <Menu.Section>
-                  {filteredCineProStreams.length === 0 ? (
+                  {filteredCineProCatalog.length === 0 ? (
                     <div className="flex items-center justify-center py-4">
                       <p className="text-video-context-type-main text-xs opacity-50">
                         No server streams match &ldquo;{searchQuery}&rdquo;
                       </p>
                     </div>
                   ) : (
-                    filteredCineProStreams.map((c, idx) => {
-                      const qVal = mapQuality(c.quality);
+                    filteredCineProCatalog.map((entry) => {
+                      const c = entry.cached;
+                      const qVal = c ? mapQuality(c.quality) : "unknown";
                       const qualityLabel =
                         qVal === "4k"
                           ? "4K"
                           : qVal !== "unknown"
                             ? qVal + "p"
                             : "";
+                      const loading = cineproLoadingId === entry.id;
                       return (
                         <SelectableLink
-                          key={`${c.sourceId}-${idx}`}
-                          onClick={() => handleSelectCineProStream(c)}
-                          selected={c.sourceId === currentSourceId}
+                          key={entry.id}
+                          loading={loading}
+                          onClick={() =>
+                            void handleSelectCineProProvider(
+                              entry.id,
+                              entry.name,
+                            )
+                          }
+                          selected={
+                            c
+                              ? c.sourceId === currentSourceId
+                              : `cinepro-${entry.id}` === currentSourceId
+                          }
                           rightSide={
                             <div className="flex items-center gap-1.5">
                               <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border text-purple-300 bg-purple-300/10 border-purple-300/30">
-                                server
+                                {c ? "ready" : "tap to load"}
                               </span>
                               {qualityLabel && (
                                 <QualityBadge quality={qualityLabel} />
@@ -402,7 +501,7 @@ export function SourceSelectionView({
                             </div>
                           }
                         >
-                          {c.providerName}
+                          {entry.name}
                         </SelectableLink>
                       );
                     })

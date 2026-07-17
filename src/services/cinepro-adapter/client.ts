@@ -2,7 +2,7 @@ import {
   CineProScrapeResponse,
   CineProProviderInfo,
   CineProScrapeRequest,
-} from './types';
+} from "./types";
 
 const MAX_RETRIES = 2;
 const RETRY_BASE_DELAY_MS = 1000;
@@ -16,7 +16,7 @@ const RETRY_BASE_DELAY_MS = 1000;
 export function isValidCineProUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
   }
@@ -29,12 +29,14 @@ export function isValidCineProUrl(url: string): boolean {
 export function getCineProBaseUrl(): string {
   const envUrl = import.meta.env?.VITE_CINEPRO_URL;
   if (!envUrl) {
-    return 'http://localhost:3005';
+    return "http://localhost:3005";
   }
-  const normalized = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  const normalized = envUrl.endsWith("/") ? envUrl.slice(0, -1) : envUrl;
   if (!isValidCineProUrl(normalized)) {
-    console.warn('[CinePro Client] VITE_CINEPRO_URL is not a valid HTTP URL, using default');
-    return 'http://localhost:3005';
+    console.warn(
+      "[CinePro Client] VITE_CINEPRO_URL is not a valid HTTP URL, using default",
+    );
+    return "http://localhost:3005";
   }
   return normalized;
 }
@@ -69,7 +71,9 @@ async function fetchWithTimeout(
 ): Promise<Response> {
   const url = baseUrl || getCineProBaseUrl();
   if (!isValidCineProUrl(url)) {
-    throw new Error(`CinePro Client: Refusing to connect to invalid URL: ${url}`);
+    throw new Error(
+      `CinePro Client: Refusing to connect to invalid URL: ${url}`,
+    );
   }
   const timeoutMs = getCineProTimeout();
   const controller = new AbortController();
@@ -79,8 +83,8 @@ async function fetchWithTimeout(
       ...options,
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         ...options.headers,
       },
     });
@@ -124,14 +128,19 @@ async function fetchWithRetry<T>(
  * Performs structural checks on the top-level shape and samples first items.
  */
 function isValidScrapeResponse(data: unknown): data is CineProScrapeResponse {
-  if (!data || typeof data !== 'object') return false;
+  if (!data || typeof data !== "object") return false;
   const obj = data as Record<string, unknown>;
   if (!Array.isArray(obj.sources)) return false;
   if (!Array.isArray(obj.subtitles)) return false;
   if (obj.sources.length > 0) {
     const first = obj.sources[0] as Record<string, unknown>;
-    if (typeof first.url !== 'string' || typeof first.type !== 'string') return false;
-    if (!first.provider || typeof (first.provider as Record<string, unknown>).id !== 'string') return false;
+    if (typeof first.url !== "string" || typeof first.type !== "string")
+      return false;
+    if (
+      !first.provider ||
+      typeof (first.provider as Record<string, unknown>).id !== "string"
+    )
+      return false;
   }
   return true;
 }
@@ -143,7 +152,8 @@ function isValidProviderList(data: unknown): data is CineProProviderInfo[] {
   if (!Array.isArray(data)) return false;
   if (data.length > 0) {
     const first = data[0] as Record<string, unknown>;
-    if (typeof first.id !== 'string' || typeof first.name !== 'string') return false;
+    if (typeof first.id !== "string" || typeof first.name !== "string")
+      return false;
   }
   return true;
 }
@@ -159,16 +169,16 @@ function isValidProviderList(data: unknown): data is CineProProviderInfo[] {
  */
 export async function checkCineProHealth(baseUrl?: string): Promise<boolean> {
   try {
-    const response = await fetchWithTimeout('/v1/health', {}, baseUrl);
+    const response = await fetchWithTimeout("/v1/health", {}, baseUrl);
     if (!response.ok) {
       return false;
     }
     const data: unknown = await response.json();
-    if (!data || typeof data !== 'object') return false;
-    return (data as Record<string, unknown>).status === 'operational';
+    if (!data || typeof data !== "object") return false;
+    return (data as Record<string, unknown>).status === "operational";
   } catch (err) {
     if (import.meta.env.DEV) {
-      console.warn('[CinePro Client] Health check failed:', err);
+      console.warn("[CinePro Client] Health check failed:", err);
     }
     return false;
   }
@@ -179,23 +189,30 @@ export async function checkCineProHealth(baseUrl?: string): Promise<boolean> {
  * @param {string} [baseUrl] Optional override for base URL.
  * @returns {Promise<CineProProviderInfo[]>} A list of providers.
  */
-export async function fetchCineProProviders(baseUrl?: string): Promise<CineProProviderInfo[]> {
+export async function fetchCineProProviders(
+  baseUrl?: string,
+): Promise<CineProProviderInfo[]> {
   try {
-    const response = await fetchWithRetry(() => fetchWithTimeout('/v1/providers', {}, baseUrl));
+    const response = await fetchWithRetry(() =>
+      fetchWithTimeout("/v1/providers", {}, baseUrl),
+    );
     if (!response.ok) {
       throw new Error(`Failed to fetch providers: Status ${response.status}`);
     }
     const data: unknown = await response.json();
     if (!isValidProviderList(data)) {
       if (import.meta.env.DEV) {
-        console.warn('[CinePro Client] Providers response failed validation:', data);
+        console.warn(
+          "[CinePro Client] Providers response failed validation:",
+          data,
+        );
       }
       return [];
     }
     return data;
   } catch (err) {
     if (import.meta.env.DEV) {
-      console.error('[CinePro Client] Failed to fetch providers:', err);
+      console.error("[CinePro Client] Failed to fetch providers:", err);
     }
     return [];
   }
@@ -203,8 +220,8 @@ export async function fetchCineProProviders(baseUrl?: string): Promise<CineProPr
 
 /**
  * Requests stream sources from CinePro Core for movies or TV episodes.
- * Uses retry logic (2 attempts) and runtime response validation.
- * Returns a safe empty response on failure instead of throwing.
+ * Bulk fan-out (all providers) — prefer {@link fetchCineProProviderStreams}
+ * for progressive TTFP. Kept for debug / full-scan mode.
  * @param {CineProScrapeRequest} request The OMSS query payload.
  * @param {string} [baseUrl] Optional override for base URL.
  * @returns {Promise<CineProScrapeResponse>} The scraping results (may be empty on failure).
@@ -221,31 +238,87 @@ export async function fetchCineProStreams(
   const { tmdbId, type, s, e } = request;
   if (!tmdbId || tmdbId.trim().length === 0) {
     if (import.meta.env.DEV) {
-      console.error('[CinePro Client] tmdbId is required');
+      console.error("[CinePro Client] tmdbId is required");
     }
     return emptyResponse;
   }
-  const endpoint = type === 'movie'
-    ? `/v1/movies/${encodeURIComponent(tmdbId)}`
-    : `/v1/tv/${encodeURIComponent(tmdbId)}/seasons/${s}/episodes/${e}`;
+  const endpoint =
+    type === "movie"
+      ? `/v1/movies/${encodeURIComponent(tmdbId)}`
+      : `/v1/tv/${encodeURIComponent(tmdbId)}/seasons/${s}/episodes/${e}`;
   try {
-    const response = await fetchWithRetry(() => fetchWithTimeout(endpoint, {}, baseUrl));
+    const response = await fetchWithRetry(() =>
+      fetchWithTimeout(endpoint, {}, baseUrl),
+    );
     if (!response.ok) {
-      throw new Error(`CinePro Core returned HTTP error status ${response.status}`);
+      throw new Error(
+        `CinePro Core returned HTTP error status ${response.status}`,
+      );
     }
     const data: unknown = await response.json();
     if (!isValidScrapeResponse(data)) {
       if (import.meta.env.DEV) {
-        console.warn('[CinePro Client] Scrape response failed validation:', data);
+        console.warn(
+          "[CinePro Client] Scrape response failed validation:",
+          data,
+        );
       }
       return emptyResponse;
     }
     return data;
   } catch (err) {
     if (import.meta.env.DEV) {
-      console.error('[CinePro Client] Scrape failed after retries:', err);
+      console.error("[CinePro Client] Scrape failed after retries:", err);
     }
     return emptyResponse;
   }
 }
 
+/**
+ * Progressive scrape: one CinePro provider only.
+ * Used by waterfall TTFP and on-demand server switch.
+ */
+export async function fetchCineProProviderStreams(
+  request: CineProScrapeRequest,
+  providerId: string,
+  baseUrl?: string,
+): Promise<CineProScrapeResponse> {
+  const emptyResponse: CineProScrapeResponse = {
+    sources: [],
+    subtitles: [],
+    diagnostics: [],
+  };
+  const { tmdbId, type, s, e } = request;
+  if (!tmdbId?.trim() || !providerId?.trim()) {
+    return emptyResponse;
+  }
+  const endpoint =
+    type === "movie"
+      ? `/v1/movies/${encodeURIComponent(tmdbId)}/providers/${encodeURIComponent(providerId)}`
+      : `/v1/tv/${encodeURIComponent(tmdbId)}/seasons/${s}/episodes/${e}/providers/${encodeURIComponent(providerId)}`;
+  try {
+    // Single attempt — waterfall advances to next provider on failure.
+    const response = await fetchWithTimeout(endpoint, {}, baseUrl);
+    if (!response.ok) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          `[CinePro Client] Provider ${providerId} HTTP ${response.status}`,
+        );
+      }
+      return emptyResponse;
+    }
+    const data: unknown = await response.json();
+    if (!isValidScrapeResponse(data)) {
+      return emptyResponse;
+    }
+    return data;
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.error(
+        `[CinePro Client] Provider ${providerId} scrape failed:`,
+        err,
+      );
+    }
+    return emptyResponse;
+  }
+}

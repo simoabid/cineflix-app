@@ -32,6 +32,9 @@ export interface CineProProviderInfo {
   id: string;
   name: string;
   enabled: boolean;
+  /** Lower = higher priority (from core progressive ranking). */
+  priority?: number;
+  tier?: string | null;
 }
 
 export interface CineProScrapeRequest {
