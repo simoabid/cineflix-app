@@ -4,7 +4,8 @@
 
 export interface CineProSource {
   url: string;
-  type: 'hls' | 'mp4' | 'dash' | 'mkv' | 'webm';
+  /** Core may also emit "embed" (iframe-only) — client filters those out. */
+  type: 'hls' | 'mp4' | 'dash' | 'mkv' | 'webm' | 'embed' | string;
   quality: string;
   audioTracks?: Array<{ language: string; label: string }>;
   provider: { id: string; name: string };

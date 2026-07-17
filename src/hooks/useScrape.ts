@@ -23,6 +23,7 @@ import {
   pstreamPriorityOrder,
 } from "@/config/scrapePriority";
 import { waterfallFirstSuccess } from "@/config/progressiveWaterfall";
+import { isFailedCineProProvider } from "@/services/cinepro-adapter/playable";
 
 export interface ScrapingSegment {
   name: string;
@@ -314,6 +315,14 @@ export function useScrape(): UseScrapeReturn {
               availableIds,
               disabledProviderIds,
             );
+            // Skip providers that failed scrape OR playback (resolve ≠ playback)
+            const failedList =
+              playerState.failedSourcesPerMedia[mediaKey] ?? [];
+            if (failedList.length > 0) {
+              cineproIds = cineproIds.filter(
+                (id) => !isFailedCineProProvider(id, failedList),
+              );
+            }
             if (options?.startFromCineProProviderId) {
               const idx = cineproIds.indexOf(
                 options.startFromCineProProviderId,

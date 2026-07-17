@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, RotateCcw, ArrowRight } from 'lucide-react';
+import { AlertCircle, RotateCcw, ArrowRight, SkipForward } from 'lucide-react';
+import { cineproProviderIdFromSourceId } from '@/services/cinepro-adapter/playable';
 
 import { PStreamPlayer } from '@/components/player/PStreamPlayer';
 import { ScrapingOverlay } from '@/components/player/overlays/ScrapingOverlay';
@@ -186,11 +187,18 @@ export function SmartPlayerModal(): React.ReactElement | null {
     window.history.pushState({}, '', previousPath);
   }, [closePlayer, reset, switchToNativeStore, previousPath]);
 
-  // Scraper Engine Lifecycle
-  const handleStartScraping = useCallback(async () => {
+  const autoAdvanceLock = React.useRef(false);
+
+  // Scraper Engine Lifecycle — preserves failed providers across retries
+  const handleStartScraping = useCallback(async (opts?: { fresh?: boolean }) => {
     if (!content || !currentRequest) return;
     setPhase('scraping');
     setErrorMessage(null);
+    autoAdvanceLock.current = false;
+    if (opts?.fresh) {
+      clearFailedSources();
+      clearFailedEmbeds();
+    }
     reset();
 
     const contentType = currentRequest.type;
@@ -198,7 +206,6 @@ export function SmartPlayerModal(): React.ReactElement | null {
     setMeta(meta, playerStatus.SCRAPING);
     setScrapeStatus();
 
-    // Get saved progress from progress store
     const progressItems = useProgressStore.getState().items;
     const startTime = getSavedProgress(progressItems, meta);
 
@@ -213,16 +220,17 @@ export function SmartPlayerModal(): React.ReactElement | null {
       await prepareStreamWithExtension(result.stream);
       const sourceData = convertStreamToSource(result);
       const captions = convertCaptions(result.stream.captions ?? []);
-      clearFailedSources();
-      clearFailedEmbeds();
-      
+
       const isCinePro = result.sourceId?.startsWith('cinepro-') ?? false;
-      let cineproProviderName: string | null = null;
+      let cineproName: string | null = null;
       if (isCinePro && result.sourceId) {
         const cached = useCineProStore.getState().scrapedStreams.find(
           (s) => s.sourceId === result.sourceId
         );
-        cineproProviderName = cached?.providerName ?? result.sourceId.replace('cinepro-', '');
+        cineproName =
+          cached?.providerName ??
+          cineproProviderIdFromSourceId(result.sourceId) ??
+          result.sourceId.replace('cinepro-', '');
       }
 
       playMedia(
@@ -231,7 +239,7 @@ export function SmartPlayerModal(): React.ReactElement | null {
         result.sourceId,
         startTime,
         isCinePro ? 'cinepro' : 'pstream',
-        cineproProviderName
+        cineproName
       );
       setPhase('playing');
     } catch (err) {
@@ -246,6 +254,14 @@ export function SmartPlayerModal(): React.ReactElement | null {
     setScrapeNotFound, setPlaybackError, reset,
     clearFailedSources, clearFailedEmbeds
   ]);
+
+  const handleTryNextProvider = useCallback(() => {
+    const sid = usePlayerStore.getState().sourceId;
+    const embed = usePlayerStore.getState().embedId;
+    if (sid && embed) addFailedEmbed(sid, embed);
+    else if (sid) addFailedSource(sid);
+    void handleStartScraping();
+  }, [addFailedEmbed, addFailedSource, handleStartScraping]);
 
   // Handle Classic Sources Switch
   const handleClassicFallback = useCallback(() => {
@@ -278,12 +294,14 @@ export function SmartPlayerModal(): React.ReactElement | null {
       handleStartScraping();
     }
   }, [displayMode, phase, handleStartScraping]);
+  // note: classic→native re-entry uses preserve failures by default
 
   // Start scraping when player is opened in native mode
   useEffect(() => {
     if (isOpen && content && displayMode === 'native') {
-      handleStartScraping();
+      void handleStartScraping({ fresh: true });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, content, selectedSeason, selectedEpisode, displayMode]);
 
   // Handle episode changes inside iframe (classic) mode
@@ -293,15 +311,29 @@ export function SmartPlayerModal(): React.ReactElement | null {
     }
   }, [selectedSeason, selectedEpisode, selectedSource, displayMode, isOpen, switchToClassic]);
 
-  // Track playback errors in native mode
+  // Playback error: mark failed + auto-advance (resolve ≠ playback)
   useEffect(() => {
-    if (status === playerStatus.PLAYBACK_ERROR && phase === 'playing') {
-      if (activeSourceId && activeEmbedId) addFailedEmbed(activeSourceId, activeEmbedId);
-      else if (activeSourceId) addFailedSource(activeSourceId);
-      setPhase('error');
-      setErrorMessage('Playback failed — the stream may have expired or been blocked.');
-    }
-  }, [activeEmbedId, activeSourceId, addFailedEmbed, addFailedSource, phase, status]);
+    if (status !== playerStatus.PLAYBACK_ERROR || phase !== 'playing') return;
+    if (autoAdvanceLock.current) return;
+    autoAdvanceLock.current = true;
+    if (activeSourceId && activeEmbedId) addFailedEmbed(activeSourceId, activeEmbedId);
+    else if (activeSourceId) addFailedSource(activeSourceId);
+    const bare = cineproProviderIdFromSourceId(activeSourceId);
+    setErrorMessage(
+      `Provider “${bare ?? activeSourceId ?? 'unknown'}” could not play (resolve success ≠ playback). Trying next…`,
+    );
+    void handleStartScraping().finally(() => {
+      autoAdvanceLock.current = false;
+    });
+  }, [
+    activeEmbedId,
+    activeSourceId,
+    addFailedEmbed,
+    addFailedSource,
+    handleStartScraping,
+    phase,
+    status,
+  ]);
 
   // Handle episode changes from inside the player controls
   const handleMetaChange = useCallback((newMeta: PlayerMeta) => {
@@ -410,12 +442,12 @@ export function SmartPlayerModal(): React.ReactElement | null {
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <button
-                      onClick={handleStartScraping}
+                      onClick={() => void handleStartScraping({ fresh: true })}
                       className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-white/10 text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-all active:scale-95 border border-white/10"
                       aria-label="Retry scanning"
                     >
                       <RotateCcw className="h-4 w-4 animate-spin-once" />
-                      Retry Scan
+                      Clear failures &amp; re-scan
                     </button>
                     <button
                       onClick={handleClassicFallback}
@@ -456,23 +488,33 @@ export function SmartPlayerModal(): React.ReactElement | null {
                   <p className="text-gray-500 text-xs mb-8 leading-relaxed">
                     This can happen when a server blocks direct video streaming access. Try switching to classic embed servers.
                   </p>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <div className="flex flex-col gap-3">
                     <button
-                      onClick={handleStartScraping}
-                      className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-white/10 text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-all active:scale-95 border border-white/10"
-                      aria-label="Retry scanning"
+                      onClick={handleTryNextProvider}
+                      className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-purple-600 text-white font-semibold text-sm rounded-xl hover:bg-purple-700 transition-all active:scale-95"
+                      aria-label="Try next provider"
                     >
-                      <RotateCcw className="h-4 w-4" />
-                      Retry Scan
+                      <SkipForward className="h-4 w-4" />
+                      Try next provider
                     </button>
-                    <button
-                      onClick={handleClassicFallback}
-                      className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-purple-600 text-white font-semibold text-sm rounded-xl hover:bg-purple-700 hover:shadow-purple-500/20 hover:shadow-lg transition-all active:scale-95"
-                      aria-label="Switch to classic player"
-                    >
-                      <span>Try Classic Sources</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <button
+                        onClick={() => void handleStartScraping()}
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-white/10 text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-all active:scale-95 border border-white/10"
+                        aria-label="Retry scan skipping failed providers"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Retry (skip failed)
+                      </button>
+                      <button
+                        onClick={handleClassicFallback}
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-white/10 text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-all active:scale-95 border border-white/10"
+                        aria-label="Switch to classic player"
+                      >
+                        <span>Classic Sources</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

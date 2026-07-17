@@ -2,6 +2,7 @@ import { ScrapeMedia } from '../../lib/providers/engine/entrypoint/utils/media';
 import { Stream, Qualities, Caption } from '../../lib/providers/engine';
 import { labelToLanguageCode } from '../../lib/providers/engine/providers/captions';
 import { CineProSource, CineProSubtitle, CineProScrapeRequest } from './types';
+import { isPlayableCineProSource } from './playable';
 
 /**
  * A mapped stream bundled with the CinePro provider metadata it came from.
@@ -139,13 +140,18 @@ export function mapCineProResultToStreamsWithMeta(
   if (!sources || sources.length === 0) {
     return [];
   }
+  // resolve ≠ playback: drop embeds / non-native types before grouping
+  const playableSources = sources.filter(isPlayableCineProSource);
+  if (playableSources.length === 0) {
+    return [];
+  }
   const captions: Caption[] = subtitles
     .map((sub, idx) => mapSubtitleToCaption(sub, idx))
     .filter((cap): cap is Caption => cap !== null);
   const results: MappedStreamWithMeta[] = [];
   const fileSourcesByProvider: Record<string, CineProSource[]> = {};
   let hlsCounter = 0;
-  for (const source of sources) {
+  for (const source of playableSources) {
     const providerId = source.provider.id;
     const isHls = source.type === 'hls' || source.type === 'dash';
     if (isHls) {

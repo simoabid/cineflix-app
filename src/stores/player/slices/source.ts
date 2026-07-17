@@ -525,8 +525,8 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set, get) => ({
       s.currentAudioTrack = null;
       s.status = playerStatus.IDLE;
       s.meta = null;
-      s.failedSourcesPerMedia = {};
-      s.failedEmbedsPerMedia = {};
+      // Keep failedSourcesPerMedia / failedEmbedsPerMedia so Retry / Try next
+      // can skip providers that already failed resolve or playback (resolve ≠ playback).
       s.resumeFromSourceId = null;
       s.displayMode = 'native';
       s.iframeSource = null;
