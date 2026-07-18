@@ -16,7 +16,50 @@ downloadCache.setCompare((a, b) => a === b);
 const expirySeconds = 24 * 60 * 60;
 
 /**
- * Always returns SRT
+ * True when URL is already served by CinePro Core /v1/proxy (public, CORS-open).
+ * Must NOT go through auth-gated SPA /api/proxy.
+ */
+function isAlreadyProxiedCaptionUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.pathname.includes("/v1/proxy") && u.searchParams.has("data");
+  } catch {
+    return url.includes("/v1/proxy?data=");
+  }
+}
+
+async function fetchCaptionTextDirect(url: string): Promise<string> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "text/plain, text/vtt, application/x-subrip, */*",
+      "Accept-Charset": "utf-8",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Subtitle download failed (HTTP ${response.status})`);
+  }
+  const contentType = response.headers.get("content-type") || "";
+  // Reject JSON error bodies from misrouted proxies
+  if (contentType.includes("application/json")) {
+    const body = await response.text();
+    throw new Error(
+      `Subtitle download returned JSON instead of a caption file: ${body.slice(0, 120)}`,
+    );
+  }
+  const charset = contentType.includes("charset=")
+    ? contentType.split("charset=")[1].toLowerCase().split(";")[0]!.trim()
+    : "utf-8";
+  const buffer = await response.arrayBuffer();
+  const decoder = new TextDecoder(charset || "utf-8");
+  return decoder.decode(buffer);
+}
+
+/**
+ * Always returns SRT.
+ *
+ * Core-proxied URLs (path B Wyzie via /v1/proxy) use direct fetch — no
+ * auth-gated /api/proxy. Legacy needsProxy still uses extension or /api/proxy.
  */
 export async function downloadCaption(
   caption: CaptionListItem,
@@ -25,7 +68,11 @@ export async function downloadCaption(
   if (cached) return cached;
 
   let data: string | undefined;
-  if (caption.needsProxy) {
+
+  // Already on public core proxy — never use MERN /api/proxy
+  if (isAlreadyProxiedCaptionUrl(caption.url) || !caption.needsProxy) {
+    data = await fetchCaptionTextDirect(caption.url);
+  } else if (caption.needsProxy) {
     if (isExtensionActiveCached()) {
       const extensionResponse = await sendExtensionRequest({
         url: caption.url,
@@ -47,20 +94,22 @@ export async function downloadCaption(
         },
       });
     }
-  } else {
-    const response = await fetch(caption.url);
-    const contentType = response.headers.get("content-type") || "";
-    const charset = contentType.includes("charset=")
-      ? contentType.split("charset=")[1].toLowerCase()
-      : "utf-8";
-
-    // Get the raw bytes
-    const buffer = await response.arrayBuffer();
-    // Decode using the detected charset, defaulting to UTF-8
-    const decoder = new TextDecoder(charset);
-    data = decoder.decode(buffer);
   }
+
   if (!data) throw new Error("failed to get caption data");
+  if (!data.trim()) throw new Error("Subtitle file was empty");
+
+  // HTML error pages from CDNs/proxies fail conversion with a clearer message
+  const trimmed = data.trim();
+  if (
+    trimmed.startsWith("<!DOCTYPE") ||
+    trimmed.startsWith("<html") ||
+    trimmed.startsWith("{")
+  ) {
+    throw new Error(
+      "Subtitle download did not return a caption file (blocked or wrong proxy)",
+    );
+  }
 
   const output = convertSubtitlesToSrt(data);
   downloadCache.set(caption.url, output, expirySeconds);

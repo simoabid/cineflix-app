@@ -8,6 +8,10 @@ import { useCineProStore } from '@/stores/cinepro';
 
 import { scrapeOpenSubtitlesCaptions } from './opensubtitles';
 import { scrapeVdrkCaptions } from './vdrk';
+import {
+  isCoreProxySubtitleUrl,
+  proxySubtitleThroughCore,
+} from './proxyThroughCore';
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout>;
@@ -39,6 +43,23 @@ function dedupeCaptions(captions: CaptionListItem[]): CaptionListItem[] {
 }
 
 /**
+ * Ensure subtitle file URLs go through public core /v1/proxy and do NOT use
+ * auth-gated SPA /api/proxy (needsProxy) — that caused red ⚠ on select.
+ */
+function ensureSelectableUrl(rawUrl: string): {
+  url: string;
+  needsProxy: boolean;
+} {
+  if (isCoreProxySubtitleUrl(rawUrl)) {
+    return { url: rawUrl, needsProxy: false };
+  }
+  return {
+    url: proxySubtitleThroughCore(rawUrl),
+    needsProxy: false,
+  };
+}
+
+/**
  * Map CinePro /v1/subtitles rows into player CaptionListItem (external path B).
  */
 function mapCoreSubtitles(
@@ -64,12 +85,13 @@ function mapCoreSubtitles(
       (sub.language ? labelToLanguageCode(sub.language) : null) ||
       sub.language?.slice(0, 2) ||
       'unknown';
+    const { url, needsProxy } = ensureSelectableUrl(sub.url);
     return {
-      id: `core-wyzie-${language}-${index}-${sub.url.slice(-24)}`,
+      id: `core-wyzie-${language}-${index}-${url.slice(-24)}`,
       language,
-      url: sub.url,
+      url,
       type,
-      needsProxy: true,
+      needsProxy,
       opensubtitles: true,
       display: sub.label,
       isHearingImpaired: sub.isHearingImpaired,
@@ -77,6 +99,16 @@ function mapCoreSubtitles(
       flagUrl: sub.flagUrl,
       release: sub.release ?? null,
     };
+  });
+}
+
+/** OpenSubtitles / VDRK still return raw CDN URLs — same proxy treatment. */
+function remapExternalForSelect(
+  captions: CaptionListItem[],
+): CaptionListItem[] {
+  return captions.map((c) => {
+    const { url, needsProxy } = ensureSelectableUrl(c.url);
+    return { ...c, url, needsProxy };
   });
 }
 
@@ -120,9 +152,19 @@ export async function scrapeExternalSubtitles(
         )
       : Promise.resolve([]),
     imdbId
-      ? withTimeout(scrapeOpenSubtitlesCaptions(imdbId, season, episode), 10_000, [])
+      ? withTimeout(
+          scrapeOpenSubtitlesCaptions(imdbId, season, episode).then(
+            remapExternalForSelect,
+          ),
+          10_000,
+          [],
+        )
       : Promise.resolve([]),
-    withTimeout(scrapeVdrkCaptions(tmdbId, season, episode), 10_000, []),
+    withTimeout(
+      scrapeVdrkCaptions(tmdbId, season, episode).then(remapExternalForSelect),
+      10_000,
+      [],
+    ),
   ]);
 
   return dedupeCaptions(
