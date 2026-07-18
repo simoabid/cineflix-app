@@ -1,50 +1,33 @@
 /**
- * Wrap an upstream subtitle CDN URL with CinePro Core's public /v1/proxy.
- * Avoids auth-gated SPA /api/proxy (protect middleware) which breaks selection
- * for anonymous viewers and for many Wyzie CDN hosts.
+ * Wrap subtitle CDN URLs with CinePro Core public download endpoints.
+ * OpenSubtitles must use /v1/subtitles/file (not OMSS /v1/proxy).
  */
 
 import { getCineProBaseUrl } from '@/services/cinepro-adapter/client';
 import { useCineProStore } from '@/stores/cinepro';
 
-const DEFAULT_SUB_HEADERS: Record<string, string> = {
-  'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-  Accept: 'text/plain, text/vtt, application/x-subrip, */*',
-};
-
-/** OpenSubtitles free API download UA (required for reliable fetches). */
-const OPENSUBTITLES_HEADERS: Record<string, string> = {
-  'User-Agent': 'TemporaryUserAgent',
-  'X-User-Agent': 'TemporaryUserAgent',
-  Accept: 'text/plain, */*',
-};
-
-export function headersForSubtitleUrl(rawUrl: string): Record<string, string> {
-  try {
-    if (new URL(rawUrl).hostname.toLowerCase().includes('opensubtitles.org')) {
-      return { ...OPENSUBTITLES_HEADERS };
-    }
-  } catch {
-    /* ignore */
-  }
-  return { ...DEFAULT_SUB_HEADERS };
-}
-
-/** True if URL already goes through an OMSS/core proxy. */
+/** True if URL is already a core-served subtitle download. */
 export function isCoreProxySubtitleUrl(url: string): boolean {
   try {
     const u = new URL(url);
+    if (u.pathname.includes('/v1/subtitles/file') && u.searchParams.has('url')) {
+      return true;
+    }
     return u.pathname.includes('/v1/proxy') && u.searchParams.has('data');
   } catch {
-    return url.includes('/v1/proxy?data=');
+    return (
+      url.includes('/v1/subtitles/file?') || url.includes('/v1/proxy?data=')
+    );
   }
 }
 
-/** Extract upstream file URL from a core /v1/proxy?data=… link when possible. */
 export function unwrapCoreProxyUpstream(url: string): string | null {
   try {
     const u = new URL(url);
+    const fileUrl = u.searchParams.get('url');
+    if (fileUrl && u.pathname.includes('/v1/subtitles/file')) {
+      return fileUrl;
+    }
     const raw = u.searchParams.get('data');
     if (!raw) return null;
     const data = JSON.parse(raw) as { url?: string };
@@ -54,10 +37,6 @@ export function unwrapCoreProxyUpstream(url: string): string | null {
   }
 }
 
-/**
- * Stable short id from URL (not url.slice(-24) of proxy JSON — that produced
- * garbage ids like "core-wyzie-ar-6-brip%2C%20*%2F*%22%7D%7D").
- */
 export function stableSubtitleId(
   prefix: string,
   language: string,
@@ -74,17 +53,46 @@ export function stableSubtitleId(
 }
 
 /**
- * Absolute core proxy URL for a raw subtitle file URL.
- * Uses store serverUrl when set, else VITE_CINEPRO_URL / default.
+ * Absolute core URL for a raw subtitle file.
+ * Uses /v1/subtitles/file so Anubis HTML is never HLS-rewritten.
  */
 export function proxySubtitleThroughCore(rawUrl: string): string {
-  if (!rawUrl || isCoreProxySubtitleUrl(rawUrl)) return rawUrl;
+  if (!rawUrl) return rawUrl;
+
+  // Already file endpoint
+  if (rawUrl.includes('/v1/subtitles/file?')) return rawUrl;
+
+  // Unwrap old /v1/proxy wrappers
+  let target = rawUrl;
+  if (rawUrl.includes('/v1/proxy?')) {
+    const inner = unwrapCoreProxyUpstream(rawUrl);
+    if (inner) {
+      // Keep non-OpenSubtitles provider VTT on /v1/proxy (vdrk works)
+      if (!/opensubtitles\.org/i.test(inner)) {
+        return rawUrl;
+      }
+      target = inner;
+    }
+  }
+
   const base = (
     useCineProStore.getState().serverUrl || getCineProBaseUrl()
   ).replace(/\/$/, '');
-  const data = JSON.stringify({
-    url: rawUrl,
-    headers: headersForSubtitleUrl(rawUrl),
-  });
-  return `${base}/v1/proxy?data=${encodeURIComponent(data)}`;
+  return `${base}/v1/subtitles/file?url=${encodeURIComponent(target)}`;
+}
+
+/** @deprecated kept for tests/callers that imported headers helper */
+export function headersForSubtitleUrl(rawUrl: string): Record<string, string> {
+  if (/opensubtitles\.org/i.test(rawUrl)) {
+    return {
+      'User-Agent': 'TemporaryUserAgent',
+      'X-User-Agent': 'TemporaryUserAgent',
+      Accept: 'text/plain, */*',
+    };
+  }
+  return {
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+    Accept: 'text/plain, text/vtt, application/x-subrip, */*',
+  };
 }

@@ -22,9 +22,17 @@ const expirySeconds = 24 * 60 * 60;
 function isAlreadyProxiedCaptionUrl(url: string): boolean {
   try {
     const u = new URL(url);
+    if (
+      u.pathname.includes("/v1/subtitles/file") &&
+      u.searchParams.has("url")
+    ) {
+      return true;
+    }
     return u.pathname.includes("/v1/proxy") && u.searchParams.has("data");
   } catch {
-    return url.includes("/v1/proxy?data=");
+    return (
+      url.includes("/v1/subtitles/file?") || url.includes("/v1/proxy?data=")
+    );
   }
 }
 
