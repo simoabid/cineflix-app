@@ -41,7 +41,8 @@ export async function scrapeOpenSubtitlesCaptions(
           display: caption.LanguageName,
           url: downloadUrl,
           type: caption.SubFormat || 'srt',
-          needsProxy: true,
+          // Browser downloads OS CDN (CORS *); user residential IP.
+          needsProxy: false,
           opensubtitles: true,
           source: 'opensubs',
         };

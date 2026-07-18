@@ -54,7 +54,8 @@ export async function scrapeWyzieCaptions(
         subtitle.format === 'srt' || subtitle.format === 'vtt'
           ? subtitle.format
           : 'srt',
-      needsProxy: true,
+      // Browser downloads CDN files (user IP); never expose keys — prefer core path B.
+      needsProxy: false,
       opensubtitles: true,
       display: subtitle.display,
       media: subtitle.media,

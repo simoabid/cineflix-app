@@ -9,8 +9,9 @@ import { useCineProStore } from '@/stores/cinepro';
 import { scrapeOpenSubtitlesCaptions } from './opensubtitles';
 import { scrapeVdrkCaptions } from './vdrk';
 import {
+  isBrowserDirectSubtitleUrl,
   isCoreProxySubtitleUrl,
-  proxySubtitleThroughCore,
+  normalizeCaptionDownloadUrl,
   stableSubtitleId,
 } from './proxyThroughCore';
 
@@ -44,20 +45,26 @@ function dedupeCaptions(captions: CaptionListItem[]): CaptionListItem[] {
 }
 
 /**
- * Ensure subtitle file URLs go through public core /v1/proxy and do NOT use
- * auth-gated SPA /api/proxy (needsProxy) — that caused red ⚠ on select.
+ * Prepare a caption URL for select + download.
+ * OpenSubtitles → raw CDN, browser-direct (user IP).
+ * Core public proxy (vdrk) → leave, no MERN auth proxy.
  */
 function ensureSelectableUrl(rawUrl: string): {
   url: string;
   needsProxy: boolean;
 } {
-  if (isCoreProxySubtitleUrl(rawUrl)) {
-    return { url: rawUrl, needsProxy: false };
+  const url = normalizeCaptionDownloadUrl(rawUrl);
+
+  if (isBrowserDirectSubtitleUrl(url)) {
+    return { url, needsProxy: false };
   }
-  return {
-    url: proxySubtitleThroughCore(rawUrl),
-    needsProxy: false,
-  };
+
+  if (isCoreProxySubtitleUrl(url)) {
+    return { url, needsProxy: false };
+  }
+
+  // Legacy external hosts that may need extension /api/proxy
+  return { url, needsProxy: true };
 }
 
 /**
@@ -103,7 +110,7 @@ function mapCoreSubtitles(
   });
 }
 
-/** OpenSubtitles / VDRK still return raw CDN URLs — same proxy treatment. */
+/** OpenSubtitles / VDRK — same normalize + needsProxy rules. */
 function remapExternalForSelect(
   captions: CaptionListItem[],
 ): CaptionListItem[] {
@@ -118,9 +125,10 @@ function remapExternalForSelect(
  *
  * Priority:
  *  1. CinePro core GET /v1/subtitles (Wyzie multi-key rotation, secret on EC2)
- *  2. OpenSubtitles (needs imdbId)
+ *  2. OpenSubtitles catalog (needs imdbId)
  *  3. VDRK public catalog
  *
+ * File downloads for OpenSubtitles happen in the browser (user IP), not on EC2.
  * Client-side Wyzie keys are intentionally NOT used (Wyzie warns against it).
  */
 export async function scrapeExternalSubtitles(
