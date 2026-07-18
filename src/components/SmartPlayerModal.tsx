@@ -1,13 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RotateCcw, ArrowRight, SkipForward } from 'lucide-react';
-import { cineproProviderIdFromSourceId } from '@/services/cinepro-adapter/playable';
+import {
+  cineproProviderIdFromSourceId,
+  findNextCachedSibling,
+} from '@/services/cinepro-adapter/playable';
 
 import { PStreamPlayer } from '@/components/player/PStreamPlayer';
 import { ScrapingOverlay } from '@/components/player/overlays/ScrapingOverlay';
 import { useScrape } from '@/hooks/useScrape';
 import { usePlayer } from '@/hooks/usePlayer';
-import { playerStatus } from '@/stores/player/slices/source';
+import { getMediaKey, playerStatus } from '@/stores/player/slices/source';
 import type { PlayerMeta } from '@/stores/player/slices/source';
 import { usePlayerStore } from '@/stores/player/store';
 import { useProgressStore, getSavedProgress } from '@/stores/progress';
@@ -143,7 +146,6 @@ export function SmartPlayerModal(): React.ReactElement | null {
   const [previousPath, setPreviousPath] = useState<string>('/');
 
   const activeSourceId = usePlayerStore((s) => s.sourceId);
-  const activeEmbedId = usePlayerStore((s) => s.embedId);
   const displayMode = usePlayerStore((s) => s.displayMode);
   const addFailedSource = usePlayerStore((s) => s.addFailedSource);
   const addFailedEmbed = usePlayerStore((s) => s.addFailedEmbed);
@@ -255,13 +257,50 @@ export function SmartPlayerModal(): React.ReactElement | null {
     clearFailedSources, clearFailedEmbeds
   ]);
 
-  const handleTryNextProvider = useCallback(() => {
-    const sid = usePlayerStore.getState().sourceId;
-    const embed = usePlayerStore.getState().embedId;
+  /** Sibling sub-server first, then next provider. */
+  const failForward = useCallback(async () => {
+    const state = usePlayerStore.getState();
+    const sid = state.sourceId;
+    const embed = state.embedId;
+    const mediaKey = getMediaKey(state.meta);
+
     if (sid && embed) addFailedEmbed(sid, embed);
     else if (sid) addFailedSource(sid);
-    void handleStartScraping();
-  }, [addFailedEmbed, addFailedSource, handleStartScraping]);
+
+    if (sid?.startsWith('cinepro-') && !embed) {
+      const failedList = mediaKey
+        ? (usePlayerStore.getState().failedSourcesPerMedia[mediaKey] ?? [])
+        : [sid];
+      const cached = useCineProStore.getState().scrapedStreams;
+      const nextId = findNextCachedSibling(sid, cached, failedList);
+      const next = nextId
+        ? cached.find((c) => c.sourceId === nextId)
+        : undefined;
+      if (next) {
+        const sourceData = convertStreamToSource({ stream: next.stream });
+        const captions = convertCaptions(next.stream.captions ?? []);
+        playMedia(
+          sourceData,
+          captions,
+          next.sourceId,
+          state.progress.time,
+          'cinepro',
+          next.providerName,
+        );
+        setPhase('playing');
+        setErrorMessage(null);
+        return;
+      }
+      const bare = cineproProviderIdFromSourceId(sid);
+      if (bare) addFailedSource(`cinepro-${bare}`);
+    }
+
+    await handleStartScraping();
+  }, [addFailedEmbed, addFailedSource, handleStartScraping, playMedia]);
+
+  const handleTryNextProvider = useCallback(() => {
+    void failForward();
+  }, [failForward]);
 
   // Handle Classic Sources Switch
   const handleClassicFallback = useCallback(() => {
@@ -311,29 +350,19 @@ export function SmartPlayerModal(): React.ReactElement | null {
     }
   }, [selectedSeason, selectedEpisode, selectedSource, displayMode, isOpen, switchToClassic]);
 
-  // Playback error: mark failed + auto-advance (resolve ≠ playback)
+  // Playback error: sub-server siblings first, then next provider
   useEffect(() => {
     if (status !== playerStatus.PLAYBACK_ERROR || phase !== 'playing') return;
     if (autoAdvanceLock.current) return;
     autoAdvanceLock.current = true;
-    if (activeSourceId && activeEmbedId) addFailedEmbed(activeSourceId, activeEmbedId);
-    else if (activeSourceId) addFailedSource(activeSourceId);
     const bare = cineproProviderIdFromSourceId(activeSourceId);
     setErrorMessage(
-      `Provider “${bare ?? activeSourceId ?? 'unknown'}” could not play (resolve success ≠ playback). Trying next…`,
+      `“${bare ?? activeSourceId ?? 'unknown'}” could not play. Trying next server…`,
     );
-    void handleStartScraping().finally(() => {
+    void failForward().finally(() => {
       autoAdvanceLock.current = false;
     });
-  }, [
-    activeEmbedId,
-    activeSourceId,
-    addFailedEmbed,
-    addFailedSource,
-    handleStartScraping,
-    phase,
-    status,
-  ]);
+  }, [activeSourceId, failForward, phase, status]);
 
   // Handle episode changes from inside the player controls
   const handleMetaChange = useCallback((newMeta: PlayerMeta) => {

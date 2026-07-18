@@ -9,7 +9,14 @@ import { CineProHealthService } from '@/services/cinepro-adapter/health';
 export type CineProConnectionStatus = 'connected' | 'disconnected' | 'checking';
 
 export interface CineProCachedStream {
+  /**
+   * Unique stream key used by the player (e.g. `cinepro-vidsrc-hls-1`).
+   * Must NOT collapse multi-server providers onto a single id.
+   */
   sourceId: string;
+  /** Bare CinePro provider id (`vidsrc`, `hexa`, …) for grouping / fail-forward. */
+  providerId: string;
+  /** Display label — often includes server, e.g. "VidSrc (Alpha)". */
   providerName: string;
   stream: Stream;
   quality: string;

@@ -8,7 +8,7 @@ import { PStreamPlayer } from '@/components/player/PStreamPlayer';
 import { ScrapingOverlay } from '@/components/player/overlays/ScrapingOverlay';
 import { useScrape } from '@/hooks/useScrape';
 import { usePlayer } from '@/hooks/usePlayer';
-import { playerStatus } from '@/stores/player/slices/source';
+import { getMediaKey, playerStatus } from '@/stores/player/slices/source';
 import type { PlayerMeta } from '@/stores/player/slices/source';
 import { usePlayerStore } from '@/stores/player/store';
 import { useProgressStore, getSavedProgress } from '@/stores/progress';
@@ -24,7 +24,10 @@ import { getProviders } from '@/backend/providers/providers';
 import { useSmartPlayer } from '@/hooks/useSmartPlayer';
 import { useCineProStore } from '@/stores/cinepro';
 import { useLenisDisable } from '@/hooks/useLenisDisable';
-import { cineproProviderIdFromSourceId } from '@/services/cinepro-adapter/playable';
+import {
+  cineproProviderIdFromSourceId,
+  findNextCachedSibling,
+} from '@/services/cinepro-adapter/playable';
 import { useOverlayRouter } from '@/hooks/useOverlayRouter';
 
 type NativePlayerPhase = 'idle' | 'scraping' | 'playing' | 'error' | 'notfound' | 'classic';
@@ -296,14 +299,59 @@ export const SmartPlayerPage: React.FC<SmartPlayerPageProps> = ({ type }) => {
     clearFailedSources, clearFailedEmbeds, type,
   ]);
 
-  /** Mark current source failed and continue waterfall to the next provider. */
-  const handleTryNextProvider = useCallback(() => {
-    const sid = usePlayerStore.getState().sourceId;
-    const embed = usePlayerStore.getState().embedId;
+  /**
+   * Fail-forward after a bad stream:
+   * 1) Mark this exact stream id failed
+   * 2) If same provider has more cached sub-servers (Bravo…), play next now
+   * 3) Else mark whole provider failed and progressive-scrape the next provider
+   */
+  const failForward = useCallback(async () => {
+    const state = usePlayerStore.getState();
+    const sid = state.sourceId;
+    const embed = state.embedId;
+    const mediaKey = getMediaKey(state.meta);
+
     if (sid && embed) addFailedEmbed(sid, embed);
     else if (sid) addFailedSource(sid);
-    void handleStartScraping({ preserveFailures: true });
-  }, [addFailedEmbed, addFailedSource, handleStartScraping]);
+
+    // Sibling advance (Alpha → Bravo) without re-scraping the provider
+    if (sid?.startsWith('cinepro-') && !embed) {
+      const failedList = mediaKey
+        ? (usePlayerStore.getState().failedSourcesPerMedia[mediaKey] ?? [])
+        : [sid];
+      const cached = useCineProStore.getState().scrapedStreams;
+      const nextId = findNextCachedSibling(sid, cached, failedList);
+      const next = nextId
+        ? cached.find((c) => c.sourceId === nextId)
+        : undefined;
+      if (next) {
+        const startTime = state.progress.time;
+        const sourceData = convertStreamToSource({ stream: next.stream });
+        const captions = convertCaptions(next.stream.captions ?? []);
+        playMedia(
+          sourceData,
+          captions,
+          next.sourceId,
+          startTime,
+          'cinepro',
+          next.providerName,
+        );
+        setPhase('playing');
+        setPlaybackErrorInfo(null);
+        return;
+      }
+      // No siblings left — skip entire provider in the waterfall
+      const bare = cineproProviderIdFromSourceId(sid);
+      if (bare) addFailedSource(`cinepro-${bare}`);
+    }
+
+    await handleStartScraping({ preserveFailures: true });
+  }, [addFailedEmbed, addFailedSource, handleStartScraping, playMedia]);
+
+  /** Mark current source failed and continue (siblings first, then next provider). */
+  const handleTryNextProvider = useCallback(() => {
+    void failForward();
+  }, [failForward]);
 
   /** Full retry still skips known failures (does not wipe them). */
   const handleRetryScan = useCallback(() => {
@@ -380,45 +428,36 @@ export const SmartPlayerPage: React.FC<SmartPlayerPageProps> = ({ type }) => {
     }
   }, [selectedSeason, selectedEpisode, selectedSource, displayMode, isOpen, switchToClassic]);
 
-  // Track playback errors: mark provider failed, then auto-continue waterfall
-  // (resolve ≠ playback). Show the error card only if the user is stuck in
-  // `error` phase (e.g. try-next exhausted → notfound, or scrape threw).
+  // Track playback errors: mark this stream failed, try next sub-server
+  // (Alpha → Bravo), else next provider. resolve ≠ playback.
   useEffect(() => {
     if (status !== playerStatus.PLAYBACK_ERROR || phase !== 'playing') return;
     if (autoAdvanceLock.current) return;
     autoAdvanceLock.current = true;
-
-    if (activeSourceId && activeEmbedId) addFailedEmbed(activeSourceId, activeEmbedId);
-    else if (activeSourceId) addFailedSource(activeSourceId);
 
     const bareId = cineproProviderIdFromSourceId(activeSourceId);
     const name =
       cineproProviderName || bareId || activeSourceId || 'unknown';
     setPlaybackErrorInfo({
       title: 'Stream playback failed',
-      message: `Provider “${name}” returned a source that could not be played (resolve success ≠ playback).`,
+      message: `“${name}” could not be played (resolve success ≠ playback). Trying the next server…`,
       detail:
         sourceOrigin === 'cinepro'
-          ? `CinePro provider id: ${bareId ?? activeSourceId}. The URL may be an embed page, expired token, or CDN block (403/410).`
+          ? `CinePro: ${bareId ?? activeSourceId} · stream ${activeSourceId}. Will try other sub-servers on this provider first, then the next provider.`
           : `Client source id: ${activeSourceId ?? 'n/a'}${activeEmbedId ? ` · embed: ${activeEmbedId}` : ''}.`,
       providerId: bareId ?? activeSourceId,
       providerName: name,
       sourceId: activeSourceId,
     });
 
-    // Fail-forward: skip this provider and try the next (preserves failure list)
-    void handleStartScraping({ preserveFailures: true }).finally(() => {
-      // Unlock after the next scrape attempt finishes so another playback
-      // error on the next provider can advance again.
+    void failForward().finally(() => {
       autoAdvanceLock.current = false;
     });
   }, [
     activeEmbedId,
     activeSourceId,
-    addFailedEmbed,
-    addFailedSource,
     cineproProviderName,
-    handleStartScraping,
+    failForward,
     phase,
     sourceOrigin,
     status,

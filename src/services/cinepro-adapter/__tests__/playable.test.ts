@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   cineproProviderIdFromSourceId,
+  findNextCachedSibling,
   isFailedCineProProvider,
+  isFailedCineProStream,
   isPlayableCineProSource,
 } from "../playable";
 import { mapCineProResultToStreamsWithMeta } from "../mapper";
@@ -82,11 +84,67 @@ describe("failure id helpers", () => {
     expect(cineproProviderIdFromSourceId("dopebox")).toBeNull();
   });
 
-  it("matches failed providers across id shapes", () => {
+  it("only marks whole provider failed for exact provider-level ids", () => {
     expect(isFailedCineProProvider("vidup", ["cinepro-vidup"])).toBe(true);
+    expect(isFailedCineProProvider("vidup", ["vidup"])).toBe(true);
+    // Sub-server failure alone must NOT skip Bravo/Charlie on the same provider
     expect(isFailedCineProProvider("vidup", ["cinepro-vidup-hls-1"])).toBe(
-      true,
+      false,
     );
     expect(isFailedCineProProvider("hexa", ["cinepro-vidup"])).toBe(false);
+  });
+
+  it("tracks failed streams and finds next sibling", () => {
+    expect(
+      isFailedCineProStream("cinepro-vidsrc-hls-1", ["cinepro-vidsrc-hls-1"]),
+    ).toBe(true);
+    expect(
+      isFailedCineProStream("cinepro-vidsrc-hls-2", ["cinepro-vidsrc-hls-1"]),
+    ).toBe(false);
+    // Whole-provider failure fails every stream
+    expect(
+      isFailedCineProStream("cinepro-vidsrc-hls-2", ["cinepro-vidsrc"]),
+    ).toBe(true);
+
+    const cached = [
+      { sourceId: "cinepro-vidsrc-hls-1", providerId: "vidsrc" },
+      { sourceId: "cinepro-vidsrc-hls-2", providerId: "vidsrc" },
+      { sourceId: "cinepro-vidsrc-hls-3", providerId: "vidsrc" },
+    ];
+    expect(
+      findNextCachedSibling("cinepro-vidsrc-hls-1", cached, [
+        "cinepro-vidsrc-hls-1",
+      ]),
+    ).toBe("cinepro-vidsrc-hls-2");
+    expect(
+      findNextCachedSibling("cinepro-vidsrc-hls-2", cached, [
+        "cinepro-vidsrc-hls-1",
+        "cinepro-vidsrc-hls-2",
+        "cinepro-vidsrc-hls-3",
+      ]),
+    ).toBeNull();
+  });
+
+  it("maps multi-server HLS into distinct stream ids (Alpha/Bravo)", () => {
+    const sources: CineProSource[] = [
+      {
+        url: "https://cdn.example.com/alpha.m3u8",
+        type: "hls",
+        quality: "Auto",
+        provider: { id: "vidsrc", name: "VidSrc (Alpha)" },
+      },
+      {
+        url: "https://cdn.example.com/bravo.m3u8",
+        type: "hls",
+        quality: "Auto",
+        provider: { id: "vidsrc", name: "VidSrc (Bravo)" },
+      },
+    ];
+    const mapped = mapCineProResultToStreamsWithMeta(sources, []);
+    expect(mapped).toHaveLength(2);
+    expect(mapped[0]!.stream.id).toBe("cinepro-vidsrc-hls-1");
+    expect(mapped[1]!.stream.id).toBe("cinepro-vidsrc-hls-2");
+    expect(mapped[0]!.providerName).toBe("VidSrc (Alpha)");
+    expect(mapped[1]!.providerName).toBe("VidSrc (Bravo)");
   });
 });

@@ -855,7 +855,9 @@
         },
         "title": "Sources",
         "unknownOption": "Unknown",
-        "findNextSource": "Find next source"
+        "findNextSource": "Find next source",
+        "cineproSectionTitle": "Server streams",
+        "localSectionTitle": "Client-side scrapers"
       },
       "subtitles": {
         "customChoice": "Drop or upload file",

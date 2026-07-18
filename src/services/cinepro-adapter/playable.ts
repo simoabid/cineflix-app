@@ -74,7 +74,12 @@ export function cineproProviderIdFromSourceId(
 }
 
 /**
- * Whether a failed-source entry matches this CinePro provider.
+ * Whether the **whole provider** should be skipped in the progressive waterfall.
+ *
+ * Only exact provider-level failures count (`vidsrc` or `cinepro-vidsrc`).
+ * A single sub-server failure (`cinepro-vidsrc-hls-1` = Alpha) must NOT skip
+ * Bravo/Charlie — those are tried via sibling advance first; only when all
+ * siblings are exhausted do we mark `cinepro-{providerId}` failed.
  */
 export function isFailedCineProProvider(
   providerId: string,
@@ -82,9 +87,43 @@ export function isFailedCineProProvider(
 ): boolean {
   const bare = providerId.replace(/^cinepro-/, "");
   return failedSourceIds.some((f) => {
-    const fb = f.startsWith("cinepro-")
-      ? cineproProviderIdFromSourceId(f)
-      : f;
-    return fb === bare || f === providerId || f === `cinepro-${bare}`;
+    if (f === bare || f === `cinepro-${bare}` || f === providerId) return true;
+    // Legacy: exact bare id only — stream suffixes are per-server failures
+    return false;
   });
+}
+
+/**
+ * Whether a specific cached stream id is in the failed list.
+ */
+export function isFailedCineProStream(
+  sourceId: string,
+  failedSourceIds: string[],
+): boolean {
+  if (failedSourceIds.includes(sourceId)) return true;
+  // If whole provider is failed, every stream under it is failed
+  const bare = cineproProviderIdFromSourceId(sourceId);
+  if (bare && isFailedCineProProvider(bare, failedSourceIds)) return true;
+  return false;
+}
+
+/**
+ * Next playable cached stream for the same provider (Alpha → Bravo → …).
+ * Skips the current id and anything already failed.
+ */
+export function findNextCachedSibling(
+  currentSourceId: string | null | undefined,
+  cached: Array<{ sourceId: string; providerId: string }>,
+  failedSourceIds: string[],
+): string | null {
+  if (!currentSourceId) return null;
+  const providerId = cineproProviderIdFromSourceId(currentSourceId);
+  if (!providerId) return null;
+  const siblings = cached.filter(
+    (s) =>
+      s.providerId === providerId &&
+      s.sourceId !== currentSourceId &&
+      !isFailedCineProStream(s.sourceId, failedSourceIds),
+  );
+  return siblings[0]?.sourceId ?? null;
 }

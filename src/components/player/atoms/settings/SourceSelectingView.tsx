@@ -295,6 +295,11 @@ export function SourceSelectionView({
     return sources.filter((s) => s.name.toLowerCase().includes(q));
   }, [sources, searchQuery]);
 
+  /** Which multi-server providers are expanded in the menu */
+  const [expandedProviders, setExpandedProviders] = useState<
+    Record<string, boolean>
+  >({});
+
   /** Catalog of CinePro providers (priority order) for on-demand scrape. */
   const cineproCatalog = useMemo(() => {
     if (!isCineProEnabled) return [];
@@ -305,11 +310,19 @@ export function SourceSelectionView({
     );
     return ids.map((id) => {
       const info = enabled.find((p) => p.id === id);
-      const cached = cineproStreams.find((s) => s.sourceId === `cinepro-${id}`);
+      const children = cineproStreams.filter((s) => s.providerId === id);
+      // Fallback for legacy cache entries that only had sourceId
+      const legacy = cineproStreams.filter(
+        (s) =>
+          !s.providerId &&
+          (s.sourceId === `cinepro-${id}` ||
+            s.sourceId.startsWith(`cinepro-${id}-`)),
+      );
+      const streams = children.length > 0 ? children : legacy;
       return {
         id,
-        name: info?.name ?? cached?.providerName ?? id,
-        cached: cached ?? null,
+        name: info?.name ?? streams[0]?.providerName?.replace(/\s*\(.*\)$/, "") ?? id,
+        streams,
       };
     });
   }, [isCineProEnabled, cineproProviders, disabledCineProIds, cineproStreams]);
@@ -317,7 +330,11 @@ export function SourceSelectionView({
   const filteredCineProCatalog = useMemo(() => {
     if (!searchQuery.trim()) return cineproCatalog;
     const q = searchQuery.toLowerCase();
-    return cineproCatalog.filter((s) => s.name.toLowerCase().includes(q));
+    return cineproCatalog.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.streams.some((st) => st.providerName.toLowerCase().includes(q)),
+    );
   }, [cineproCatalog, searchQuery]);
 
   const showCinePro = isCineProEnabled && cineproCatalog.length > 0;
@@ -337,16 +354,34 @@ export function SourceSelectionView({
     router.close();
   };
 
-  /** On-demand: scrape one CinePro provider only if not already cached. */
+  /** Short label for a sub-server: "VidSrc (Alpha)" → "Alpha"; else quality. */
+  const subServerLabel = (cached: CineProCachedStream, index: number) => {
+    const m = cached.providerName.match(/\(([^)]+)\)\s*$/);
+    if (m?.[1]) return m[1];
+    if (cached.quality && cached.quality.toLowerCase() !== "auto") {
+      return cached.quality;
+    }
+    return `Server ${index + 1}`;
+  };
+
+  /**
+   * On-demand: scrape one CinePro provider → cache ALL sub-servers → play first.
+   * If already scraped, toggle expand (multi) or re-select first stream (single).
+   */
   const handleSelectCineProProvider = async (
     providerId: string,
     name: string,
   ) => {
-    const existing = cineproStreams.find(
-      (s) => s.sourceId === `cinepro-${providerId}`,
-    );
-    if (existing) {
-      handleSelectCineProStream(existing);
+    const existing = cineproStreams.filter((s) => s.providerId === providerId);
+    if (existing.length > 0) {
+      if (existing.length > 1) {
+        setExpandedProviders((prev) => ({
+          ...prev,
+          [providerId]: !prev[providerId],
+        }));
+        return;
+      }
+      handleSelectCineProStream(existing[0]!);
       return;
     }
     if (!meta) return;
@@ -367,18 +402,21 @@ export function SourceSelectionView({
         res.subtitles,
       );
       if (!mapped.length) return;
-      const best = mapped[0];
-      const cached: CineProCachedStream = {
-        sourceId: `cinepro-${best.providerId}`,
-        providerName: best.providerName || name,
-        stream: best.stream,
-        quality: best.quality,
-      };
+      const cachedAll: CineProCachedStream[] = mapped.map((m) => ({
+        sourceId: m.stream.id,
+        providerId: m.providerId,
+        providerName: m.providerName || name,
+        stream: m.stream,
+        quality: m.quality,
+      }));
       setCineProStreams([
-        cached,
-        ...cineproStreams.filter((s) => s.sourceId !== cached.sourceId),
+        ...cachedAll,
+        ...cineproStreams.filter((s) => s.providerId !== providerId),
       ]);
-      handleSelectCineProStream(cached);
+      if (cachedAll.length > 1) {
+        setExpandedProviders((prev) => ({ ...prev, [providerId]: true }));
+      }
+      handleSelectCineProStream(cachedAll[0]!);
     } finally {
       setCineproLoadingId(null);
     }
@@ -466,43 +504,81 @@ export function SourceSelectionView({
                     </div>
                   ) : (
                     filteredCineProCatalog.map((entry) => {
-                      const c = entry.cached;
-                      const qVal = c ? mapQuality(c.quality) : "unknown";
+                      const streams = entry.streams;
+                      const hasStreams = streams.length > 0;
+                      const multi = streams.length > 1;
+                      const expanded =
+                        multi &&
+                        (expandedProviders[entry.id] ||
+                          streams.some((s) => s.sourceId === currentSourceId));
+                      const bestQ = hasStreams
+                        ? mapQuality(streams[0]!.quality)
+                        : "unknown";
                       const qualityLabel =
-                        qVal === "4k"
+                        bestQ === "4k"
                           ? "4K"
-                          : qVal !== "unknown"
-                            ? qVal + "p"
+                          : bestQ !== "unknown"
+                            ? bestQ + "p"
                             : "";
                       const loading = cineproLoadingId === entry.id;
+                      const selected =
+                        hasStreams &&
+                        streams.some((s) => s.sourceId === currentSourceId);
                       return (
-                        <SelectableLink
-                          key={entry.id}
-                          loading={loading}
-                          onClick={() =>
-                            void handleSelectCineProProvider(
-                              entry.id,
-                              entry.name,
-                            )
-                          }
-                          selected={
-                            c
-                              ? c.sourceId === currentSourceId
-                              : `cinepro-${entry.id}` === currentSourceId
-                          }
-                          rightSide={
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border text-purple-300 bg-purple-300/10 border-purple-300/30">
-                                {c ? "ready" : "tap to load"}
-                              </span>
-                              {qualityLabel && (
-                                <QualityBadge quality={qualityLabel} />
-                              )}
-                            </div>
-                          }
-                        >
-                          {entry.name}
-                        </SelectableLink>
+                        <div key={entry.id} className="flex flex-col">
+                          <SelectableLink
+                            loading={loading}
+                            onClick={() =>
+                              void handleSelectCineProProvider(
+                                entry.id,
+                                entry.name,
+                              )
+                            }
+                            selected={selected && !multi}
+                            rightSide={
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border text-purple-300 bg-purple-300/10 border-purple-300/30">
+                                  {!hasStreams
+                                    ? "tap to load"
+                                    : multi
+                                      ? `${streams.length} servers`
+                                      : "ready"}
+                                </span>
+                                {qualityLabel && (
+                                  <QualityBadge quality={qualityLabel} />
+                                )}
+                              </div>
+                            }
+                          >
+                            {entry.name}
+                          </SelectableLink>
+                          {expanded &&
+                            streams.map((st, idx) => {
+                              const sq = mapQuality(st.quality);
+                              const sqLabel =
+                                sq === "4k"
+                                  ? "4K"
+                                  : sq !== "unknown"
+                                    ? sq + "p"
+                                    : "";
+                              return (
+                                <SelectableLink
+                                  key={st.sourceId}
+                                  onClick={() => handleSelectCineProStream(st)}
+                                  selected={st.sourceId === currentSourceId}
+                                  rightSide={
+                                    sqLabel ? (
+                                      <QualityBadge quality={sqLabel} />
+                                    ) : undefined
+                                  }
+                                >
+                                  <span className="pl-3 text-sm opacity-90">
+                                    {subServerLabel(st, idx)}
+                                  </span>
+                                </SelectableLink>
+                              );
+                            })}
+                        </div>
                       );
                     })
                   )}

@@ -444,22 +444,33 @@ export function useScrape(): UseScrapeReturn {
               return (qualityWeight[qB] ?? 0) - (qualityWeight[qA] ?? 0);
             });
 
+            // One cache entry per sub-server (Alpha/Bravo/…) — unique stream.id
             const cached: CineProCachedStream[] = sorted.map((m) => ({
-              sourceId: `cinepro-${m.providerId}`,
+              sourceId: m.stream.id,
+              providerId: m.providerId,
               providerName: m.providerName,
               stream: m.stream,
               quality: m.quality,
             }));
 
-            // Merge into store (keep prior on-demand results)
+            // Merge: replace prior entries for this provider, keep other providers
             const prevCached = useCineProStore.getState().scrapedStreams ?? [];
             const merged = [
               ...cached,
               ...prevCached.filter(
-                (p) => !cached.some((c) => c.sourceId === p.sourceId),
+                (p) =>
+                  p.providerId !== providerId &&
+                  !cached.some((c) => c.sourceId === p.sourceId),
               ),
             ];
             useCineProStore.getState().setScrapedStreams(merged);
+
+            // Prefer first sub-server that is not already known-failed
+            const streamFailed =
+              usePlayerStore.getState().failedSourcesPerMedia[mediaKey] ?? [];
+            const playableCached =
+              cached.find((c) => !streamFailed.includes(c.sourceId)) ??
+              cached[0];
 
             setSources((prev) => {
               const updated = { ...prev };
@@ -468,6 +479,10 @@ export function useScrape(): UseScrapeReturn {
                 id: segmentId,
                 status: "success",
                 percentage: 100,
+                reason:
+                  cached.length > 1
+                    ? `${cached.length} servers`
+                    : undefined,
               };
               // Mark remaining waiting slots as skipped (not scraped)
               if (!onDemand) {
@@ -499,8 +514,8 @@ export function useScrape(): UseScrapeReturn {
             });
 
             return {
-              sourceId: cached[0].sourceId,
-              stream: cached[0].stream,
+              sourceId: playableCached.sourceId,
+              stream: playableCached.stream,
             } satisfies RunOutput;
           });
 
