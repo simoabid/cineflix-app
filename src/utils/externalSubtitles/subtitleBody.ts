@@ -1,21 +1,21 @@
 /**
- * Pure validators for subtitle download bodies (browser Path B).
+ * Validate subtitle download bodies before converting to SRT.
  */
 
 export function isBotChallengeHtml(text: string): boolean {
   const t = text.slice(0, 8000).toLowerCase();
   return (
-    t.includes('anubis') ||
-    t.includes('just a moment') ||
-    t.includes('making sure you') ||
-    t.includes('cf-challenge') ||
-    t.includes('captcha') ||
-    t.includes('_cf_chl') ||
-    (t.includes('<!doctype html') && t.includes('challenge'))
+    t.includes("anubis") ||
+    t.includes("just a moment") ||
+    t.includes("making sure you") ||
+    t.includes("cf-challenge") ||
+    t.includes("captcha") ||
+    t.includes("_cf_chl") ||
+    (t.includes("<!doctype html") && t.includes("challenge"))
   );
 }
 
-/** OpenSubtitles soft-block for datacenter / unauthenticated IPs. */
+/** OpenSubtitles soft-block (datacenter IP / unauthenticated). */
 export function isOpenSubtitlesLoginWall(text: string): boolean {
   const t = text.slice(0, 4000);
   return (
@@ -31,9 +31,11 @@ export function isInvalidSubtitleBody(text: string): boolean {
   if (!trimmed) return true;
   if (isBotChallengeHtml(trimmed)) return true;
   if (isOpenSubtitlesLoginWall(trimmed)) return true;
-  if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) return true;
-  if (trimmed.startsWith('{') && !/^\{\d+\}/.test(trimmed)) {
-    // JSON error object, not microDVD
+  if (trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html")) {
+    return true;
+  }
+  // JSON error object (not microDVD {frame}{frame})
+  if (trimmed.startsWith("{") && !/^\{\d+\}/.test(trimmed)) {
     try {
       JSON.parse(trimmed.slice(0, 500));
       return true;
@@ -41,18 +43,6 @@ export function isInvalidSubtitleBody(text: string): boolean {
       /* not JSON */
     }
   }
-  if (trimmed.startsWith('/v1/proxy?data=')) return true;
-  return false;
-}
-
-export function looksLikeSubtitle(text: string): boolean {
-  if (isInvalidSubtitleBody(text)) return false;
-  const t = text.trim();
-  if (/^WEBVTT/i.test(t)) return true;
-  if (/\d{1,2}:\d{2}:\d{2}[.,]\d{2,3}\s*-->\s*\d{1,2}:\d{2}:\d{2}/.test(t)) {
-    return !isOpenSubtitlesLoginWall(t);
-  }
-  if (/^\{\d+\}\{\d+\}/m.test(t)) return true;
-  if (/\[Script Info\]/i.test(t) || /Dialogue:/i.test(t)) return true;
+  if (trimmed.startsWith("/v1/proxy?data=")) return true;
   return false;
 }

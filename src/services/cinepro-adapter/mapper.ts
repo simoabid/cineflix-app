@@ -1,6 +1,10 @@
 import { ScrapeMedia } from '../../lib/providers/engine/entrypoint/utils/media';
 import { Stream, Qualities, Caption } from '../../lib/providers/engine';
 import { labelToLanguageCode } from '../../lib/providers/engine/providers/captions';
+import {
+  captionNeedsProxy,
+  normalizeCaptionDownloadUrl,
+} from '@/utils/externalSubtitles/captionUrls';
 import { CineProSource, CineProSubtitle, CineProScrapeRequest } from './types';
 import { isPlayableCineProSource } from './playable';
 
@@ -99,11 +103,13 @@ export function mapSubtitleToCaption(
   const langCode =
     labelToLanguageCode(subtitle.label) ||
     subtitle.label.toLowerCase().slice(0, 2);
+  const url = normalizeCaptionDownloadUrl(subtitle.url);
   return {
     id: `cinepro-sub-${langCode}-${index}-${format}`,
     type: engineType,
-    url: subtitle.url,
-    hasCorsRestrictions: true,
+    url,
+    // OpenSubtitles / public core proxy: browser can fetch; others need proxy.
+    hasCorsRestrictions: captionNeedsProxy(url),
     language: langCode,
     display: subtitle.label,
   };

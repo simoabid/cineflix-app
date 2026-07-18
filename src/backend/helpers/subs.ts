@@ -5,10 +5,9 @@ import { convertSubtitlesToSrt } from "@/components/player/utils/captions";
 import { CaptionListItem } from "@/stores/player/slices/source";
 import { SimpleCache } from "@/utils/cache";
 import {
-  isBrowserDirectSubtitleUrl,
-  isCoreProxySubtitleUrl,
+  canBrowserFetchCaption,
   normalizeCaptionDownloadUrl,
-} from "@/utils/externalSubtitles/proxyThroughCore";
+} from "@/utils/externalSubtitles/captionUrls";
 import {
   isInvalidSubtitleBody,
   isOpenSubtitlesLoginWall,
@@ -59,9 +58,7 @@ async function fetchCaptionTextDirect(url: string): Promise<string> {
 }
 
 function assertValidCaptionBody(data: string): void {
-  if (!data.trim()) {
-    throw new Error("Subtitle file was empty");
-  }
+  if (!data.trim()) throw new Error("Subtitle file was empty");
   if (isOpenSubtitlesLoginWall(data)) {
     throw new Error(
       "Subtitle CDN blocked this network. Try another track or disable VPN.",
@@ -75,51 +72,39 @@ function assertValidCaptionBody(data: string): void {
 }
 
 /**
- * Always returns SRT.
- *
- * Path B: OpenSubtitles CDN URLs are fetched in the browser (user IP).
- * Core /v1/subtitles/file is unwrapped for OS so we never rely on EC2 egress.
- * Legacy needsProxy still uses extension or auth-gated /api/proxy.
+ * Download a caption track and return SRT text.
+ * OpenSubtitles / public core proxy: browser fetch (user IP).
+ * CORS-restricted hosts: extension or MERN /api/proxy.
  */
 export async function downloadCaption(
   caption: CaptionListItem,
 ): Promise<string> {
-  // Prefer cache by normalized URL so old wrapped + new raw share cache
   const downloadUrl = normalizeCaptionDownloadUrl(caption.url);
-  const cached = downloadCache.get(downloadUrl) ?? downloadCache.get(caption.url);
+  const cached =
+    downloadCache.get(downloadUrl) ?? downloadCache.get(caption.url);
   if (cached) return cached;
 
   let data: string | undefined;
 
-  const browserDirect =
-    isBrowserDirectSubtitleUrl(downloadUrl) ||
-    isCoreProxySubtitleUrl(downloadUrl) ||
-    !caption.needsProxy;
-
-  if (browserDirect) {
+  if (canBrowserFetchCaption(downloadUrl) || !caption.needsProxy) {
     data = await fetchCaptionTextDirect(downloadUrl);
-  } else if (caption.needsProxy) {
-    if (isExtensionActiveCached()) {
-      const extensionResponse = await sendExtensionRequest({
-        url: downloadUrl,
-        method: "GET",
-      });
-      if (
-        !extensionResponse?.success ||
-        typeof extensionResponse.response.body !== "string"
-      ) {
-        throw new Error("failed to get caption data from extension");
-      }
-
-      data = extensionResponse.response.body;
-    } else {
-      data = await proxiedFetch<string>(downloadUrl, {
-        responseType: "text",
-        headers: {
-          "Accept-Charset": "utf-8",
-        },
-      });
+  } else if (isExtensionActiveCached()) {
+    const extensionResponse = await sendExtensionRequest({
+      url: downloadUrl,
+      method: "GET",
+    });
+    if (
+      !extensionResponse?.success ||
+      typeof extensionResponse.response.body !== "string"
+    ) {
+      throw new Error("failed to get caption data from extension");
     }
+    data = extensionResponse.response.body;
+  } else {
+    data = await proxiedFetch<string>(downloadUrl, {
+      responseType: "text",
+      headers: { "Accept-Charset": "utf-8" },
+    });
   }
 
   if (!data) throw new Error("failed to get caption data");
@@ -133,14 +118,8 @@ export async function downloadCaption(
   return output;
 }
 
-/**
- * Downloads the WebVTT content. No different than a simple
- * get request with a cache.
- */
 export async function downloadWebVTT(url: string): Promise<string> {
   const cached = downloadCache.get(url);
   if (cached) return cached;
-
-  const data = await fetch(url).then((v) => v.text());
-  return data;
+  return fetch(url).then((v) => v.text());
 }

@@ -6,16 +6,19 @@ import { fetchCineProSubtitles } from '@/services/cinepro-adapter/subtitles';
 import { labelToLanguageCode } from '@/lib/providers';
 import { useCineProStore } from '@/stores/cinepro';
 
-import { scrapeOpenSubtitlesCaptions } from './opensubtitles';
-import { scrapeVdrkCaptions } from './vdrk';
 import {
-  isBrowserDirectSubtitleUrl,
-  isCoreProxySubtitleUrl,
+  captionNeedsProxy,
   normalizeCaptionDownloadUrl,
   stableSubtitleId,
-} from './proxyThroughCore';
+} from './captionUrls';
+import { scrapeOpenSubtitlesCaptions } from './opensubtitles';
+import { scrapeVdrkCaptions } from './vdrk';
 
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  fallback: T,
+): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<T>((resolve) => {
     timeoutId = setTimeout(() => resolve(fallback), timeoutMs);
@@ -44,32 +47,14 @@ function dedupeCaptions(captions: CaptionListItem[]): CaptionListItem[] {
   });
 }
 
-/**
- * Prepare a caption URL for select + download.
- * OpenSubtitles → raw CDN, browser-direct (user IP).
- * Core public proxy (vdrk) → leave, no MERN auth proxy.
- */
-function ensureSelectableUrl(rawUrl: string): {
+function prepareCaptionUrl(rawUrl: string): {
   url: string;
   needsProxy: boolean;
 } {
   const url = normalizeCaptionDownloadUrl(rawUrl);
-
-  if (isBrowserDirectSubtitleUrl(url)) {
-    return { url, needsProxy: false };
-  }
-
-  if (isCoreProxySubtitleUrl(url)) {
-    return { url, needsProxy: false };
-  }
-
-  // Legacy external hosts that may need extension /api/proxy
-  return { url, needsProxy: true };
+  return { url, needsProxy: captionNeedsProxy(url) };
 }
 
-/**
- * Map CinePro /v1/subtitles rows into player CaptionListItem (external path B).
- */
 function mapCoreSubtitles(
   subs: Array<{
     url: string;
@@ -86,14 +71,16 @@ function mapCoreSubtitles(
     const fmt = (sub.format || 'srt').toLowerCase();
     const type =
       fmt === 'vtt' || fmt === 'srt' || fmt === 'ass' || fmt === 'ssa'
-        ? (fmt === 'vtt' ? 'vtt' : 'srt')
+        ? fmt === 'vtt'
+          ? 'vtt'
+          : 'srt'
         : 'srt';
     const language =
       labelToLanguageCode(sub.label) ||
       (sub.language ? labelToLanguageCode(sub.language) : null) ||
       sub.language?.slice(0, 2) ||
       'unknown';
-    const { url, needsProxy } = ensureSelectableUrl(sub.url);
+    const { url, needsProxy } = prepareCaptionUrl(sub.url);
     return {
       id: stableSubtitleId('core-wyzie', language, index, url),
       language,
@@ -110,33 +97,27 @@ function mapCoreSubtitles(
   });
 }
 
-/** OpenSubtitles / VDRK — same normalize + needsProxy rules. */
-function remapExternalForSelect(
-  captions: CaptionListItem[],
-): CaptionListItem[] {
+function remapForSelect(captions: CaptionListItem[]): CaptionListItem[] {
   return captions.map((c) => {
-    const { url, needsProxy } = ensureSelectableUrl(c.url);
+    const { url, needsProxy } = prepareCaptionUrl(c.url);
     return { ...c, url, needsProxy };
   });
 }
 
 /**
- * Path B: load external subtitles independent of which stream provider won.
+ * Path B external captions (independent of stream provider).
  *
- * Priority:
- *  1. CinePro core GET /v1/subtitles (Wyzie multi-key rotation, secret on EC2)
- *  2. OpenSubtitles catalog (needs imdbId)
- *  3. VDRK public catalog
+ * 1. Core GET /v1/subtitles (Wyzie keys on EC2)
+ * 2. OpenSubtitles catalog (imdbId)
+ * 3. VDRK public catalog
  *
- * File downloads for OpenSubtitles happen in the browser (user IP), not on EC2.
- * Client-side Wyzie keys are intentionally NOT used (Wyzie warns against it).
+ * OpenSubtitles files download in the browser (user IP).
  */
 export async function scrapeExternalSubtitles(
   meta: PlayerMeta,
 ): Promise<CaptionListItem[]> {
   const imdbId = meta.imdbId;
   const tmdbId = meta.tmdbId;
-
   if (!imdbId && !tmdbId) return [];
 
   const season = meta.season?.number;
@@ -163,14 +144,14 @@ export async function scrapeExternalSubtitles(
     imdbId
       ? withTimeout(
           scrapeOpenSubtitlesCaptions(imdbId, season, episode).then(
-            remapExternalForSelect,
+            remapForSelect,
           ),
           10_000,
           [],
         )
       : Promise.resolve([]),
     withTimeout(
-      scrapeVdrkCaptions(tmdbId, season, episode).then(remapExternalForSelect),
+      scrapeVdrkCaptions(tmdbId, season, episode).then(remapForSelect),
       10_000,
       [],
     ),
@@ -184,5 +165,4 @@ export async function scrapeExternalSubtitles(
 }
 
 export { scrapeOpenSubtitlesCaptions } from './opensubtitles';
-// Client Wyzie kept for optional direct use / tests — prefer core path B.
 export { scrapeWyzieCaptions } from './wyzie';

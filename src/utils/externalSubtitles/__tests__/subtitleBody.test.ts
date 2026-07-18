@@ -3,17 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   isInvalidSubtitleBody,
   isOpenSubtitlesLoginWall,
-  looksLikeSubtitle,
 } from "../subtitleBody";
 
 describe("subtitleBody", () => {
   it("accepts real SRT", () => {
     expect(
-      looksLikeSubtitle("1\n00:00:05,866 --> 00:00:30,866\nHello\n"),
-    ).toBe(true);
-    expect(isInvalidSubtitleBody("1\n00:00:05,866 --> 00:00:30,866\nHello\n")).toBe(
-      false,
-    );
+      isInvalidSubtitleBody("1\n00:00:05,866 --> 00:00:30,866\nHello\n"),
+    ).toBe(false);
   });
 
   it("rejects login-wall fake SRT", () => {
@@ -24,12 +20,11 @@ subtitles service you need to Log In
 `;
     expect(isOpenSubtitlesLoginWall(wall)).toBe(true);
     expect(isInvalidSubtitleBody(wall)).toBe(true);
-    expect(looksLikeSubtitle(wall)).toBe(false);
   });
 
   it("rejects CF challenge HTML", () => {
     const html =
-      '<!DOCTYPE html><html><title>Just a moment...</title><body>challenge</body></html>';
+      "<!DOCTYPE html><html><title>Just a moment...</title><body>challenge</body></html>";
     expect(isInvalidSubtitleBody(html)).toBe(true);
   });
 });

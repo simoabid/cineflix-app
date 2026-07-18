@@ -1,9 +1,7 @@
 /**
- * Direct browser Wyzie client (legacy / optional).
- *
- * Prefer `fetchCineProSubtitles` → core GET /v1/subtitles so API keys never
- * ship in the SPA. This module only runs if an operator explicitly sets
- * `VITE_WYZIE_API_KEY` (discouraged; free keys get burned when extracted).
+ * Optional direct browser Wyzie client.
+ * Prefer core GET /v1/subtitles so API keys never ship in the SPA.
+ * Only runs if VITE_WYZIE_API_KEY is set (discouraged).
  */
 
 import { type SubtitleData, configure, searchSubtitles } from 'wyzie-lib';
@@ -21,7 +19,6 @@ export async function scrapeWyzieCaptions(
   season?: number,
   episode?: number,
 ): Promise<CaptionListItem[]> {
-  // No client key → skip (core path B owns Wyzie).
   if (!clientKey) return [];
 
   try {
@@ -44,7 +41,9 @@ export async function scrapeWyzieCaptions(
       searchParams.episode = episode;
     }
 
-    const subtitles: SubtitleData[] = await searchSubtitles(searchParams as never);
+    const subtitles: SubtitleData[] = await searchSubtitles(
+      searchParams as never,
+    );
 
     return subtitles.map((subtitle) => ({
       id: subtitle.id,
@@ -54,7 +53,6 @@ export async function scrapeWyzieCaptions(
         subtitle.format === 'srt' || subtitle.format === 'vtt'
           ? subtitle.format
           : 'srt',
-      // Browser downloads CDN files (user IP); never expose keys — prefer core path B.
       needsProxy: false,
       opensubtitles: true,
       display: subtitle.display,
