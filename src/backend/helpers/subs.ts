@@ -33,11 +33,17 @@ async function fetchCaptionTextDirect(url: string): Promise<string> {
     method: "GET",
     headers: {
       Accept: "text/plain, text/vtt, application/x-subrip, */*",
-      "Accept-Charset": "utf-8",
+      "Accept-Charset": "utf-8, iso-8859-1, *",
     },
   });
   if (!response.ok) {
-    throw new Error(`Subtitle download failed (HTTP ${response.status})`);
+    // OpenSubtitles often 403s AWS IPs — core must use residential PROXY_URL
+    throw new Error(
+      `Subtitle download failed (HTTP ${response.status}). ` +
+        (response.status === 403 || response.status === 502
+          ? "Subtitle CDN blocked the server — ensure PROXY_URL is set on core for OpenSubtitles."
+          : "Try another track."),
+    );
   }
   const contentType = response.headers.get("content-type") || "";
   // Reject JSON error bodies from misrouted proxies
@@ -47,12 +53,20 @@ async function fetchCaptionTextDirect(url: string): Promise<string> {
       `Subtitle download returned JSON instead of a caption file: ${body.slice(0, 120)}`,
     );
   }
-  const charset = contentType.includes("charset=")
-    ? contentType.split("charset=")[1].toLowerCase().split(";")[0]!.trim()
-    : "utf-8";
   const buffer = await response.arrayBuffer();
-  const decoder = new TextDecoder(charset || "utf-8");
-  return decoder.decode(buffer);
+  // Prefer utf-8; fall back to latin1 for older OpenSubtitles files
+  let text = new TextDecoder("utf-8").decode(buffer);
+  if (text.includes("\uFFFD") && !text.includes("-->")) {
+    text = new TextDecoder("iso-8859-1").decode(buffer);
+  } else if (text.includes("\uFFFD")) {
+    // Mixed: try windows-1256 for Arabic SRT if many replacement chars
+    try {
+      text = new TextDecoder("windows-1256").decode(buffer);
+    } catch {
+      /* keep utf-8 */
+    }
+  }
+  return text;
 }
 
 /**
@@ -99,15 +113,16 @@ export async function downloadCaption(
   if (!data) throw new Error("failed to get caption data");
   if (!data.trim()) throw new Error("Subtitle file was empty");
 
-  // HTML error pages from CDNs/proxies fail conversion with a clearer message
+  // HTML / rewritten-manifest garbage from blocked OpenSubtitles on EC2
   const trimmed = data.trim();
   if (
     trimmed.startsWith("<!DOCTYPE") ||
     trimmed.startsWith("<html") ||
-    trimmed.startsWith("{")
+    trimmed.startsWith("{") ||
+    trimmed.startsWith("/v1/proxy?data=")
   ) {
     throw new Error(
-      "Subtitle download did not return a caption file (blocked or wrong proxy)",
+      "Subtitle download did not return a caption file (CDN blocked or wrong proxy). Check core PROXY_URL for OpenSubtitles.",
     );
   }
 

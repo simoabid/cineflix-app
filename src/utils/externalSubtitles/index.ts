@@ -11,6 +11,7 @@ import { scrapeVdrkCaptions } from './vdrk';
 import {
   isCoreProxySubtitleUrl,
   proxySubtitleThroughCore,
+  stableSubtitleId,
 } from './proxyThroughCore';
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
@@ -87,7 +88,7 @@ function mapCoreSubtitles(
       'unknown';
     const { url, needsProxy } = ensureSelectableUrl(sub.url);
     return {
-      id: `core-wyzie-${language}-${index}-${url.slice(-24)}`,
+      id: stableSubtitleId('core-wyzie', language, index, url),
       language,
       url,
       type,
