@@ -1,8 +1,19 @@
+/**
+ * Direct browser Wyzie client (legacy / optional).
+ *
+ * Prefer `fetchCineProSubtitles` → core GET /v1/subtitles so API keys never
+ * ship in the SPA. This module only runs if an operator explicitly sets
+ * `VITE_WYZIE_API_KEY` (discouraged; free keys get burned when extracted).
+ */
+
 import { type SubtitleData, configure, searchSubtitles } from 'wyzie-lib';
 
 import type { CaptionListItem } from '@/stores/player/slices/source';
 
-configure({ key: 'wyzie-eeba2b82f8668e42da7534acaa088c99' });
+const clientKey = import.meta.env?.VITE_WYZIE_API_KEY as string | undefined;
+if (clientKey) {
+  configure({ key: clientKey });
+}
 
 export async function scrapeWyzieCaptions(
   tmdbId: string | number,
@@ -10,8 +21,11 @@ export async function scrapeWyzieCaptions(
   season?: number,
   episode?: number,
 ): Promise<CaptionListItem[]> {
+  // No client key → skip (core path B owns Wyzie).
+  if (!clientKey) return [];
+
   try {
-    const searchParams: any = {
+    const searchParams: Record<string, unknown> = {
       encoding: 'utf-8',
       source: 'all',
     };
@@ -30,7 +44,7 @@ export async function scrapeWyzieCaptions(
       searchParams.episode = episode;
     }
 
-    const subtitles: SubtitleData[] = await searchSubtitles(searchParams);
+    const subtitles: SubtitleData[] = await searchSubtitles(searchParams as never);
 
     return subtitles.map((subtitle) => ({
       id: subtitle.id,

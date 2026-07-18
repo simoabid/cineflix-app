@@ -729,7 +729,26 @@ export function CaptionsView({
 
           <div className="h-1" />
 
-          {/* No subtitles available message */}
+          {/* Empty provider-bundled, still loading external (path B) */}
+          {isLoadingExternalSubtitles && sourceCaptions.length === 0 && (
+            <div className="p-3 mb-2 rounded-xl bg-video-context-light bg-opacity-10 text-center">
+              <div className="text-video-context-type-secondary text-sm">
+                {t("player.menus.subtitles.emptySource") ??
+                  "This stream did not include captions. Checking external catalogs…"}
+              </div>
+            </div>
+          )}
+
+          {/* Loading external subtitles */}
+          {isLoadingExternalSubtitles && sourceCaptions.length > 0 && (
+            <div className="p-3 mb-2 rounded-xl bg-video-context-light bg-opacity-10 text-center">
+              <div className="text-video-context-type-secondary text-sm">
+                {t("player.menus.subtitles.loadingExternal")}
+              </div>
+            </div>
+          )}
+
+          {/* Truly empty after external scrape finishes */}
           {!isLoadingExternalSubtitles &&
             sourceCaptions.length === 0 &&
             externalCaptions.length === 0 && (
@@ -737,17 +756,30 @@ export function CaptionsView({
                 <div className="text-video-context-type-secondary">
                   {t("player.menus.subtitles.empty")}
                 </div>
+                <div className="text-video-context-type-secondary text-xs mt-2 opacity-70">
+                  {t("player.menus.subtitles.emptyExternalHint") ??
+                    "Subtitles often come from external catalogs, not the video server."}
+                </div>
               </div>
             )}
 
-          {/* Loading external subtitles */}
-          {isLoadingExternalSubtitles && (
-            <div className="p-4 rounded-xl bg-video-context-light bg-opacity-10 text-center">
-              <div className="text-video-context-type-secondary">
-                {t("player.menus.subtitles.loadingExternal")}
+          {/* Section labels when both source + external exist */}
+          {!isLoadingExternalSubtitles &&
+            sourceCaptions.length > 0 &&
+            externalCaptions.length > 0 && (
+              <div className="px-1 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-video-context-type-secondary opacity-60">
+                {t("player.menus.subtitles.SourceChoice")}
+                {" · "}
+                {t("player.menus.subtitles.OpenSubtitlesChoice")}
               </div>
-            </div>
-          )}
+            )}
+          {!isLoadingExternalSubtitles &&
+            sourceCaptions.length === 0 &&
+            externalCaptions.length > 0 && (
+              <div className="px-1 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-video-context-type-secondary opacity-60">
+                {t("player.menus.subtitles.OpenSubtitlesChoice")}
+              </div>
+            )}
 
           {/* Language selection */}
           {groupedCaptions.length > 0 &&

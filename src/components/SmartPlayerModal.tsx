@@ -29,6 +29,12 @@ import { useLenisToggle } from '@/hooks/useLenisToggle';
 
 type NativePlayerPhase = 'idle' | 'scraping' | 'playing' | 'error' | 'notfound' | 'classic';
 
+function resolveImdbId(content: Movie | TVShow): string | undefined {
+  if ('imdb_id' in content && content.imdb_id) return content.imdb_id;
+  const ext = (content as TVShow).external_ids?.imdb_id;
+  return ext || undefined;
+}
+
 /**
  * Builds PlayerMeta from CINEFLIX content data.
  */
@@ -46,6 +52,7 @@ function buildPlayerMeta(
     type: contentType === 'movie' ? 'movie' : 'show',
     title,
     tmdbId: String(content.id),
+    imdbId: resolveImdbId(content),
     releaseYear,
     poster: content.poster_path
       ? `https://image.tmdb.org/t/p/w342${content.poster_path}`
@@ -85,7 +92,7 @@ function buildScrapeMedia(
       title: movie.title,
       releaseYear: new Date(movie.release_date).getFullYear(),
       tmdbId: String(movie.id),
-      imdbId: movie.imdb_id,
+      imdbId: resolveImdbId(movie),
     };
   }
   const tvShow = content as TVShow;
@@ -94,6 +101,7 @@ function buildScrapeMedia(
     title: tvShow.name,
     releaseYear: new Date(tvShow.first_air_date).getFullYear(),
     tmdbId: String(tvShow.id),
+    imdbId: resolveImdbId(tvShow),
     episode: {
       number: episode ?? 1,
       tmdbId: `${tvShow.id}-s${season ?? 1}e${episode ?? 1}`,

@@ -89,15 +89,21 @@ export function mapSubtitleToCaption(
   index: number,
 ): Caption | null {
   const format = subtitle.format.toLowerCase();
-  if (format !== 'vtt' && format !== 'srt') {
+  // Player downloads then converts via subsrt-ts (supports ass/ssa → srt).
+  // Caption engine type is only srt|vtt; store ass/ssa as srt for list typing.
+  const allowed = new Set(['vtt', 'srt', 'ass', 'ssa']);
+  if (!allowed.has(format)) {
     return null;
   }
-  const langCode = labelToLanguageCode(subtitle.label) || subtitle.label.toLowerCase().slice(0, 2);
+  const engineType: 'vtt' | 'srt' = format === 'vtt' ? 'vtt' : 'srt';
+  const langCode =
+    labelToLanguageCode(subtitle.label) ||
+    subtitle.label.toLowerCase().slice(0, 2);
   return {
-    id: `cinepro-sub-${langCode}-${index}`,
-    type: format as 'vtt' | 'srt',
+    id: `cinepro-sub-${langCode}-${index}-${format}`,
+    type: engineType,
     url: subtitle.url,
-    hasCorsRestrictions: false,
+    hasCorsRestrictions: true,
     language: langCode,
     display: subtitle.label,
   };

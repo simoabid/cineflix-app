@@ -1,6 +1,10 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMovieDetails, getTVShowDetails } from '@/services/tmdb';
+import {
+  getMovieDetails,
+  getTVShowDetails,
+  getTVShowExternalIds,
+} from '@/services/tmdb';
 import { rivestreamService } from '@/services/rivestreamService';
 import { SmashyStreamService } from '@/services/smashystream';
 import { Movies111Service } from '@/services/111movies';
@@ -298,6 +302,19 @@ export const SmartPlayerProvider: React.FC<SmartPlayerProviderProps> = ({ childr
           contentData = await getMovieDetails(contentId);
         } else {
           contentData = await getTVShowDetails(contentId);
+          // TV detail endpoint has no imdb_id — attach external_ids for OpenSubtitles
+          try {
+            const external = await getTVShowExternalIds(contentId);
+            contentData = {
+              ...contentData,
+              external_ids: {
+                ...contentData.external_ids,
+                ...external,
+              },
+            };
+          } catch {
+            // optional; path B still works with tmdbId via Wyzie
+          }
         }
 
         setContent(contentData);

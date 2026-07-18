@@ -100,6 +100,18 @@ describe('CinePro Mapper', () => {
   });
 
   describe('mapSubtitleToCaption', () => {
+    it('should map ass/ssa subtitles (converted to srt type for player)', () => {
+      const input = {
+        url: 'http://proxy.com/sub.ass',
+        label: 'English',
+        format: 'ass' as const,
+      };
+      const actual = mapSubtitleToCaption(input, 2);
+      expect(actual).not.toBeNull();
+      expect(actual?.type).toBe('srt');
+      expect(actual?.url).toBe('http://proxy.com/sub.ass');
+    });
+
     it('should map vtt subtitle correctly', () => {
       const inputSubtitle: CineProSubtitle = {
         url: 'http://proxy.com/sub.vtt',
@@ -115,9 +127,9 @@ describe('CinePro Mapper', () => {
 
     it('should return null for unsupported formats', () => {
       const inputSubtitle: CineProSubtitle = {
-        url: 'http://proxy.com/sub.ass',
+        url: 'http://proxy.com/sub.ttml',
         label: 'English',
-        format: 'ass',
+        format: 'ttml',
       };
       const actualCaption = mapSubtitleToCaption(inputSubtitle, 1);
       expect(actualCaption).toBeNull();
