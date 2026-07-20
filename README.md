@@ -952,7 +952,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 
 <br/>
 
-**Built with ❤️ by [ABID.Dev](https://abid.dev) for movie lovers worldwide 🎥**
+**Built with ❤️ by [ABID.Dev](https://abidev.dev) for movie lovers worldwide 🎥**
 
 <br/>
 
