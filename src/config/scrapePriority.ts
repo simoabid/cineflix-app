@@ -21,21 +21,23 @@ export type PriorityEntry = {
  * Ids must match BaseProvider.id in cineflix-core.
  */
 export const CINEPRO_PROVIDER_PRIORITY: readonly PriorityEntry[] = [
-  { id: "vidup", tier: "S", timeoutMs: 8_000 },
-  { id: "vidlink", tier: "S", timeoutMs: 10_000 },
+  // Preferred product order (UI + progressive waterfall)
   { id: "vidsrc", tier: "S", timeoutMs: 12_000 },
   { id: "hexa", tier: "S", timeoutMs: 15_000 },
-  { id: "m111movies", tier: "A", timeoutMs: 15_000 },
+  { id: "vidlink", tier: "S", timeoutMs: 10_000 },
   { id: "fsharetv", tier: "A", timeoutMs: 12_000 },
   { id: "lookmovie", tier: "A", timeoutMs: 15_000 },
-  { id: "vidrock", tier: "A", timeoutMs: 12_000 },
-  { id: "vidcore", tier: "A", timeoutMs: 15_000 },
   { id: "Icefy", tier: "A", timeoutMs: 12_000 },
   { id: "Peachify", tier: "B", timeoutMs: 15_000 },
-  { id: "vidnest", tier: "B", timeoutMs: 18_000 },
+  { id: "m111movies", tier: "A", timeoutMs: 22_000 },
+  { id: "vixsrc", tier: "C", timeoutMs: 15_000 },
+  // Remaining providers (previous relative order)
+  { id: "vidup", tier: "S", timeoutMs: 8_000 },
+  { id: "vidrock", tier: "A", timeoutMs: 12_000 },
+  { id: "vidcore", tier: "A", timeoutMs: 15_000 },
+  { id: "vidnest", tier: "B", timeoutMs: 25_000 },
   { id: "vidking", tier: "B", timeoutMs: 18_000 },
-  { id: "Videasy", tier: "B", timeoutMs: 20_000 },
-  { id: "vixsrc", tier: "C", timeoutMs: 12_000 },
+  { id: "Videasy", tier: "B", timeoutMs: 35_000 },
 ] as const;
 
 /**

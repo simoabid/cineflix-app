@@ -33,7 +33,7 @@ export function BottomControls(props: {
       <div
         onMouseOver={() => setHoveringAnyControls(true)}
         onMouseOut={() => setHoveringAnyControls(false)}
-        className="pointer-events-auto z-10 pl-[calc(2rem+env(safe-area-inset-left))] pr-[calc(2rem+env(safe-area-inset-right))] pb-3 mb-[env(safe-area-inset-bottom)] absolute bottom-0 w-full"
+        className="pointer-events-auto z-10 absolute bottom-0 w-full pl-[calc(0.75rem+env(safe-area-inset-left))] pr-[calc(0.75rem+env(safe-area-inset-right))] pb-[max(0.5rem,env(safe-area-inset-bottom))] ssm:pl-[calc(1rem+env(safe-area-inset-left))] ssm:pr-[calc(1rem+env(safe-area-inset-right))] ssm:pb-2 md:pl-[calc(2rem+env(safe-area-inset-left))] md:pr-[calc(2rem+env(safe-area-inset-right))] md:pb-3 md:mb-[env(safe-area-inset-bottom)]"
       >
         <Transition animation="slide-up" show={props.show}>
           {props.children}

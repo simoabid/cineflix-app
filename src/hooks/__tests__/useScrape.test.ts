@@ -73,12 +73,15 @@ describe('useScrape ordering helpers', () => {
 describe('scrapePriority ordering', () => {
   it('orders CinePro providers best-first and skips disabled', () => {
     const order = cineproPriorityOrder(
-      ['vixsrc', 'vidup', 'hexa', 'Peachify'],
+      ['vixsrc', 'vidup', 'hexa', 'Peachify', 'vidsrc'],
       ['hexa'],
     );
-    expect(order[0]).toBe('vidup');
+    // Preferred product order: vidsrc before Peachify before vixsrc; vidup is remaining
+    expect(order[0]).toBe('vidsrc');
     expect(order).not.toContain('hexa');
+    expect(order.indexOf('vidsrc')).toBeLessThan(order.indexOf('Peachify'));
     expect(order.indexOf('Peachify')).toBeLessThan(order.indexOf('vixsrc'));
+    expect(order.indexOf('vixsrc')).toBeLessThan(order.indexOf('vidup'));
   });
 
   it('puts preferred p-stream ids first then priority', () => {

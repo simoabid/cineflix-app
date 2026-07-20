@@ -185,37 +185,48 @@ export function SelectableLink(props: {
   box?: boolean;
   rightSide?: ReactNode;
 }) {
-  let rightContent = props.rightSide; // Use custom rightSide if provided
-  if (!rightContent) {
-    if (props.selected) {
-      rightContent = (
-        <Icon
-          icon={Icons.CIRCLE_CHECK}
-          className="text-xl text-video-context-type-accent"
-        />
-      );
-    }
-    if (props.error)
-      rightContent = (
-        <span className="flex items-center text-video-context-error">
-          <Icon className="ml-2" icon={Icons.WARNING} />
+  // Loading always wins — custom rightSide (e.g. "tap to load") must not hide scrape feedback.
+  let rightContent: ReactNode;
+  if (props.loading) {
+    rightContent = (
+      <span className="flex items-center gap-1.5" aria-busy="true" aria-live="polite">
+        <Spinner className="text-base text-video-context-type-accent" />
+        <span className="text-[9px] font-bold uppercase tracking-wider text-video-context-type-accent/90">
+          Loading
         </span>
-      );
-    if (props.loading) rightContent = <Spinner className="text-lg" />; // should override selected and error
+      </span>
+    );
+  } else if (props.rightSide) {
+    rightContent = props.rightSide;
+  } else if (props.error) {
+    rightContent = (
+      <span className="flex items-center text-video-context-error">
+        <Icon className="ml-2" icon={Icons.WARNING} />
+      </span>
+    );
+  } else if (props.selected) {
+    rightContent = (
+      <Icon
+        icon={Icons.CIRCLE_CHECK}
+        className="text-xl text-video-context-type-accent"
+      />
+    );
   }
 
   return (
     <Link
-      onClick={props.onClick}
-      onDoubleClick={props.onDoubleClick}
-      clickable={!props.disabled}
+      onClick={props.loading || props.disabled ? undefined : props.onClick}
+      onDoubleClick={props.loading || props.disabled ? undefined : props.onDoubleClick}
+      clickable={!props.disabled && !props.loading}
       rightSide={rightContent}
       box={props.box}
+      disabled={props.disabled || props.loading}
     >
       <LinkTitle
         textClass={classNames({
-          "text-white": props.selected,
-          "text-video-context-type-main text-opacity-40": props.disabled,
+          "text-white": props.selected && !props.loading,
+          "text-video-context-type-main text-opacity-40":
+            props.disabled || props.loading,
         })}
       >
         {props.children}

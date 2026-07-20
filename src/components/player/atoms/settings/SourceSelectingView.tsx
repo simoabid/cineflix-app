@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getCachedMetadata } from "@/backend/helpers/providerApi";
+import { Icon, Icons } from "@/components/Icon";
 import { Loading } from "@/components/layout/Loading";
 import {
   useEmbedScraping,
@@ -528,6 +529,9 @@ export function SourceSelectionView({
                         <div key={entry.id} className="flex flex-col">
                           <SelectableLink
                             loading={loading}
+                            disabled={
+                              !!cineproLoadingId && cineproLoadingId !== entry.id
+                            }
                             onClick={() =>
                               void handleSelectCineProProvider(
                                 entry.id,
@@ -544,40 +548,61 @@ export function SourceSelectionView({
                                       ? `${streams.length} servers`
                                       : "ready"}
                                 </span>
-                                {qualityLabel && (
+                                {qualityLabel && !multi && (
                                   <QualityBadge quality={qualityLabel} />
+                                )}
+                                {multi && (
+                                  <Icon
+                                    icon={
+                                      expanded
+                                        ? Icons.CHEVRON_UP
+                                        : Icons.CHEVRON_DOWN
+                                    }
+                                    className="text-base text-video-context-type-main/70 -mr-0.5"
+                                  />
                                 )}
                               </div>
                             }
                           >
                             {entry.name}
                           </SelectableLink>
-                          {expanded &&
-                            streams.map((st, idx) => {
-                              const sq = mapQuality(st.quality);
-                              const sqLabel =
-                                sq === "4k"
-                                  ? "4K"
-                                  : sq !== "unknown"
-                                    ? sq + "p"
-                                    : "";
-                              return (
-                                <SelectableLink
-                                  key={st.sourceId}
-                                  onClick={() => handleSelectCineProStream(st)}
-                                  selected={st.sourceId === currentSourceId}
-                                  rightSide={
-                                    sqLabel ? (
-                                      <QualityBadge quality={sqLabel} />
-                                    ) : undefined
-                                  }
-                                >
-                                  <span className="pl-3 text-sm opacity-90">
-                                    {subServerLabel(st, idx)}
-                                  </span>
-                                </SelectableLink>
-                              );
-                            })}
+                          {expanded && (
+                            <div
+                              className="ml-2 pl-2 border-l border-video-context-border/60 mb-0.5"
+                              role="group"
+                              aria-label={`${entry.name} servers`}
+                            >
+                              {streams.map((st, idx) => {
+                                const sq = mapQuality(st.quality);
+                                const sqLabel =
+                                  sq === "4k"
+                                    ? "4K"
+                                    : sq !== "unknown"
+                                      ? sq + "p"
+                                      : "";
+                                return (
+                                  <SelectableLink
+                                    key={st.sourceId}
+                                    onClick={() =>
+                                      handleSelectCineProStream(st)
+                                    }
+                                    selected={
+                                      st.sourceId === currentSourceId
+                                    }
+                                    rightSide={
+                                      sqLabel ? (
+                                        <QualityBadge quality={sqLabel} />
+                                      ) : undefined
+                                    }
+                                  >
+                                    <span className="text-sm opacity-90">
+                                      {subServerLabel(st, idx)}
+                                    </span>
+                                  </SelectableLink>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })

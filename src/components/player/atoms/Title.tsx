@@ -46,8 +46,8 @@ export function Title() {
   return (
     <p
       onClick={handleTitleClick}
-      className="cursor-copy transform transition-transform duration-200 hover:scale-105"
-      title={isShifting ? "Copy with current time" : "Copy link"}
+      className="cursor-copy transform transition-transform duration-200 hover:scale-105 min-w-0 max-w-[40vw] ssm:max-w-[50vw] md:max-w-none truncate text-sm ssm:text-base md:text-base"
+      title={isShifting ? "Copy with current time" : title || "Copy link"}
     >
       {title}
     </p>

@@ -48,18 +48,18 @@ describe("waterfallFirstSuccess (shipped progressive orchestration)", () => {
     expect(priorityIndex(order[0]!)).toBeLessThan(
       priorityIndex(order[order.length - 1]!),
     );
-    expect(order[0]).toBe("vidup");
-    expect(order[order.length - 1]).toBe("vixsrc");
+    // Available subset ordered by product list: hexa → Peachify → vixsrc → vidup
+    expect(order).toEqual(["hexa", "Peachify", "vixsrc", "vidup"]);
 
     const tried: string[] = [];
     await waterfallFirstSuccess(order, async (id) => {
       tried.push(id);
-      // succeed on second (should be early S/A tier, not vixsrc)
+      // succeed on second (Peachify)
       if (tried.length === 2) return { ok: true };
       return null;
     });
-    expect(tried).toHaveLength(2);
-    expect(tried).not.toContain("vixsrc");
-    expect(priorityIndex(tried[0]!)).toBeLessThan(priorityIndex("vixsrc"));
+    expect(tried).toEqual(["hexa", "Peachify"]);
+    expect(priorityIndex(tried[0]!)).toBeLessThan(priorityIndex("vidup"));
   });
 });
+

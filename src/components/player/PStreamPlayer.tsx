@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 
 import { BrandPill } from "@/components/layout/BrandPill";
 import { Player } from "@/components/player";
+import { RotateHint } from "@/components/player/atoms/RotateHint";
 import { SkipSegmentButton } from "@/components/player/atoms/SkipSegmentButton";
 import { ThumbsFeedback } from "@/components/player/atoms/ThumbsFeedback";
 import { WatchPartyStatus } from "@/components/player/atoms/WatchPartyStatus";
@@ -13,7 +14,11 @@ import {
   useSkipTime,
 } from "@/components/player/hooks/useSkipTime";
 import { PauseOverlay } from "@/components/player/overlays/PauseOverlay";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import {
+  tryLockLandscape,
+  tryUnlockOrientation,
+  usePlayerViewport,
+} from "@/hooks/usePlayerViewport";
 import { type PlayerMeta, playerStatus } from "@/stores/player/slices/source";
 import { usePlayerStore } from "@/stores/player/store";
 import { usePreferencesStore } from "@/stores/preferences";
@@ -35,7 +40,8 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
   const switchToNative = usePlayerStore((s) => s.switchToNative);
   const sourceOrigin = usePlayerStore((s) => s.sourceOrigin);
   const cineproProviderName = usePlayerStore((s) => s.cineproProviderName);
-  const { isMobile } = useIsMobile();
+  const { isMobile } = usePlayerViewport();
+  const isFullscreen = usePlayerStore((s) => s.interface.isFullscreen);
   const manualSourceSelection = usePreferencesStore(
     (s) => s.manualSourceSelection,
   );
@@ -43,6 +49,17 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
   const { isHost, enabled } = useWatchPartyStore();
   const { t } = useTranslation();
   const meta = usePlayerStore((s) => s.meta);
+
+  // On mobile, prefer landscape while fullscreen (best-effort; OS may ignore).
+  useEffect(() => {
+    if (!isMobile) return;
+    if (isFullscreen) {
+      void tryLockLandscape();
+      return () => tryUnlockOrientation();
+    }
+    tryUnlockOrientation();
+    return undefined;
+  }, [isMobile, isFullscreen]);
 
   const inControl = !enabled || isHost;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -173,32 +190,52 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
       )}
 
       <Player.TopControls show={showTargets && displayMode === "native"}>
-        <div className="grid grid-cols-[1fr,auto] xl:grid-cols-3 items-center">
-          <div className="flex space-x-3 items-center">
+        <div
+          className={`grid items-center gap-y-1 ${
+            isMobile
+              ? "grid-cols-[minmax(0,1fr)_auto]"
+              : "grid-cols-[1fr,auto] xl:grid-cols-3"
+          }`}
+        >
+          <div className="flex min-w-0 items-center gap-1.5 ssm:gap-2 md:gap-3">
             <Player.BackLink
               url={props.backUrl ?? "/"}
               onBack={props.onBack}
             />
-            <span className="text mx-3 text-type-secondary">/</span>
-            <Player.Title />
+            <span className="text text-type-secondary hidden ssm:inline shrink-0">
+              /
+            </span>
+            <div className="min-w-0 flex items-center gap-1.5 ssm:gap-2">
+              <Player.Title />
 
-            {isMobile && meta?.type === "show" && (
-              <span className="text-type-secondary text-sm whitespace-nowrap flex-shrink-0">
-                {t("media.episodeDisplay", {
-                  season: meta?.season?.number,
-                  episode: meta?.episode?.number,
-                })}
-              </span>
-            )}
+              {isMobile && meta?.type === "show" && (
+                <span className="text-type-secondary text-xs ssm:text-sm whitespace-nowrap flex-shrink-0">
+                  {t("media.episodeDisplay", {
+                    season: meta?.season?.number,
+                    episode: meta?.episode?.number,
+                  })}
+                </span>
+              )}
+            </div>
 
+            {/* Desktop / tablet: full badge. Phone: compact so title isn't crushed. */}
             {sourceOrigin === "cinepro" && cineproProviderName && (
-              <span className="ml-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-purple-600/20 text-purple-300 border border-purple-500/30 whitespace-nowrap">
-                CinePro: {cineproProviderName}
+              <span
+                className={`shrink-0 font-bold uppercase tracking-wider rounded bg-purple-600/20 text-purple-300 border border-purple-500/30 ${
+                  isMobile
+                    ? "hidden ssm:inline-block max-w-[7.5rem] truncate px-1.5 py-0.5 text-[9px]"
+                    : "ml-1 px-2 py-0.5 text-[10px] whitespace-nowrap"
+                }`}
+                title={`CinePro: ${cineproProviderName}`}
+              >
+                {isMobile ? cineproProviderName : `CinePro: ${cineproProviderName}`}
               </span>
             )}
 
-            <Player.InfoButton />
-            <Player.BookmarkButton />
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Player.InfoButton />
+              <Player.BookmarkButton />
+            </div>
           </div>
           <div className="text-center hidden xl:flex justify-center items-center">
             <Player.EpisodeTitle />
@@ -206,7 +243,7 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
           <div className="hidden lg:flex items-center justify-end">
             <BrandPill />
           </div>
-          <div className="flex lg:hidden items-center justify-end">
+          <div className="flex lg:hidden items-center justify-end shrink-0">
             {status === playerStatus.PLAYING ? (
               <>
                 <Player.Airplay />
@@ -216,6 +253,8 @@ export function PStreamPlayer(props: PStreamPlayerProps) {
           </div>
         </div>
       </Player.TopControls>
+
+      <RotateHint show={showTargets && displayMode === "native"} />
 
       <Player.BottomControls show={showTargets && displayMode === "native"}>
         {status !== playerStatus.PLAYING && !manualSourceSelection && displayMode === "native" ? (
