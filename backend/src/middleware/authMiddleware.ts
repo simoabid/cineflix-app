@@ -16,14 +16,22 @@ declare global {
 
 const { JWT_SECRET } = env;
 
+function extractToken(req: Request): string | undefined {
+    // Prefer httpOnly cookie (web); accept Bearer for native mobile SecureStore sessions.
+    if (req.cookies?.auth_token) {
+        return req.cookies.auth_token as string;
+    }
+    const header = req.headers.authorization;
+    if (typeof header === 'string' && header.toLowerCase().startsWith('bearer ')) {
+        const bearer = header.slice(7).trim();
+        if (bearer.length > 0) return bearer;
+    }
+    return undefined;
+}
+
 export const protect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        let token: string | undefined;
-
-        // Auth is exclusively via httpOnly cookie
-        if (req.cookies?.auth_token) {
-            token = req.cookies.auth_token;
-        }
+        const token = extractToken(req);
 
         if (!token) {
             res.status(401).json({ success: false, error: 'Not authorized, no token' });
@@ -53,12 +61,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
 // Optional auth - doesn't fail if no token, just attaches user if available
 export const optionalAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        let token: string | undefined;
-
-        // Auth is exclusively via httpOnly cookie
-        if (req.cookies?.auth_token) {
-            token = req.cookies.auth_token;
-        }
+        const token = extractToken(req);
 
         if (token) {
             const decoded = jwt.verify(token, JWT_SECRET) as { id: string };

@@ -52,9 +52,9 @@ const buildCookieOptions = (): {
 });
 
 /**
- * Send token response with httpOnly cookie and user data.
- * The token is set exclusively as an httpOnly cookie — never returned in the body.
- * This prevents XSS-based token theft via localStorage.
+ * Send token response with httpOnly cookie (web) and token in body (native mobile).
+ * Web should prefer the cookie and avoid persisting the body token in localStorage.
+ * Mobile stores the body token in OS SecureStore (not plain AsyncStorage).
  */
 const sendTokenResponse = (user: IUser, statusCode: number, res: Response): void => {
     const token = generateToken(user._id.toString());
@@ -62,6 +62,8 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response): void
         .cookie('auth_token', token, buildCookieOptions())
         .json({
             success: true,
+            // Top-level token for mobile clients that read ApiResponse.token
+            token,
             data: {
                 user: {
                     id: user._id,
@@ -70,6 +72,8 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response): void
                     avatar: user.avatar,
                     createdAt: user.createdAt,
                 },
+                // Nested for clients that only read data.token
+                token,
             },
         });
 };

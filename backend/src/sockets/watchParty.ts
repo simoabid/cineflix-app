@@ -61,19 +61,32 @@ function sanitizeChatMessage(message: string): string {
 }
 
 /**
- * Authenticate a Socket.io handshake using the auth cookie JWT.
+ * Authenticate a Socket.io handshake via httpOnly cookie (web) or
+ * `handshake.auth.token` (native mobile SecureStore session).
  */
 function authenticateSocket(socket: Socket): boolean {
     try {
-        const cookieHeader = socket.handshake.headers.cookie;
-        if (!cookieHeader) return false;
-        // Parse the auth_token cookie from the cookie header
-        const cookies = cookieHeader.split(';').reduce<Record<string, string>>((acc, cookie) => {
-            const [key, ...vals] = cookie.trim().split('=');
-            if (key) acc[key.trim()] = vals.join('=');
-            return acc;
-        }, {});
-        const token = cookies['auth_token'];
+        let token: string | undefined;
+
+        // Mobile / native: explicit auth payload
+        const authPayload = socket.handshake.auth as { token?: string } | undefined;
+        if (authPayload?.token && typeof authPayload.token === 'string') {
+            token = authPayload.token.trim();
+        }
+
+        // Web: cookie
+        if (!token) {
+            const cookieHeader = socket.handshake.headers.cookie;
+            if (cookieHeader) {
+                const cookies = cookieHeader.split(';').reduce<Record<string, string>>((acc, cookie) => {
+                    const [key, ...vals] = cookie.trim().split('=');
+                    if (key) acc[key.trim()] = vals.join('=');
+                    return acc;
+                }, {});
+                token = cookies['auth_token'];
+            }
+        }
+
         if (!token) return false;
         const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string };
         (socket as any).userId = decoded.id;
