@@ -23,7 +23,7 @@
     "@react-spring/web": "^10.1.0",
     "@sozialhelden/ietf-language-tags": "^5.4.2",
     "@tailwindcss/line-clamp": "^0.4.4",
-    "axios": "^1.16.1",
+    "axios": "^1.18.0",
     "bcryptjs": "^3.0.3",
     "cheerio": "^1.2.0",
     "classnames": "^2.5.1",
