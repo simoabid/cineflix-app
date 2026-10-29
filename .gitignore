@@ -52,6 +52,8 @@ docs/
 logs_result.json
 .agent/*
 .agent
+.claude
+.playwright
 .ai-code-review/*
 .ai-code-review
 .cursor/*
